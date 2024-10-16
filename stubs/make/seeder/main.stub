@@ -1,0 +1,21 @@
+{{#var modelSingularPascal = generators.modelName(entity.name)}}
+{{#var modelPluralPascal = string.plural(modelSingularPascal)}}
+{{#var modelPluralCamel = string.camelCase(modelPluralPascal)}}
+{{#var modelSingularCamel = string.camelCase(modelSingularPascal)}}
+{{#var modelSingularSnake = string.snakeCase(modelSingularPascal)}}
+{{#var factoryName = `${modelSingularPascal}Factory`}}
+{{{
+  exports({
+    to: app.makePath('database/seeders/development', entity.path, `${modelSingularSnake}_seeder.ts`)
+  })
+}}}
+import { {{ factoryName }} } from '#database/factories/{{ modelSingularSnake }}_factory'
+import { BaseSeeder } from '@adonisjs/lucid/seeders'
+
+export default class extends BaseSeeder {
+  async run() {
+    const {{ modelPluralCamel }} = []
+
+    await {{ factoryName }}.merge({{ modelPluralCamel }}).createMany({{modelPluralCamel}}.length)
+  }
+}
