@@ -29,6 +29,7 @@
     "#services/*": "./app/services/*.js",
     "#start/*": "./start/*.js",
     "#tests/*": "./tests/*.js",
+    "#types/*": "./types/*.js",
     "#utils/*": "./utils/*.js",
     "#validators/*": "./app/validators/*.js"
   },
