@@ -5,12 +5,12 @@ export default class extends BaseSeeder {
   async run() {
     const userItems = [
       {
-        email: 'super-admin@townshare.com',
+        email: 'application-admin@townshare.com',
         isAdmin: true,
         password: 'Secret1!',
       },
       {
-        email: 'user@townshare.com',
+        email: 'user@example.com',
         isAdmin: false,
         password: 'Secret1!',
       },
