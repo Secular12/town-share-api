@@ -70,6 +70,7 @@ declare module '@japa/runner/core' {
     tagCrud(crudTags: CrudTag | CrudTag[]): this
     tagRouteGroup(authorizationTags: RouteGroupTag | RouteGroupTag[]): this
     tagSuccess(): this
+    tagUnauthorized(): this
   }
 }
 
@@ -92,5 +93,10 @@ Test.macro('tagRouteGroup', function (this: Test, routeGroupTags: RouteGroupTag 
 
 Test.macro('tagSuccess', function (this: Test) {
   this.tags(['@success'], 'append')
+  return this
+})
+
+Test.macro('tagUnauthorized', function (this: Test) {
+  this.tags(['@error', '@clientError', '@unauthorized'], 'append')
   return this
 })

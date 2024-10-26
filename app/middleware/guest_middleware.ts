@@ -22,7 +22,9 @@ export default class GuestMiddleware {
   ) {
     for (let guard of options.guards || [ctx.auth.defaultGuard]) {
       if (await ctx.auth.use(guard).check()) {
-        return ctx.response.redirect(this.redirectTo, true)
+        return ctx.response.badRequest({
+          errors: [{ message: 'Request contains an active session' }],
+        })
       }
     }
 
