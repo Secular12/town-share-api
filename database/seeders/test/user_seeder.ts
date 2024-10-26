@@ -11,8 +11,6 @@ export default class extends BaseSeeder {
         lastName: 'Service',
         middleName: 'Test',
         nameSuffix: 'unit',
-        phoneExtension: '123',
-        phoneNumber: '(555) 555-5555',
         password: 'Secret1!',
       },
       {
@@ -22,8 +20,6 @@ export default class extends BaseSeeder {
         lastName: 'Service',
         middleName: 'Test',
         nameSuffix: 'unit',
-        phoneExtension: null,
-        phoneNumber: '(123) 456-7890',
         password: 'Secret1!',
       },
     ]
