@@ -60,3 +60,37 @@ new Ignitor(APP_ROOT, { importer: IMPORTER })
     process.exitCode = 1
     prettyPrintError(error)
   })
+
+import { Test } from '@japa/runner/core'
+import type { CrudTag, RouteGroupTag } from '#types/test_tags'
+
+declare module '@japa/runner/core' {
+  interface Test {
+    tagBadRequest(): this
+    tagCrud(crudTags: CrudTag | CrudTag[]): this
+    tagRouteGroup(authorizationTags: RouteGroupTag | RouteGroupTag[]): this
+    tagSuccess(): this
+  }
+}
+
+Test.macro('tagBadRequest', function (this: Test) {
+  this.tags(['@error', '@clientError', '@badRequest'], 'append')
+  return this
+})
+
+Test.macro('tagCrud', function (this: Test, crudTags: CrudTag | CrudTag[]) {
+  const tags = Array.isArray(crudTags) ? crudTags : [crudTags]
+  this.tags(['@crud', ...tags], 'append')
+  return this
+})
+
+Test.macro('tagRouteGroup', function (this: Test, routeGroupTags: RouteGroupTag | RouteGroupTag[]) {
+  const tags = Array.isArray(routeGroupTags) ? routeGroupTags : [routeGroupTags]
+  this.tags(['@routeGroup', ...tags], 'append')
+  return this
+})
+
+Test.macro('tagSuccess', function (this: Test) {
+  this.tags(['@success'], 'append')
+  return this
+})
