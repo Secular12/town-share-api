@@ -6,6 +6,6 @@ const AuthenticationController = () => import('#controllers/authentication_contr
 router
   .group(() => {
     router.post('login', [AuthenticationController, 'login']).use(middleware.guest())
-    router.get('logout', [AuthenticationController, 'logout']).use(middleware.auth())
+    router.delete('logout', [AuthenticationController, 'logout']).use(middleware.auth())
   })
   .prefix('authentication')

@@ -5,7 +5,7 @@ test.group('auth logout', () => {
   test('successful logout', async ({ client }) => {
     const user = await User.findOrFail(1)
 
-    const response = await client.get('/authentication/logout').loginAs(user)
+    const response = await client.delete('/authentication/logout').loginAs(user)
 
     response.assertStatus(200)
   })
@@ -13,7 +13,7 @@ test.group('auth logout', () => {
     .tagSuccess()
 
   test('unauthorized when already logged out', async ({ client }) => {
-    const response = await client.get('/authentication/logout')
+    const response = await client.delete('/authentication/logout')
 
     response.assertStatus(401)
     response.assertBody({
