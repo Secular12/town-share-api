@@ -17,6 +17,10 @@ test.group('PATCH:authentication/reset-password', () => {
     await User.resetTokens.delete(user, token.identifier)
 
     response.assertStatus(200)
+
+    user.password = 'Secret123!'
+
+    await user.save()
   })
     .tagRouteGroup('@authentication')
     .tagSuccess()
@@ -50,14 +54,14 @@ test.group('PATCH:authentication/reset-password', () => {
 
     const token = await User.resetTokens.create(user)
 
-    const requiredPasswordResponse = await client.patch('/authentication/reset-password').json({
+    const response = await client.patch('/authentication/reset-password').json({
       password: '',
       passwordConfirmation: '',
       token: token.value!.release(),
     })
 
-    requiredPasswordResponse.assertStatus(422)
-    requiredPasswordResponse.assertBody({
+    response.assertStatus(422)
+    response.assertBody({
       errors: [
         {
           field: 'password',
@@ -75,16 +79,14 @@ test.group('PATCH:authentication/reset-password', () => {
 
     const token = await User.resetTokens.create(user)
 
-    const requiredPasswordConfirmationResponse = await client
-      .patch('/authentication/reset-password')
-      .json({
-        password: 'Test-Password-123',
-        passwordConfirmation: '',
-        token: token.value!.release(),
-      })
+    const response = await client.patch('/authentication/reset-password').json({
+      password: 'Test-Password-123',
+      passwordConfirmation: '',
+      token: token.value!.release(),
+    })
 
-    requiredPasswordConfirmationResponse.assertStatus(422)
-    requiredPasswordConfirmationResponse.assertBody({
+    response.assertStatus(422)
+    response.assertBody({
       errors: [
         {
           field: 'password',
@@ -149,14 +151,14 @@ test.group('PATCH:authentication/reset-password', () => {
 
     const token = await User.resetTokens.create(user)
 
-    const minLengthResponse = await client.patch('/authentication/reset-password').json({
-      password: 't',
-      passwordConfirmation: 't',
+    const response = await client.patch('/authentication/reset-password').json({
+      password: 'Secret1!',
+      passwordConfirmation: 'Secret1!',
       token: token.value!.release(),
     })
 
-    minLengthResponse.assertStatus(422)
-    minLengthResponse.assertBody({
+    response.assertStatus(422)
+    response.assertBody({
       errors: [
         {
           field: 'password',
@@ -179,14 +181,14 @@ test.group('PATCH:authentication/reset-password', () => {
 
     const token = await User.resetTokens.create(user)
 
-    const regexLowerCaseResponse = await client.patch('/authentication/reset-password').json({
+    const response = await client.patch('/authentication/reset-password').json({
       password: 'TEST-PASSWORD-123',
       passwordConfirmation: 'TEST-PASSWORD-123',
       token: token.value!.release(),
     })
 
-    regexLowerCaseResponse.assertStatus(422)
-    regexLowerCaseResponse.assertBody({
+    response.assertStatus(422)
+    response.assertBody({
       errors: [
         {
           field: 'password',
@@ -209,14 +211,14 @@ test.group('PATCH:authentication/reset-password', () => {
 
     const token = await User.resetTokens.create(user)
 
-    const regexUpperCaseResponse = await client.patch('/authentication/reset-password').json({
+    const response = await client.patch('/authentication/reset-password').json({
       password: 'test-password-123',
       passwordConfirmation: 'test-password-123',
       token: token.value!.release(),
     })
 
-    regexUpperCaseResponse.assertStatus(422)
-    regexUpperCaseResponse.assertBody({
+    response.assertStatus(422)
+    response.assertBody({
       errors: [
         {
           field: 'password',
@@ -237,14 +239,14 @@ test.group('PATCH:authentication/reset-password', () => {
 
     const token = await User.resetTokens.create(user)
 
-    const regexNumberResponse = await client.patch('/authentication/reset-password').json({
+    const response = await client.patch('/authentication/reset-password').json({
       password: 'Test-Password',
       passwordConfirmation: 'Test-Password',
       token: token.value!.release(),
     })
 
-    regexNumberResponse.assertStatus(422)
-    regexNumberResponse.assertBody({
+    response.assertStatus(422)
+    response.assertBody({
       errors: [
         {
           field: 'password',
@@ -267,16 +269,14 @@ test.group('PATCH:authentication/reset-password', () => {
 
     const token = await User.resetTokens.create(user)
 
-    const regexSpecialCharacterResponse = await client
-      .patch('/authentication/reset-password')
-      .json({
-        password: 'TestPassword123',
-        passwordConfirmation: 'TestPassword123',
-        token: token.value!.release(),
-      })
+    const response = await client.patch('/authentication/reset-password').json({
+      password: 'TestPassword123',
+      passwordConfirmation: 'TestPassword123',
+      token: token.value!.release(),
+    })
 
-    regexSpecialCharacterResponse.assertStatus(422)
-    regexSpecialCharacterResponse.assertBody({
+    response.assertStatus(422)
+    response.assertBody({
       errors: [
         {
           field: 'password',
@@ -299,16 +299,14 @@ test.group('PATCH:authentication/reset-password', () => {
 
     const token = await User.resetTokens.create(user)
 
-    const regexSpecialCharacterResponse = await client
-      .patch('/authentication/reset-password')
-      .json({
-        password: 'Test-Password+123',
-        passwordConfirmation: 'Test-Password+123',
-        token: token.value!.release(),
-      })
+    const response = await client.patch('/authentication/reset-password').json({
+      password: 'Test-Password+123',
+      passwordConfirmation: 'Test-Password+123',
+      token: token.value!.release(),
+    })
 
-    regexSpecialCharacterResponse.assertStatus(422)
-    regexSpecialCharacterResponse.assertBody({
+    response.assertStatus(422)
+    response.assertBody({
       errors: [
         {
           field: 'password',

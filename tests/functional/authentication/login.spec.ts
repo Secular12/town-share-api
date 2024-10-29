@@ -5,7 +5,7 @@ test.group('POST:authentication/login', () => {
   test('successful login', async ({ client }) => {
     const response = await client.post('/authentication/login').json({
       email: 'admin@test.com',
-      password: 'Secret1!',
+      password: 'Secret123!',
     })
 
     response.assertStatus(200)
@@ -16,7 +16,7 @@ test.group('POST:authentication/login', () => {
   test('bad request with invalid email', async ({ client }) => {
     const response = await client.post('/authentication/login').json({
       email: 'bademail@test.com',
-      password: 'Secret1!',
+      password: 'Secret123!',
     })
 
     response.assertStatus(400)

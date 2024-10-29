@@ -7,12 +7,12 @@ export default class extends BaseSeeder {
       {
         email: 'application-admin@townshare.com',
         isAdmin: true,
-        password: 'Secret1!',
+        password: 'Secret123!',
       },
       {
         email: 'user@example.com',
         isAdmin: false,
-        password: 'Secret1!',
+        password: 'Secret123!',
       },
     ]
 
