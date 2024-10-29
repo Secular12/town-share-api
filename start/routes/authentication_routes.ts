@@ -14,6 +14,7 @@ router
 
 router
   .group(() => {
+    router.patch('change-password', [AuthenticationController, 'changePassword'])
     router.delete('logout', [AuthenticationController, 'logout'])
   })
   .prefix('authentication')

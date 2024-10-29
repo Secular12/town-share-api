@@ -8,6 +8,20 @@ import { SimpleMessagesProvider } from '@vinejs/vine'
 import { DateTime } from 'luxon'
 
 export default class AuthenticationController {
+  async changePassword({ auth, request }: HttpContext) {
+    const payload = await AuthenticionValidator.changePassword.validate(request.body(), {
+      messagesProvider: new SimpleMessagesProvider({
+        'newPassword.regex': AuthenticionValidator.passwordRegexMessage,
+      }),
+    })
+
+    const user = await User.verifyCredentials(auth.user!.email, payload.currentPassword)
+
+    user.password = payload.newPassword
+
+    await user.save()
+  }
+
   async forgotPassword({ request }: HttpContext) {
     const { email, timezone } = await AuthenticionValidator.forgotPassword.validate(request.body())
 

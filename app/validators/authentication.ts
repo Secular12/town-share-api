@@ -6,8 +6,12 @@ const passwordSchema = vine
   .minLength(10)
   .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#?!@$%^&*-])[A-Za-z\d#?!@$%^&*-]{10,}$/)
 
-export const passwordRegexMessage =
-  'The {{ field }} field must have at least one uppercase letter, one lowercase letter, one number and one special character (#?!@$%^&*-)'
+export const changePassword = vine.compile(
+  vine.object({
+    currentPassword: vine.string(),
+    newPassword: passwordSchema.clone().confirmed({ confirmationField: 'newPasswordConfirmation' }),
+  })
+)
 
 export const forgotPassword = vine.compile(
   vine.object({
@@ -22,6 +26,9 @@ export const login = vine.compile(
     password: vine.string(),
   })
 )
+
+export const passwordRegexMessage =
+  'The {{ field }} field must have at least one uppercase letter, one lowercase letter, one number and one special character (#?!@$%^&*-)'
 
 export const resetPassword = vine.compile(
   vine.object({

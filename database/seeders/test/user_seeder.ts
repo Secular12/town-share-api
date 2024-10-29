@@ -11,7 +11,7 @@ export default class extends BaseSeeder {
         lastName: 'Service',
         middleName: 'Test',
         nameSuffix: 'unit',
-        password: 'Secret1!',
+        password: 'Secret123!',
       },
       {
         email: 'user@test.com',
@@ -20,7 +20,7 @@ export default class extends BaseSeeder {
         lastName: 'Service',
         middleName: 'Test',
         nameSuffix: 'unit',
-        password: 'Secret1!',
+        password: 'Secret123!',
       },
     ]
 
