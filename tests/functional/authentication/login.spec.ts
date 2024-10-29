@@ -1,7 +1,7 @@
 import User from '#models/user'
 import { test } from '@japa/runner'
 
-test.group('Authentication login', () => {
+test.group('authentication login', () => {
   test('successful login', async ({ client }) => {
     const response = await client.post('/authentication/login').json({
       email: 'admin@test.com',

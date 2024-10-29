@@ -10,6 +10,23 @@
 */
 
 import { Env } from '@adonisjs/core/env'
+import stringHelpers from '@adonisjs/core/helpers/string'
+
+const customSchema = {
+  prettyMsTime(name: string, value?: string) {
+    if (!value) {
+      throw new Error(`Value for ${name} is required`)
+    }
+
+    if (!stringHelpers.milliseconds.parse(value)) {
+      throw new Error(
+        `Value for ${name} must be a number of milliseconds or a pretty time, See https://docs.adonisjs.com/guides/references/helpers#milliseconds`
+      )
+    }
+
+    return value
+  },
+}
 
 export default await Env.create(new URL('../', import.meta.url), {
   /*
@@ -18,6 +35,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   APP_KEY: Env.schema.string(),
+  APP_NAME: Env.schema.string(),
   HOST: Env.schema.string({ format: 'host' }),
   LOG_LEVEL: Env.schema.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']),
   NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
@@ -37,8 +55,26 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   /*
   |----------------------------------------------------------
+  | Variables for configuring the mail package
+  |----------------------------------------------------------
+  */
+  MAIL_TO_OVERRIDE_EMAIL: Env.schema.string({ format: 'email' }),
+  SMTP_HOST: Env.schema.string({ format: 'host' }),
+  SMTP_PASSWORD: Env.schema.string(),
+  SMTP_PORT: Env.schema.string(),
+  SMTP_USERNAME: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
   | Variables for configuring session package
   |----------------------------------------------------------
   */
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory'] as const),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring tokens
+  |----------------------------------------------------------
+  */
+  TOKEN_FORGOT_PASSWORD_EXPIRATION: customSchema.prettyMsTime,
 })

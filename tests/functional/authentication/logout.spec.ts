@@ -1,7 +1,7 @@
 import User from '#models/user'
 import { test } from '@japa/runner'
 
-test.group('auth logout', () => {
+test.group('authentication logout', () => {
   test('successful logout', async ({ client }) => {
     const user = await User.findOrFail(1)
 

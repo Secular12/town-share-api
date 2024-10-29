@@ -5,7 +5,15 @@ const AuthenticationController = () => import('#controllers/authentication_contr
 
 router
   .group(() => {
-    router.post('login', [AuthenticationController, 'login']).use(middleware.guest())
-    router.delete('logout', [AuthenticationController, 'logout']).use(middleware.auth())
+    router.post('forgot-password', [AuthenticationController, 'forgotPassword'])
+    router.post('login', [AuthenticationController, 'login'])
   })
   .prefix('authentication')
+  .use(middleware.guest())
+
+router
+  .group(() => {
+    router.delete('logout', [AuthenticationController, 'logout'])
+  })
+  .prefix('authentication')
+  .use(middleware.auth())

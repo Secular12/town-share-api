@@ -68,6 +68,7 @@ declare module '@japa/runner/core' {
   interface Test {
     tagBadRequest(): this
     tagCrud(crudTags: CrudTag | CrudTag[]): this
+    tagEmail(): this
     tagRouteGroup(authorizationTags: RouteGroupTag | RouteGroupTag[]): this
     tagSuccess(): this
     tagUnauthorized(): this
@@ -82,6 +83,11 @@ Test.macro('tagBadRequest', function (this: Test) {
 Test.macro('tagCrud', function (this: Test, crudTags: CrudTag | CrudTag[]) {
   const tags = Array.isArray(crudTags) ? crudTags : [crudTags]
   this.tags(['@crud', ...tags], 'append')
+  return this
+})
+
+Test.macro('tagEmail', function (this: Test) {
+  this.tags(['@email'], 'append')
   return this
 })
 
