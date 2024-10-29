@@ -72,6 +72,7 @@ declare module '@japa/runner/core' {
     tagRouteGroup(authorizationTags: RouteGroupTag | RouteGroupTag[]): this
     tagSuccess(): this
     tagUnauthorized(): this
+    tagUnprocessableEntity(): this
   }
 }
 
@@ -104,5 +105,10 @@ Test.macro('tagSuccess', function (this: Test) {
 
 Test.macro('tagUnauthorized', function (this: Test) {
   this.tags(['@error', '@clientError', '@unauthorized'], 'append')
+  return this
+})
+
+Test.macro('tagUnprocessableEntity', function (this: Test) {
+  this.tags(['@error', '@clientError', '@unprocessableEntity'], 'append')
   return this
 })

@@ -7,6 +7,7 @@ router
   .group(() => {
     router.post('forgot-password', [AuthenticationController, 'forgotPassword'])
     router.post('login', [AuthenticationController, 'login'])
+    router.patch('reset-password', [AuthenticationController, 'resetPassword'])
   })
   .prefix('authentication')
   .use(middleware.guest())

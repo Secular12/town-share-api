@@ -1,8 +1,10 @@
 import ForgotPasswordNotification from '#mails/forgot_password_notification'
 import User from '#models/user'
 import * as AuthenticionValidator from '#validators/authentication'
+import { Secret } from '@adonisjs/core/helpers'
 import type { HttpContext } from '@adonisjs/core/http'
 import mail from '@adonisjs/mail/services/main'
+import { SimpleMessagesProvider } from '@vinejs/vine'
 import { DateTime } from 'luxon'
 
 export default class AuthenticationController {
@@ -47,5 +49,35 @@ export default class AuthenticationController {
 
   async logout({ auth }: HttpContext) {
     return auth.use('web').logout()
+  }
+
+  async resetPassword({ request, response }: HttpContext) {
+    const { password, token } = await AuthenticionValidator.resetPassword.validate(request.body(), {
+      messagesProvider: new SimpleMessagesProvider({
+        'password.regex': AuthenticionValidator.passwordRegexMessage,
+      }),
+    })
+
+    const resetPasswordToken = await User.resetTokens.verify(new Secret(token))
+
+    if (!resetPasswordToken) {
+      return response.unprocessableEntity({
+        errors: [{ message: 'The provided token is invalid or expired' }],
+      })
+    }
+
+    const user = await User.find(resetPasswordToken?.tokenableId)
+
+    if (!user) {
+      return response.unprocessableEntity({
+        errors: [{ message: 'The provided token is invalid or expired' }],
+      })
+    }
+
+    user.password = password
+
+    await user.save()
+
+    await User.resetTokens.delete(user, resetPasswordToken.identifier)
   }
 }
