@@ -5,7 +5,7 @@ import env from '#start/env'
 import mail from '@adonisjs/mail/services/main'
 import { test } from '@japa/runner'
 
-test.group('authentication forgot password', () => {
+test.group('POST:authentication/forgot-password', () => {
   test('bad request with active session', async ({ client }) => {
     const user = await User.findOrFail(1)
 
