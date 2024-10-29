@@ -29,4 +29,8 @@ export default class {{ modelName }} extends BaseModel {
   /* Relationships */
 
   /* Scopes */
+
+  /* Lucid Properties */
+
+  /* Lucid Methods */
 }
