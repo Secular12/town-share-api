@@ -1,9 +1,14 @@
+import Neighborhood from '#models/neighborhood'
+import Organization from '#models/organization'
+import OrganizationLocation from '#models/organization_location'
+import UserLocation from '#models/user_location'
 import env from '#start/env'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { compose } from '@adonisjs/core/helpers'
 import hash from '@adonisjs/core/services/hash'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
+import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
@@ -26,7 +31,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare firstName: string
 
   @column()
-  declare isAdmin: boolean
+  declare isApplicationAdmin: boolean
 
   @column()
   declare lastName: string
@@ -50,8 +55,21 @@ export default class User extends compose(BaseModel, AuthFinder) {
   /* Computed */
 
   /* Relationships */
+  @manyToMany(() => Neighborhood, {
+    pivotForeignKey: 'admin_id',
+  })
+  declare adminedNeighborhoods: ManyToMany<typeof Neighborhood>
 
-  /* Scopes */
+  @hasMany(() => UserLocation)
+  declare locations: HasMany<typeof UserLocation>
+
+  @manyToMany(() => OrganizationLocation)
+  declare organizationLocations: ManyToMany<typeof OrganizationLocation>
+
+  @manyToMany(() => Organization, {
+    pivotColumns: ['is_organization_admin'],
+  })
+  declare organizations: ManyToMany<typeof Organization>
 
   /* Lucid Properties */
   static resetTokens = DbAccessTokensProvider.forModel(User, {
@@ -63,4 +81,30 @@ export default class User extends compose(BaseModel, AuthFinder) {
   })
 
   /* Lucid Methods */
+  serializeExtras() {
+    const extraColumns: {
+      isOrganizationAdmin?: boolean
+      locationsCount?: number
+      organizationLocationsCount?: number
+      organizationsCount?: number
+    } = {}
+
+    if (this.$extras.pivot_is_organization_admin !== undefined) {
+      extraColumns.isOrganizationAdmin = this.$extras.pivot_is_organization_admin
+    }
+
+    if (this.$extras.locations_count !== undefined) {
+      extraColumns.locationsCount = +this.$extras.locations_count
+    }
+
+    if (this.$extras.organizationLocations_count !== undefined) {
+      extraColumns.organizationLocationsCount = +this.$extras.organizationLocations_count
+    }
+
+    if (this.$extras.organizations_count !== undefined) {
+      extraColumns.organizationsCount = +this.$extras.organizations_count
+    }
+
+    return extraColumns
+  }
 }

@@ -15,15 +15,28 @@ export default class extends BaseSeeder {
 
   async run() {
     if (app.inDev) {
-      await this.seed('development', ['user_seeder'])
+      await this.seed('development', [
+        'user_seeder',
+        'neighborhood_seeder',
+        'organization_seeder',
+        'organization_user_seeder',
+      ])
     }
 
     if (app.inTest) {
-      await this.seed('test', ['user_seeder'])
+      await this.seed('test', [
+        'user_seeder',
+        'neighborhood_seeder',
+        'user_location_seeder',
+        'organization_seeder',
+        'organization_user_seeder',
+        'organization_location_seeder',
+        'organization_location_user_seeder',
+      ])
     }
 
     if (app.inProduction) {
-      await this.seed('production', ['user_seeder'])
+      await this.seed('production', ['user_seeder', 'organization_seeder'])
     }
   }
 }

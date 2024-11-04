@@ -1,2 +1,9 @@
 export type CrudTag = '@create' | '@read' | '@update' | '@delete'
-export type RouteGroupTag = '@authentication' | '@users'
+export type ResourceTag =
+  | '@neighborhood'
+  | '@organizationLocation'
+  | '@organization'
+  | '@session'
+  | '@userLocation'
+  | '@user'
+  | '@userToken'

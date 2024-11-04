@@ -1,0 +1,23 @@
+{{#var modelSingularPascal = generators.modelName(entity.name)}}
+{{#var modelSingularSnake = string.snakeCase(modelSingularPascal)}}
+{{#var serializerName = `${modelSingularPascal}Serializer`}}
+{{{
+  exports({
+    to: app.makePath('app/serializers', entity.path, `${modelSingularSnake}_serializer.ts`)
+  })
+}}}
+import User from '#models/user'
+import BaseSerializer, { Role, SerializerPermissions } from '#serializers/base_serializer'
+
+export default class {{serializerName}} extends BaseSerializer {
+  static permissions: SerializerPermissions = {
+    id: { guest: false, roles: ['application_admin'] },
+    createdAt: { guest: false, roles: ['application_admin'] },
+    updatedAt: { guest: false, roles: ['application_admin'] },
+  }
+
+  static getRole(authUser: User): Role {
+    // Override getRole behavior here
+    return super.getRole(authUser)
+  }
+}

@@ -6,12 +6,32 @@ export default class extends BaseSeeder {
     const userItems = [
       {
         email: 'application-admin@townshare.com',
-        isAdmin: true,
+        isApplicationAdmin: true,
         password: 'Secret123!',
       },
       {
         email: 'user@example.com',
-        isAdmin: false,
+        isApplicationAdmin: false,
+        password: 'Secret123!',
+      },
+      {
+        email: 'admin@pittsburgh-share.com',
+        isApplicationAdmin: true,
+        password: 'Secret123!',
+      },
+      {
+        email: 'user@pittsburgh-share.com',
+        isApplicationAdmin: false,
+        password: 'Secret123!',
+      },
+      {
+        email: 'admin@seattle-share.com',
+        isApplicationAdmin: true,
+        password: 'Secret123!',
+      },
+      {
+        email: 'user@seattle-share.com',
+        isApplicationAdmin: false,
         password: 'Secret123!',
       },
     ]

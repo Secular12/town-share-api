@@ -1,5 +1,5 @@
 import User from '#models/user'
-import * as UtilHelpers from '#utils/helpers'
+import * as HelpersUtil from '#utils/helpers'
 import { test } from '@japa/runner'
 
 test.group('PATCH:authentication/reset-password', () => {
@@ -22,7 +22,8 @@ test.group('PATCH:authentication/reset-password', () => {
 
     await user.save()
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud(['@delete', '@update'])
+    .tagResource(['@user', '@userToken'])
     .tagSuccess()
 
   test('bad request with active session', async ({ client }) => {
@@ -46,7 +47,8 @@ test.group('PATCH:authentication/reset-password', () => {
       errors: [{ message: 'Request contains an active session' }],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud(['@delete', '@update'])
+    .tagResource(['@user', '@userToken'])
     .tagBadRequest()
 
   test('unprocessable entity if missing password', async ({ client }) => {
@@ -71,7 +73,8 @@ test.group('PATCH:authentication/reset-password', () => {
       ],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud(['@delete', '@update'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity if missing password confirmation', async ({ client }) => {
@@ -97,7 +100,8 @@ test.group('PATCH:authentication/reset-password', () => {
       ],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud(['@delete', '@update'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity with invalid token', async ({ client }) => {
@@ -118,7 +122,8 @@ test.group('PATCH:authentication/reset-password', () => {
       errors: [{ message: 'The provided token is invalid or expired' }],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud(['@delete', '@update'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity with expired token', async ({ client }) => {
@@ -128,7 +133,7 @@ test.group('PATCH:authentication/reset-password', () => {
 
     const releasedToken = token.value!.release()
 
-    await UtilHelpers.wait('2 seconds')
+    await HelpersUtil.wait('2 seconds')
 
     const response = await client.patch('/authentication/reset-password').json({
       password: 'Test-Password-123',
@@ -143,7 +148,8 @@ test.group('PATCH:authentication/reset-password', () => {
       errors: [{ message: 'The provided token is invalid or expired' }],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud(['@delete', '@update'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity if password is not at least 10 characters', async ({ client }) => {
@@ -171,7 +177,8 @@ test.group('PATCH:authentication/reset-password', () => {
 
     await User.resetTokens.delete(user, token.identifier)
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud(['@delete', '@update'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity if password does not have at least one lowercase letter', async ({
@@ -201,7 +208,8 @@ test.group('PATCH:authentication/reset-password', () => {
 
     await User.resetTokens.delete(user, token.identifier)
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud(['@delete', '@update'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity if password does not at least one uppercase letter', async ({
@@ -231,7 +239,8 @@ test.group('PATCH:authentication/reset-password', () => {
 
     await User.resetTokens.delete(user, token.identifier)
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud(['@delete', '@update'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity if password does not have at least one number', async ({ client }) => {
@@ -259,7 +268,8 @@ test.group('PATCH:authentication/reset-password', () => {
 
     await User.resetTokens.delete(user, token.identifier)
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud(['@delete', '@update'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity if password does not have at least one special character (#?!@$%^&*-)', async ({
@@ -289,7 +299,8 @@ test.group('PATCH:authentication/reset-password', () => {
 
     await User.resetTokens.delete(user, token.identifier)
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud(['@delete', '@update'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity if password has an unaccepted special character (#?!@$%^&*-)', async ({
@@ -319,6 +330,7 @@ test.group('PATCH:authentication/reset-password', () => {
 
     await User.resetTokens.delete(user, token.identifier)
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud(['@delete', '@update'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 })

@@ -27,7 +27,8 @@ test.group('PATCH:authentication/change-password', () => {
 
     await user.save()
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@update')
+    .tagResource('@user')
     .tagSuccess()
 
   test('unauthorized when logged out', async ({ client }) => {
@@ -42,7 +43,8 @@ test.group('PATCH:authentication/change-password', () => {
       errors: [{ message: 'Unauthorized access' }],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@update')
+    .tagResource('@user')
     .tagUnauthorized()
 
   test('bad request with invalid current password', async ({ client }) => {
@@ -62,7 +64,8 @@ test.group('PATCH:authentication/change-password', () => {
       errors: [{ message: 'Invalid user credentials' }],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@update')
+    .tagResource('@user')
     .tagBadRequest()
 
   test('unprocessable entity if missing current password', async ({ client }) => {
@@ -88,7 +91,8 @@ test.group('PATCH:authentication/change-password', () => {
       ],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@update')
+    .tagResource('@user')
     .tagUnprocessableEntity()
 
   test('unprocessable entity if missing new password', async ({ client }) => {
@@ -114,7 +118,8 @@ test.group('PATCH:authentication/change-password', () => {
       ],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@update')
+    .tagResource('@user')
     .tagUnprocessableEntity()
 
   test('unprocessable entity if missing new password confirmation', async ({ client }) => {
@@ -141,7 +146,8 @@ test.group('PATCH:authentication/change-password', () => {
       ],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@update')
+    .tagResource('@user')
     .tagUnprocessableEntity()
 
   test('unprocessable entity if new password is not at least 10 characters', async ({ client }) => {
@@ -168,7 +174,8 @@ test.group('PATCH:authentication/change-password', () => {
       ],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@update')
+    .tagResource('@user')
     .tagUnprocessableEntity()
 
   test('unprocessable entity if new password does not have at least one lowercase letter', async ({
@@ -197,7 +204,8 @@ test.group('PATCH:authentication/change-password', () => {
       ],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@update')
+    .tagResource('@user')
     .tagUnprocessableEntity()
 
   test('unprocessable entity if new password does not at least one uppercase letter', async ({
@@ -226,7 +234,8 @@ test.group('PATCH:authentication/change-password', () => {
       ],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@update')
+    .tagResource('@user')
     .tagUnprocessableEntity()
 
   test('unprocessable entity if new password does not have at least one number', async ({
@@ -255,7 +264,8 @@ test.group('PATCH:authentication/change-password', () => {
       ],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@update')
+    .tagResource('@user')
     .tagUnprocessableEntity()
 
   test('unprocessable entity if new password does not have at least one special character (#?!@$%^&*-)', async ({
@@ -284,7 +294,8 @@ test.group('PATCH:authentication/change-password', () => {
       ],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@update')
+    .tagResource('@user')
     .tagUnprocessableEntity()
 
   test('unprocessable entity if new password has an unaccepted special character (#?!@$%^&*-)', async ({
@@ -313,6 +324,7 @@ test.group('PATCH:authentication/change-password', () => {
       ],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@update')
+    .tagResource('@user')
     .tagUnprocessableEntity()
 })

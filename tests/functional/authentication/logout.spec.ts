@@ -9,7 +9,8 @@ test.group('DELETE:authentication/logout', () => {
 
     response.assertStatus(200)
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@delete')
+    .tagResource('@session')
     .tagSuccess()
 
   test('unauthorized when already logged out', async ({ client }) => {
@@ -20,6 +21,7 @@ test.group('DELETE:authentication/logout', () => {
       errors: [{ message: 'Unauthorized access' }],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@delete')
+    .tagResource('@session')
     .tagUnauthorized()
 })

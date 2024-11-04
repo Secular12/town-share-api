@@ -19,7 +19,8 @@ test.group('POST:authentication/forgot-password', () => {
       errors: [{ message: 'Request contains an active session' }],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@create')
+    .tagResource('@userToken')
     .tagBadRequest()
 
   test('invalid user email does not send email', async ({ cleanup, client }) => {
@@ -37,7 +38,8 @@ test.group('POST:authentication/forgot-password', () => {
       mail.restore()
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@create')
+    .tagResource('@userToken')
     .tagSuccess()
     .tagEmail()
 
@@ -63,12 +65,14 @@ test.group('POST:authentication/forgot-password', () => {
       mail.restore()
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@create')
+    .tagResource('@userToken')
     .tagSuccess()
     .tagEmail()
 
   test('forgot password email contains working token')
-    .tagRouteGroup('@authentication')
+    .tagCrud('@create')
+    .tagResource('@userToken')
     .tagSuccess()
     .tagEmail()
 })

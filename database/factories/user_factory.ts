@@ -10,7 +10,7 @@ export const UserFactory = factory
     return {
       email: faker.internet.email({ firstName, lastName }),
       firstName,
-      isAdmin: faker.datatype.boolean(0.1),
+      isApplicationAdmin: faker.datatype.boolean(0.1),
       lastName,
       middleName: FakerUtils.randomCall(faker.person.middleName, 0.2),
       nameSuffix: FakerUtils.randomCall(faker.person.suffix, 0.1),

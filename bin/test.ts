@@ -62,14 +62,15 @@ new Ignitor(APP_ROOT, { importer: IMPORTER })
   })
 
 import { Test } from '@japa/runner/core'
-import type { CrudTag, RouteGroupTag } from '#types/test_tags'
+import type { CrudTag, ResourceTag } from '#types/test_tags'
 
 declare module '@japa/runner/core' {
   interface Test {
     tagBadRequest(): this
     tagCrud(crudTags: CrudTag | CrudTag[]): this
     tagEmail(): this
-    tagRouteGroup(authorizationTags: RouteGroupTag | RouteGroupTag[]): this
+    tagForbidden(): this
+    tagResource(authorizationTags: ResourceTag | ResourceTag[]): this
     tagSuccess(): this
     tagUnauthorized(): this
     tagUnprocessableEntity(): this
@@ -92,9 +93,14 @@ Test.macro('tagEmail', function (this: Test) {
   return this
 })
 
-Test.macro('tagRouteGroup', function (this: Test, routeGroupTags: RouteGroupTag | RouteGroupTag[]) {
-  const tags = Array.isArray(routeGroupTags) ? routeGroupTags : [routeGroupTags]
-  this.tags(['@routeGroup', ...tags], 'append')
+Test.macro('tagForbidden', function (this: Test) {
+  this.tags(['@error', '@clientError', '@forbidden'], 'append')
+  return this
+})
+
+Test.macro('tagResource', function (this: Test, resourceTags: ResourceTag | ResourceTag[]) {
+  const tags = Array.isArray(resourceTags) ? resourceTags : [resourceTags]
+  this.tags(['@model', ...tags], 'append')
   return this
 })
 

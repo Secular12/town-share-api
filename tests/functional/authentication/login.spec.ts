@@ -10,7 +10,8 @@ test.group('POST:authentication/login', () => {
 
     response.assertStatus(200)
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@create')
+    .tagResource('@session')
     .tagSuccess()
 
   test('bad request with invalid email', async ({ client }) => {
@@ -24,7 +25,8 @@ test.group('POST:authentication/login', () => {
       errors: [{ message: 'Invalid user credentials' }],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@create')
+    .tagResource('@session')
     .tagBadRequest()
 
   test('bad request with invalid password', async ({ client }) => {
@@ -38,7 +40,8 @@ test.group('POST:authentication/login', () => {
       errors: [{ message: 'Invalid user credentials' }],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@create')
+    .tagResource('@session')
     .tagBadRequest()
 
   test('bad request with active session', async ({ client }) => {
@@ -51,6 +54,7 @@ test.group('POST:authentication/login', () => {
       errors: [{ message: 'Request contains an active session' }],
     })
   })
-    .tagRouteGroup('@authentication')
+    .tagCrud('@create')
+    .tagResource('@session')
     .tagBadRequest()
 })
