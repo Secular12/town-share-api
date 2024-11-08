@@ -8,8 +8,8 @@ export default class UserPolicy extends TownShareBasePolicy {
     return false
   }
 
-  edit(authUser: User, user: User): AuthorizerResponse {
-    return authUser.id === user.id
+  edit(authUser: User, user: User | number): AuthorizerResponse {
+    return authUser.id === (typeof user === 'number' ? user : user.id)
   }
 
   editIsApplicationAdmin(
@@ -23,7 +23,7 @@ export default class UserPolicy extends TownShareBasePolicy {
     return true
   }
 
-  read(_authUser: User, _user: User): AuthorizerResponse {
+  read(_authUser: User, _user: User | number): AuthorizerResponse {
     return true
   }
 

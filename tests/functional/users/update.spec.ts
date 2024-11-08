@@ -66,7 +66,7 @@ test.group('PATCH:users/:id', () => {
     .tagResource('@user')
     .tagSuccess()
 
-  test('successful when admin and editing other user', async ({ assert, client }) => {
+  test('successful when application admin and editing other user', async ({ assert, client }) => {
     const user = await User.findOrFail(1)
 
     const updateData = {
@@ -89,7 +89,10 @@ test.group('PATCH:users/:id', () => {
     .tagResource('@user')
     .tagSuccess()
 
-  test('successful when admin and editing other isApplicationAdmin', async ({ assert, client }) => {
+  test('successful when application admin and editing other isApplicationAdmin', async ({
+    assert,
+    client,
+  }) => {
     const user = await User.findOrFail(1)
 
     const updateData = {

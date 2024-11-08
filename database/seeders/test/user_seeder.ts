@@ -30,7 +30,7 @@ export const users = [
   },
   // 4
   {
-    email: 'east_side_pitt_admin@test.com',
+    email: 'north_hills_pitt_admin@test.com',
     isApplicationAdmin: false,
     password: 'Secret123!',
   },

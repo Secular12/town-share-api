@@ -1,5 +1,6 @@
 import User from '#models/user'
 import UserPolicy from '#policies/user_policy'
+import NeighborhoodSerializer from '#serializers/neighborhood_serializer'
 import OrganizationLocationSerializer from '#serializers/organization_location_serializer'
 import OrganizationSerializer from '#serializers/organization_serializer'
 import UserLocationSerializer from '#serializers/user_location_serializer'
@@ -19,14 +20,13 @@ export default class UsersController {
     const payload = await UserValidator.index.validate(request.qs())
 
     const users = await User.query()
-      .select('users.*')
       .if((payload.count?.length ?? 0) > 0, (countQuery) => {
         if (vine.helpers.isArray(payload.count)) {
           payload.count!.forEach((countBy) => {
             countQuery.withCount(countBy)
           })
         } else if (payload.count === '*') {
-          UserValidator.countAndIncludeOptions.forEach((countBy) => {
+          UserValidator.countOptions.forEach((countBy) => {
             countQuery.withCount(countBy)
           })
         } else {
@@ -34,15 +34,45 @@ export default class UsersController {
         }
       })
       .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, ['locations', '*']),
-        (includeLocationsQuery) => {
-          includeLocationsQuery.preload('locations')
+        ArrayUtil.hasOrIsAnyFrom(payload.include, ['adminedNeighborhoods', '*']),
+        (includeAdminedNeighborhoodsQuery) => {
+          includeAdminedNeighborhoodsQuery.preload('adminedNeighborhoods')
         }
       )
       .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, ['organizationLocations', '*']),
+        ArrayUtil.hasOrIsAnyFrom(payload.include, ['locations', 'locations.neighborhood', '*']),
+        (includeLocationsQuery) => {
+          includeLocationsQuery.preload('locations', (preloadLocationsQuery) => {
+            preloadLocationsQuery.if(
+              ArrayUtil.hasOrIsAnyFrom(payload.include, ['locations.neighborhood', '*']),
+              (includeNeighborhoodQuery) => {
+                includeNeighborhoodQuery.preload('neighborhood')
+              }
+            )
+          })
+        }
+      )
+      .if(
+        ArrayUtil.hasOrIsAnyFrom(payload.include, [
+          'organizationLocations',
+          'organizationLocations.neighborhood',
+          '*',
+        ]),
         (includeOrganizationLocationsQuery) => {
-          includeOrganizationLocationsQuery.preload('organizationLocations')
+          includeOrganizationLocationsQuery.preload(
+            'organizationLocations',
+            (preloadOrganizationLocationsQuery) => {
+              preloadOrganizationLocationsQuery.if(
+                ArrayUtil.hasOrIsAnyFrom(payload.include, [
+                  'organizationLocations.neighborhood',
+                  '*',
+                ]),
+                (includeNeighborhoodQuery) => {
+                  includeNeighborhoodQuery.preload('neighborhood')
+                }
+              )
+            }
+          )
         }
       )
       .if(
@@ -57,6 +87,21 @@ export default class UsersController {
           isApplicationAdminQuery.where('isApplicationAdmin', payload.isApplicationAdmin!)
         }
       )
+      .if(payload.neighborhoodId, (neighborhoodIdQuery) => {
+        neighborhoodIdQuery.withScopes((scopes) =>
+          scopes.existsWithNeighborhood(payload.neighborhoodId!)
+        )
+      })
+      .if(payload.organizationId, (organizationIdQuery) => {
+        organizationIdQuery.withScopes((scopes) => {
+          scopes.existsWithOrganization(payload.organizationId!)
+        })
+      })
+      .if(payload.organizationLocationId, (organizationLocationIdQuery) => {
+        organizationLocationIdQuery.withScopes((scopes) => {
+          scopes.existsWithOrganizationLocation(payload.organizationLocationId!)
+        })
+      })
       .if(payload.orderBy, (orderByQuery) => {
         orderByQuery.orderBy(ArrayUtil.orderBy(payload.orderBy!))
       })
@@ -75,9 +120,12 @@ export default class UsersController {
     return UserSerializer.serialize(users, {
       authUser: auth.user,
       relatedSerializers: {
-        locations: UserLocationSerializer,
-        organizationLocations: OrganizationLocationSerializer,
-        organizations: OrganizationSerializer,
+        'adminedNeighborhoods': NeighborhoodSerializer,
+        'locations': UserLocationSerializer,
+        'locations.neighborhood': NeighborhoodSerializer,
+        'organizationLocations': OrganizationLocationSerializer,
+        'organizationLocations.neighborhood': NeighborhoodSerializer,
+        'organizations': OrganizationSerializer,
       },
     })
   }
@@ -94,6 +142,7 @@ export default class UsersController {
    * Show individual record
    */
   async show({ auth, bouncer, params, request }: HttpContext) {
+    await bouncer.with(UserPolicy).authorize('read', params.id)
     const payload = await UserValidator.show.validate(request.qs())
 
     const user = await User.query()
@@ -103,7 +152,7 @@ export default class UsersController {
             countQuery.withCount(countBy)
           })
         } else if (payload.count === '*') {
-          UserValidator.countAndIncludeOptions.forEach((countBy) => {
+          UserValidator.countOptions.forEach((countBy) => {
             countQuery.withCount(countBy)
           })
         } else {
@@ -111,15 +160,45 @@ export default class UsersController {
         }
       })
       .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, ['locations', '*']),
-        (includeLocationsQuery) => {
-          includeLocationsQuery.preload('locations')
+        ArrayUtil.hasOrIsAnyFrom(payload.include, ['adminedNeighborhoods', '*']),
+        (includeAdminedNeighborhoodsQuery) => {
+          includeAdminedNeighborhoodsQuery.preload('adminedNeighborhoods')
         }
       )
       .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, ['organizationLocations', '*']),
+        ArrayUtil.hasOrIsAnyFrom(payload.include, ['locations', 'locations.neighborhood', '*']),
+        (includeLocationsQuery) => {
+          includeLocationsQuery.preload('locations', (locationsQuery) => {
+            locationsQuery.if(
+              ArrayUtil.hasOrIsAnyFrom(payload.include, ['locations.neighborhood', '*']),
+              (includeNeighborhoodQuery) => {
+                includeNeighborhoodQuery.preload('neighborhood')
+              }
+            )
+          })
+        }
+      )
+      .if(
+        ArrayUtil.hasOrIsAnyFrom(payload.include, [
+          'organizationLocations',
+          'organizationLocations.neighborhood',
+          '*',
+        ]),
         (includeOrganizationLocationsQuery) => {
-          includeOrganizationLocationsQuery.preload('organizationLocations')
+          includeOrganizationLocationsQuery.preload(
+            'organizationLocations',
+            (organizationLocationsQuery) => {
+              organizationLocationsQuery.if(
+                ArrayUtil.hasOrIsAnyFrom(payload.include, [
+                  'organizationLocations.neighborhood',
+                  '*',
+                ]),
+                (includeNeighborhoodQuery) => {
+                  includeNeighborhoodQuery.preload('neighborhood')
+                }
+              )
+            }
+          )
         }
       )
       .if(
@@ -131,14 +210,15 @@ export default class UsersController {
       .where('id', params.id)
       .firstOrFail()
 
-    await bouncer.with(UserPolicy).authorize('read', user)
-
     return UserSerializer.serialize(user, {
       authUser: auth.user,
       relatedSerializers: {
-        locations: UserLocationSerializer,
-        organizationLocations: OrganizationLocationSerializer,
-        organizations: OrganizationSerializer,
+        'adminedNeighborhoods': NeighborhoodSerializer,
+        'locations': UserLocationSerializer,
+        'locations.neighborhood': NeighborhoodSerializer,
+        'organizationLocations': OrganizationLocationSerializer,
+        'organizationLocations.neighborhood': NeighborhoodSerializer,
+        'organizations': OrganizationSerializer,
       },
     })
   }
@@ -147,9 +227,9 @@ export default class UsersController {
    * Handle form submission for the edit action
    */
   async update({ auth, bouncer, params, request }: HttpContext) {
-    const user = await User.findOrFail(params.id)
+    await bouncer.with(UserPolicy).authorize('edit', params.id)
 
-    await bouncer.with(UserPolicy).authorize('edit', user)
+    const user = await User.findOrFail(params.id)
 
     const payload = await UserValidator.update.validate(request.body())
 
