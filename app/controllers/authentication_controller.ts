@@ -4,16 +4,11 @@ import * as AuthenticionValidator from '#validators/authentication'
 import { Secret } from '@adonisjs/core/helpers'
 import type { HttpContext } from '@adonisjs/core/http'
 import mail from '@adonisjs/mail/services/main'
-import { SimpleMessagesProvider } from '@vinejs/vine'
 import { DateTime } from 'luxon'
 
 export default class AuthenticationController {
   async changePassword({ auth, request }: HttpContext) {
-    const payload = await AuthenticionValidator.changePassword.validate(request.body(), {
-      messagesProvider: new SimpleMessagesProvider({
-        'newPassword.regex': AuthenticionValidator.passwordRegexMessage,
-      }),
-    })
+    const payload = await AuthenticionValidator.changePassword.validate(request.body())
 
     const user = await User.verifyCredentials(auth.user!.email, payload.currentPassword)
 
@@ -66,11 +61,7 @@ export default class AuthenticationController {
   }
 
   async resetPassword({ request, response }: HttpContext) {
-    const { password, token } = await AuthenticionValidator.resetPassword.validate(request.body(), {
-      messagesProvider: new SimpleMessagesProvider({
-        'password.regex': AuthenticionValidator.passwordRegexMessage,
-      }),
-    })
+    const { password, token } = await AuthenticionValidator.resetPassword.validate(request.body())
 
     const resetPasswordToken = await User.resetTokens.verify(new Secret(token))
 

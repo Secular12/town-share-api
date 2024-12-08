@@ -1,4 +1,7 @@
-import vine from '@vinejs/vine'
+import vine, { SimpleMessagesProvider } from '@vinejs/vine'
+
+export const passwordRegexMessage =
+  'The {{ field }} field must have at least one uppercase letter, one lowercase letter, one number and one special character (#?!@$%^&*-)'
 
 const passwordSchema = vine
   .string()
@@ -12,6 +15,10 @@ export const changePassword = vine.compile(
     newPassword: passwordSchema.clone().confirmed({ confirmationField: 'newPasswordConfirmation' }),
   })
 )
+
+changePassword.messagesProvider = new SimpleMessagesProvider({
+  'newPassword.regex': passwordRegexMessage,
+})
 
 export const forgotPassword = vine.compile(
   vine.object({
@@ -27,12 +34,13 @@ export const login = vine.compile(
   })
 )
 
-export const passwordRegexMessage =
-  'The {{ field }} field must have at least one uppercase letter, one lowercase letter, one number and one special character (#?!@$%^&*-)'
-
 export const resetPassword = vine.compile(
   vine.object({
     password: passwordSchema.clone().confirmed({ confirmationField: 'passwordConfirmation' }),
     token: vine.string().trim(),
   })
 )
+
+resetPassword.messagesProvider = new SimpleMessagesProvider({
+  'password.regex': passwordRegexMessage,
+})
