@@ -1,10 +1,18 @@
 import User from '#models/user'
 import { ModelObject } from '@adonisjs/lucid/types/model'
 
-const roles = ['application_admin', 'organization_admin', 'guest', 'user'] as const
+const permissableRoles = [
+  'application_admin',
+  'neighborhood_admin',
+  'organization_admin',
+  'user',
+] as const
+
+const roles = [...permissableRoles, 'guest'] as const
 
 type Attribute = string
 
+export type PermissableRole = (typeof permissableRoles)[number]
 export type Role = (typeof roles)[number]
 
 type AttributesByRole = {
@@ -20,26 +28,38 @@ type RelatedSerializers = {
 export type SerializerPermissions = {
   [x: Attribute]: {
     guest: boolean
-    roles: '*' | Role[]
+    roles: '*' | PermissableRole[]
   }
 }
 
 export default class BaseSerializer {
   static permissions: SerializerPermissions = {}
 
-  static roles = roles
+  static roles = permissableRoles
 
   static get attributesByRole(): AttributesByRole {
-    return this.roles.reduce((acc, role) => {
-      const test = {
-        ...acc,
-        [role]: Object.entries(this.permissions).reduce(
+    return this.roles.reduce(
+      (acc, role) => {
+        const test = {
+          ...acc,
+          [role]: Object.entries(this.permissions).reduce(
+            (attributes: string[], [attribute, permission]) => {
+              if (permission.roles === '*' || permission.roles.includes(role)) {
+                attributes.push(attribute)
+              }
+
+              return attributes
+            },
+            []
+          ),
+        }
+
+        return test
+      },
+      {
+        guest: Object.entries(this.permissions).reduce(
           (attributes: string[], [attribute, permission]) => {
-            if (
-              (role === 'guest' && permission.guest) ||
-              permission.roles === '*' ||
-              permission.roles.includes(role)
-            ) {
+            if (permission.guest) {
               attributes.push(attribute)
             }
 
@@ -47,10 +67,8 @@ export default class BaseSerializer {
           },
           []
         ),
-      }
-
-      return test
-    }, {} as AttributesByRole)
+      } as AttributesByRole
+    )
   }
 
   static getRole(authUser?: User | null): Role {
