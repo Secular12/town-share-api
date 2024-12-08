@@ -5,23 +5,8 @@ import { organizationLocationUsers } from '#database/seeders/test/organization_l
 import { organizations } from '#database/seeders/test/organization_seeder'
 import { organizationUsers } from '#database/seeders/test/organization_user_seeder'
 import { userLocations } from '#database/seeders/test/user_location_seeder'
-import { users } from '#database/seeders/test/user_seeder'
 
-export const getNeighborhoodAdmins = (neighborhoodId: number) =>
-  users.reduce((admins: Record<string, unknown>[], user, userIndex) => {
-    const userId = userIndex + 1
-    if (
-      neighborhoodAdmins.some(
-        ({ neighborhood_id, admin_id }) => neighborhood_id === neighborhoodId && admin_id === userId
-      )
-    ) {
-      admins.push({ id: userId, email: user.email })
-    }
-
-    return admins
-  }, [])
-
-export const getUserAdminedNeighborhoods = (userId: number) =>
+export const getAdminedNeighborhoods = (userId: number) =>
   neighborhoods.reduce(
     (adminedNeighborhoods: Record<string, unknown>[], neighborhood, neighborhoodIndex) => {
       const neighborhoodId = neighborhoodIndex + 1
@@ -40,7 +25,22 @@ export const getUserAdminedNeighborhoods = (userId: number) =>
     []
   )
 
-export const getUserLocations = (userId: number) =>
+export const getAdminedNeighborhoodsCount = (userId: number) =>
+  neighborhoods.reduce((adminedNeighborhoodsCount, _neighborhood, neighborhoodIndex) => {
+    const neighborhoodId = neighborhoodIndex + 1
+
+    if (
+      neighborhoodAdmins.some(
+        ({ neighborhood_id, admin_id }) => neighborhood_id === neighborhoodId && admin_id === userId
+      )
+    ) {
+      return adminedNeighborhoodsCount + 1
+    }
+
+    return adminedNeighborhoodsCount
+  }, 0)
+
+export const getLocations = (userId: number) =>
   userLocations.reduce(
     (
       locations: ({ id: number } & (typeof userLocations)[number])[],
@@ -56,12 +56,12 @@ export const getUserLocations = (userId: number) =>
     []
   )
 
-export const getUserLocationsCount = (userId: number) =>
+export const getLocationsCount = (userId: number) =>
   userLocations.reduce((count: number, userLocation) => {
     return userLocation.userId === userId ? count + 1 : count
   }, 0)
 
-export const getUserOrganizationLocations = (userId: number) =>
+export const getOrganizationLocations = (userId: number) =>
   organizationLocations.reduce(
     (
       locations: ({ id: number } & (typeof organizationLocations)[number])[],
@@ -84,12 +84,12 @@ export const getUserOrganizationLocations = (userId: number) =>
     []
   )
 
-export const getUserOrganizationLocationsCount = (userId: number) =>
+export const getOrganizationLocationsCount = (userId: number) =>
   organizationLocationUsers.reduce((count: number, organizationLocationUser) => {
     return organizationLocationUser.user_id === userId ? count + 1 : count
   }, 0)
 
-export const getUserOrganizations = (userId: number) =>
+export const getOrganizations = (userId: number) =>
   organizations.reduce((orgs: Record<string, unknown>[], organization, organizationIndex) => {
     const organizationId = organizationIndex + 1
 
@@ -108,7 +108,7 @@ export const getUserOrganizations = (userId: number) =>
     return orgs
   }, [])
 
-export const getUserOrganizationsCount = (userId: number) =>
+export const getOrganizationsCount = (userId: number) =>
   organizationUsers.reduce((count: number, organizationUser) => {
     return organizationUser.user_id === userId ? count + 1 : count
   }, 0)

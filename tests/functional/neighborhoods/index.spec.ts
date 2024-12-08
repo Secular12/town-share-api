@@ -5,7 +5,8 @@ import { userLocations } from '#database/seeders/test/user_location_seeder'
 import User from '#models/user'
 import * as AuthorizationTestLib from '#tests/lib/authorization'
 import * as PaginationTestLib from '#tests/lib/pagination'
-import * as TestSeedUtil from '#utils/test_seed'
+import * as NeighborhoodSeedDataUtil from '#utils/seed_data/neighborhood'
+import * as UserSeedDataUtil from '#utils/seed_data/user'
 import { test } from '@japa/runner'
 
 test.group('GET:neighborhoods', () => {
@@ -47,7 +48,7 @@ test.group('GET:neighborhoods', () => {
         return {
           id: neighborhoodId,
           name: neighborhoodData.name,
-          admins: TestSeedUtil.getNeighborhoodAdmins(neighborhoodId),
+          admins: NeighborhoodSeedDataUtil.getAdmins(neighborhoodId),
         }
       })
 
@@ -81,11 +82,11 @@ test.group('GET:neighborhoods', () => {
         return {
           id: neighborhoodId,
           name: neighborhoodData.name,
-          admins: TestSeedUtil.getNeighborhoodAdmins(neighborhoodId).map((admin) => {
+          admins: NeighborhoodSeedDataUtil.getAdmins(neighborhoodId).map((admin) => {
             return {
               id: admin.id,
               email: admin.email,
-              organizations: TestSeedUtil.getUserOrganizations(admin.id as number),
+              organizations: UserSeedDataUtil.getOrganizations(admin.id as number),
             }
           }),
         }

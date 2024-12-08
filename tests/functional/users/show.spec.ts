@@ -1,7 +1,7 @@
 import { neighborhoods } from '#database/seeders/test/neighborhood_seeder'
 import { users } from '#database/seeders/test/user_seeder'
 import User from '#models/user'
-import * as TestSeedUtil from '#utils/test_seed'
+import * as UserSeedDataUtil from '#utils/seed_data/user'
 import { test } from '@japa/runner'
 
 test.group('GET:users/:id', () => {
@@ -45,9 +45,9 @@ test.group('GET:users/:id', () => {
     assert.containsSubset(body, {
       id: 16,
       email,
-      locationsCount: TestSeedUtil.getUserLocationsCount(16),
-      organizationLocationsCount: TestSeedUtil.getUserOrganizationLocationsCount(16),
-      organizationsCount: TestSeedUtil.getUserOrganizationsCount(16),
+      locationsCount: UserSeedDataUtil.getLocationsCount(16),
+      organizationLocationsCount: UserSeedDataUtil.getOrganizationLocationsCount(16),
+      organizationsCount: UserSeedDataUtil.getOrganizationsCount(16),
     })
   })
     .tagCrud('@read')
@@ -73,7 +73,7 @@ test.group('GET:users/:id', () => {
     assert.containsSubset(body, {
       id: userId,
       email,
-      adminedNeighborhoods: TestSeedUtil.getUserAdminedNeighborhoods(userId),
+      adminedNeighborhoods: UserSeedDataUtil.getAdminedNeighborhoods(userId),
     })
   })
     .tagCrud('@read')
@@ -99,7 +99,7 @@ test.group('GET:users/:id', () => {
     assert.containsSubset(body, {
       id: userId,
       email,
-      locations: TestSeedUtil.getUserLocations(userId),
+      locations: UserSeedDataUtil.getLocations(userId),
     })
   })
     .tagCrud('@read')
@@ -125,7 +125,7 @@ test.group('GET:users/:id', () => {
     assert.containsSubset(body, {
       id: userId,
       email,
-      locations: TestSeedUtil.getUserLocations(userId).map((userLocation) => {
+      locations: UserSeedDataUtil.getLocations(userId).map((userLocation) => {
         return {
           ...userLocation,
           neighborhood: neighborhoods[userLocation.neighborhoodId - 1],
@@ -156,7 +156,7 @@ test.group('GET:users/:id', () => {
     assert.containsSubset(body, {
       id: userId,
       email,
-      organizationLocations: TestSeedUtil.getUserOrganizationLocations(userId),
+      organizationLocations: UserSeedDataUtil.getOrganizationLocations(userId),
     })
   })
     .tagCrud('@read')
@@ -182,7 +182,7 @@ test.group('GET:users/:id', () => {
     assert.containsSubset(body, {
       id: userId,
       email,
-      organizationLocations: TestSeedUtil.getUserOrganizationLocations(userId).map(
+      organizationLocations: UserSeedDataUtil.getOrganizationLocations(userId).map(
         (organizationLocation) => {
           return {
             ...organizationLocation,
@@ -215,7 +215,7 @@ test.group('GET:users/:id', () => {
     assert.containsSubset(body, {
       id: userId,
       email,
-      organizations: TestSeedUtil.getUserOrganizations(userId),
+      organizations: UserSeedDataUtil.getOrganizations(userId),
     })
   })
     .tagCrud('@read')
@@ -241,13 +241,13 @@ test.group('GET:users/:id', () => {
     assert.containsSubset(body, {
       id: userId,
       email,
-      locations: TestSeedUtil.getUserLocations(userId).map((userLocation) => {
+      locations: UserSeedDataUtil.getLocations(userId).map((userLocation) => {
         return {
           ...userLocation,
           neighborhood: neighborhoods[userLocation.neighborhoodId - 1],
         }
       }),
-      organizations: TestSeedUtil.getUserOrganizations(userId),
+      organizations: UserSeedDataUtil.getOrganizations(userId),
     })
   })
     .tagCrud('@read')
@@ -273,13 +273,13 @@ test.group('GET:users/:id', () => {
     assert.containsSubset(body, {
       id: userId,
       email,
-      locations: TestSeedUtil.getUserLocations(userId).map((userLocation) => {
+      locations: UserSeedDataUtil.getLocations(userId).map((userLocation) => {
         return {
           ...userLocation,
           neighborhood: neighborhoods[userLocation.neighborhoodId - 1],
         }
       }),
-      organizationLocations: TestSeedUtil.getUserOrganizationLocations(userId).map(
+      organizationLocations: UserSeedDataUtil.getOrganizationLocations(userId).map(
         (organizationLocation) => {
           return {
             ...organizationLocation,
@@ -287,7 +287,7 @@ test.group('GET:users/:id', () => {
           }
         }
       ),
-      organizations: TestSeedUtil.getUserOrganizations(userId),
+      organizations: UserSeedDataUtil.getOrganizations(userId),
     })
   })
     .tagCrud('@read')

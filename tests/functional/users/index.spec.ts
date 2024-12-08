@@ -7,7 +7,7 @@ import { users } from '#database/seeders/test/user_seeder'
 import User from '#models/user'
 import * as AuthorizationTestLib from '#tests/lib/authorization'
 import * as PaginationTestLib from '#tests/lib/pagination'
-import * as TestSeedUtil from '#utils/test_seed'
+import * as UserSeedDataUtil from '#utils/seed_data/user'
 import { test } from '@japa/runner'
 
 test.group('GET:users', () => {
@@ -45,9 +45,9 @@ test.group('GET:users', () => {
       return {
         id: userId,
         email,
-        locationsCount: TestSeedUtil.getUserLocationsCount(userId),
-        organizationLocationsCount: TestSeedUtil.getUserOrganizationLocationsCount(userId),
-        organizationsCount: TestSeedUtil.getUserOrganizationsCount(userId),
+        locationsCount: UserSeedDataUtil.getLocationsCount(userId),
+        organizationLocationsCount: UserSeedDataUtil.getOrganizationLocationsCount(userId),
+        organizationsCount: UserSeedDataUtil.getOrganizationsCount(userId),
       }
     })
 
@@ -79,7 +79,7 @@ test.group('GET:users', () => {
       return {
         id: userId,
         email: userData.email,
-        adminedNeighborhoods: TestSeedUtil.getUserAdminedNeighborhoods(userId),
+        adminedNeighborhoods: UserSeedDataUtil.getAdminedNeighborhoods(userId),
       }
     })
 
@@ -111,7 +111,7 @@ test.group('GET:users', () => {
       return {
         id: userId,
         email: userData.email,
-        locations: TestSeedUtil.getUserLocations(userId),
+        locations: UserSeedDataUtil.getLocations(userId),
       }
     })
 
@@ -143,7 +143,7 @@ test.group('GET:users', () => {
       return {
         id: userId,
         email: userData.email,
-        locations: TestSeedUtil.getUserLocations(userId).map((userLocation) => {
+        locations: UserSeedDataUtil.getLocations(userId).map((userLocation) => {
           return {
             ...userLocation,
             neighborhood: neighborhoods[userLocation.neighborhoodId - 1],
@@ -180,7 +180,7 @@ test.group('GET:users', () => {
       return {
         id: userId,
         email: userData.email,
-        organizationLocations: TestSeedUtil.getUserOrganizationLocations(userId),
+        organizationLocations: UserSeedDataUtil.getOrganizationLocations(userId),
       }
     })
 
@@ -212,7 +212,7 @@ test.group('GET:users', () => {
       return {
         id: userId,
         email: userData.email,
-        organizationLocations: TestSeedUtil.getUserOrganizationLocations(userId).map(
+        organizationLocations: UserSeedDataUtil.getOrganizationLocations(userId).map(
           (organizationLocation) => {
             return {
               ...organizationLocation,
@@ -251,7 +251,7 @@ test.group('GET:users', () => {
       return {
         id: userId,
         email: userData.email,
-        organizations: TestSeedUtil.getUserOrganizations(userId),
+        organizations: UserSeedDataUtil.getOrganizations(userId),
       }
     })
 
@@ -283,13 +283,13 @@ test.group('GET:users', () => {
       return {
         id: userId,
         email: userData.email,
-        locations: TestSeedUtil.getUserLocations(userId).map((userLocation) => {
+        locations: UserSeedDataUtil.getLocations(userId).map((userLocation) => {
           return {
             ...userLocation,
             neighborhood: neighborhoods[userLocation.neighborhoodId - 1],
           }
         }),
-        organizations: TestSeedUtil.getUserOrganizations(userId),
+        organizations: UserSeedDataUtil.getOrganizations(userId),
       }
     })
 
@@ -321,14 +321,14 @@ test.group('GET:users', () => {
       return {
         id: userId,
         email: userData.email,
-        adminedNeighborhoods: TestSeedUtil.getUserAdminedNeighborhoods(userId),
-        locations: TestSeedUtil.getUserLocations(userId).map((userLocation) => {
+        adminedNeighborhoods: UserSeedDataUtil.getAdminedNeighborhoods(userId),
+        locations: UserSeedDataUtil.getLocations(userId).map((userLocation) => {
           return {
             ...userLocation,
             neighborhood: neighborhoods[userLocation.neighborhoodId - 1],
           }
         }),
-        organizationLocations: TestSeedUtil.getUserOrganizationLocations(userId).map(
+        organizationLocations: UserSeedDataUtil.getOrganizationLocations(userId).map(
           (organizationLocation) => {
             return {
               ...organizationLocation,
@@ -336,7 +336,7 @@ test.group('GET:users', () => {
             }
           }
         ),
-        organizations: TestSeedUtil.getUserOrganizations(userId),
+        organizations: UserSeedDataUtil.getOrganizations(userId),
       }
     })
 
