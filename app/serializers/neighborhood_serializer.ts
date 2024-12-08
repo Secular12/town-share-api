@@ -9,6 +9,9 @@ export default class NeighborhoodSerializer extends BaseSerializer {
     state: { guest: false, roles: '*' },
     createdAt: { guest: false, roles: '*' },
     updatedAt: { guest: false, roles: '*' },
+    adminsCount: { guest: false, roles: '*' },
+    organizationLocationsCount: { guest: false, roles: '*' },
+    userLocationsCount: { guest: false, roles: '*' },
   }
 
   static getRole(authUser: User): Role {

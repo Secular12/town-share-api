@@ -110,4 +110,25 @@ export default class Neighborhood extends BaseModel {
   /* Lucid Properties */
 
   /* Lucid Methods */
+  serializeExtras() {
+    const extraColumns: {
+      adminsCount?: number
+      organizationLocationsCount?: number
+      userLocationsCount?: number
+    } = {}
+
+    if (this.$extras.admins_count !== undefined) {
+      extraColumns.adminsCount = +this.$extras.admins_count
+    }
+
+    if (this.$extras.organizationLocations_count !== undefined) {
+      extraColumns.organizationLocationsCount = +this.$extras.organizationLocations_count
+    }
+
+    if (this.$extras.userLocations_count !== undefined) {
+      extraColumns.userLocationsCount = +this.$extras.userLocations_count
+    }
+
+    return extraColumns
+  }
 }
