@@ -1,9 +1,7 @@
 import Neighborhood from '#models/neighborhood'
 import NeighborhoodPolicy from '#policies/neighborhood_policy'
 import NeighborhoodSerializer from '#serializers/neighborhood_serializer'
-import OrganizationLocationSerializer from '#serializers/organization_location_serializer'
 import OrganizationSerializer from '#serializers/organization_serializer'
-import UserLocationSerializer from '#serializers/user_location_serializer'
 import UserSerializer from '#serializers/user_serializer'
 import * as ArrayUtil from '#utils/array'
 import * as NeighborhoodValidator from '#validators/neighborhood'
@@ -47,42 +45,6 @@ export default class NeighborhoodsController {
           })
         }
       )
-      .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, [
-          '*',
-          'organizationLocations',
-          'organizationLocations.organization',
-        ]),
-        (includeOrganizationLocationsQuery) => {
-          includeOrganizationLocationsQuery.preload(
-            'organizationLocations',
-            (preloadOrganizationLocationsQuery) => {
-              preloadOrganizationLocationsQuery.if(
-                ArrayUtil.hasOrIsAnyFrom(payload.include, [
-                  '*',
-                  'organizationLocations.organization',
-                ]),
-                (includeOrganizationQuery) => {
-                  includeOrganizationQuery.preload('organization')
-                }
-              )
-            }
-          )
-        }
-      )
-      .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'userLocations', 'userLocations.user']),
-        (includeUserLocationsQuery) => {
-          includeUserLocationsQuery.preload('userLocations', (preloadUserLocationsQuery) => {
-            preloadUserLocationsQuery.if(
-              ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'userLocations.user']),
-              (includeUserQuery) => {
-                includeUserQuery.preload('user')
-              }
-            )
-          })
-        }
-      )
       .if(payload.organizationId, (userIdQuery) => {
         userIdQuery.withScopes((scopes) => scopes.existsWithOrganization(payload.organizationId!))
       })
@@ -99,10 +61,6 @@ export default class NeighborhoodsController {
       relatedSerializers: {
         'admins': UserSerializer,
         'admins.organizations': OrganizationSerializer,
-        'organizationLocations': OrganizationLocationSerializer,
-        'organizationLocations.organization': OrganizationSerializer,
-        'userLocations': UserLocationSerializer,
-        'userLocations.user': UserSerializer,
       },
     })
   }

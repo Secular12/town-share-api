@@ -1,14 +1,7 @@
 import * as ValidatorUtil from '#utils/validator'
 import vine from '@vinejs/vine'
 
-export const includeOptions = [
-  'admins',
-  'admins.organizations',
-  'organizationLocations',
-  'organizationLocations.organization',
-  'userLocations',
-  'userLocations.user',
-] as const
+export const includeOptions = ['admins', 'admins.organizations'] as const
 export const countOptions = ['admins', 'organizationLocations', 'userLocations'] as const
 
 const counts = vine.group([
