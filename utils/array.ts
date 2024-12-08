@@ -1,5 +1,13 @@
 import vine from '@vinejs/vine'
 
+export const combineUnique = <T>(...args: T[][]): T[] => {
+  const arrayItems = args.reduce((items, arr) => {
+    return [...items, ...arr]
+  }, [] as T[])
+
+  return [...new Set(arrayItems)]
+}
+
 export const hasAnyFrom = <SourceArray extends readonly unknown[], FromArray extends SourceArray>(
   sourceArray?: SourceArray,
   fromArray?: FromArray
