@@ -75,8 +75,47 @@ export default class NeighborhoodsController {
   /**
    * Show individual record
    */
-  async show({ bouncer, params }: HttpContext) {
+  async show({ auth, bouncer, params, request }: HttpContext) {
     await bouncer.with(NeighborhoodPolicy).authorize('read', params.id)
+
+    const payload = await NeighborhoodValidator.show.validate(request.qs())
+
+    const neighborhood = await Neighborhood.query()
+      .if((payload.count?.length ?? 0) > 0, (countQuery) => {
+        if (vine.helpers.isArray(payload.count)) {
+          payload.count!.forEach((countBy) => {
+            countQuery.withCount(countBy)
+          })
+        } else if (payload.count === '*') {
+          NeighborhoodValidator.countOptions.forEach((countBy) => {
+            countQuery.withCount(countBy)
+          })
+        } else {
+          countQuery.withCount(payload.count!)
+        }
+      })
+      .if(
+        ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins', 'admins.organizations']),
+        (includeAdminsQuery) => {
+          includeAdminsQuery.preload('admins', (preloadAdminsQuery) => {
+            preloadAdminsQuery.if(
+              ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins.organizations']),
+              (includeOrganizationsQuery) => {
+                includeOrganizationsQuery.preload('organizations')
+              }
+            )
+          })
+        }
+      )
+      .where('id', params.id)
+
+    return NeighborhoodSerializer.serialize(neighborhood, {
+      authUser: auth.user,
+      relatedSerializers: {
+        'admins': UserSerializer,
+        'admins.organizations': OrganizationSerializer,
+      },
+    })
   }
 
   /**

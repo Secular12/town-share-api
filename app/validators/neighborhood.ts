@@ -34,3 +34,5 @@ export const index = vine.compile(
     .merge(counts)
     .merge(includes)
 )
+
+export const show = vine.compile(vine.object({}).merge(counts).merge(includes))
