@@ -181,11 +181,16 @@ export default class User extends compose(BaseModel, AuthFinder) {
   /* Lucid Methods */
   serializeExtras() {
     const extraColumns: {
+      adminedNeighborhoodsCount?: number
       isOrganizationAdmin?: boolean
       locationsCount?: number
       organizationLocationsCount?: number
       organizationsCount?: number
     } = {}
+
+    if (this.$extras.adminedNeighborhoods_count !== undefined) {
+      extraColumns.adminedNeighborhoodsCount = +this.$extras.adminedNeighborhoods_count
+    }
 
     if (this.$extras.pivot_is_organization_admin !== undefined) {
       extraColumns.isOrganizationAdmin = this.$extras.pivot_is_organization_admin

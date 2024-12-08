@@ -12,6 +12,7 @@ export default class UserSerializer extends BaseSerializer {
     nameSuffix: { guest: false, roles: '*' },
     createdAt: { guest: false, roles: '*' },
     updatedAt: { guest: false, roles: '*' },
+    adminedNeighborhoodsCount: { guest: false, roles: '*' },
     locationsCount: { guest: false, roles: '*' },
     organizationLocationsCount: { guest: false, roles: '*' },
     organizationsCount: { guest: false, roles: '*' },

@@ -1,7 +1,12 @@
 import * as ValidatorUtil from '#utils/validator'
 import vine from '@vinejs/vine'
 
-export const countOptions = ['locations', 'organizationLocations', 'organizations'] as const
+export const countOptions = [
+  'adminedNeighborhoods',
+  'locations',
+  'organizationLocations',
+  'organizations',
+] as const
 
 export const includeOptions = [
   'adminedNeighborhoods',
