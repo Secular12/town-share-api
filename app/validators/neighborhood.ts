@@ -1,8 +1,8 @@
 import * as ValidatorUtil from '#utils/validator'
 import vine from '@vinejs/vine'
 
-export const includeOptions = ['admins', 'admins.organizations'] as const
 export const countOptions = ['admins', 'organizationLocations', 'userLocations'] as const
+export const includeOptions = ['admins', 'admins.*', 'admins.organizations'] as const
 
 const counts = vine.group([
   vine.group.if((data) => vine.helpers.isArray(data.count), {
@@ -30,9 +30,12 @@ export const index = vine.compile(
       perPage: vine.number().max(100).min(1),
       userId: vine.number().min(1).optional(),
     })
-    .merge(ValidatorUtil.orderBy(['name', 'createdAt', 'updatedAt'] as const))
+    .merge(
+      ValidatorUtil.orderByGroup(['id', 'city', 'name', 'state', 'createdAt', 'updatedAt'] as const)
+    )
     .merge(counts)
     .merge(includes)
+    .merge(ValidatorUtil.searchGroup(['city', 'name', 'state'] as const))
 )
 
 export const show = vine.compile(vine.object({}).merge(counts).merge(includes))

@@ -2,37 +2,11 @@ import User from '#models/user'
 import hash from '@adonisjs/core/services/hash'
 import { test } from '@japa/runner'
 
-test.group('PATCH:authentication/change-password', () => {
-  test('successful change password', async ({ assert, client }) => {
-    const user = await User.findOrFail(1)
+const route = '/authentication/change-password'
 
-    const response = await client
-      .patch('/authentication/change-password')
-      .json({
-        currentPassword: 'Secret123!',
-        newPassword: 'Test-Password-123',
-        newPasswordConfirmation: 'Test-Password-123',
-      })
-      .loginAs(user)
-
-    response.assertStatus(200)
-
-    await user.refresh()
-
-    const isNewPasswordChanged = await hash.verify(user.password, 'Test-Password-123')
-
-    assert.isTrue(isNewPasswordChanged)
-
-    user.password = 'Secret123!'
-
-    await user.save()
-  })
-    .tagCrud('@update')
-    .tagResource('@user')
-    .tagSuccess()
-
-  test('unauthorized when logged out', async ({ client }) => {
-    const response = await client.patch('/authentication/change-password').json({
+test.group(`PATCH:${route}`, () => {
+  test('unauthorized - missing: session', async ({ client }) => {
+    const response = await client.patch(route).json({
       currentPassword: 'Secret123!',
       newPassword: 'Test-Password-123',
       newPasswordConfirmation: 'Test-Password-123',
@@ -47,38 +21,10 @@ test.group('PATCH:authentication/change-password', () => {
     .tagResource('@user')
     .tagUnauthorized()
 
-  test('bad request with invalid current password', async ({ client }) => {
+  test('unprocessable entity - missing: currentPassword, newPassword', async ({ client }) => {
     const user = await User.findOrFail(1)
 
-    const response = await client
-      .patch('/authentication/change-password')
-      .json({
-        currentPassword: 'badpassword',
-        newPassword: 'Test-Password-123',
-        newPasswordConfirmation: 'Test-Password-123',
-      })
-      .loginAs(user)
-
-    response.assertStatus(400)
-    response.assertBody({
-      errors: [{ message: 'Invalid user credentials' }],
-    })
-  })
-    .tagCrud('@update')
-    .tagResource('@user')
-    .tagBadRequest()
-
-  test('unprocessable entity if missing current password', async ({ client }) => {
-    const user = await User.findOrFail(1)
-
-    const response = await client
-      .patch('/authentication/change-password')
-      .json({
-        currentPassword: '',
-        newPassword: 'Test-Password-123',
-        newPasswordConfirmation: 'Test-Password-123',
-      })
-      .loginAs(user)
+    const response = await client.patch(route).json({}).loginAs(user)
 
     response.assertStatus(422)
     response.assertBody({
@@ -88,28 +34,6 @@ test.group('PATCH:authentication/change-password', () => {
           message: 'The currentPassword field must be defined',
           rule: 'required',
         },
-      ],
-    })
-  })
-    .tagCrud('@update')
-    .tagResource('@user')
-    .tagUnprocessableEntity()
-
-  test('unprocessable entity if missing new password', async ({ client }) => {
-    const user = await User.findOrFail(1)
-
-    const response = await client
-      .patch('/authentication/change-password')
-      .json({
-        currentPassword: 'Secret123!',
-        newPassword: '',
-        newPasswordConfirmation: 'Test-Password-123',
-      })
-      .loginAs(user)
-
-    response.assertStatus(422)
-    response.assertBody({
-      errors: [
         {
           field: 'newPassword',
           message: 'The newPassword field must be defined',
@@ -122,11 +46,11 @@ test.group('PATCH:authentication/change-password', () => {
     .tagResource('@user')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity if missing new password confirmation', async ({ client }) => {
+  test('unprocessable entity - missing: new password confirmation', async ({ client }) => {
     const user = await User.findOrFail(1)
 
     const response = await client
-      .patch('/authentication/change-password')
+      .patch(route)
       .json({
         currentPassword: 'Secret123!',
         newPassword: 'Test-Password-123',
@@ -150,11 +74,11 @@ test.group('PATCH:authentication/change-password', () => {
     .tagResource('@user')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity if new password is not at least 10 characters', async ({ client }) => {
+  test('unprocessable entity - new password is not at least 10 characters', async ({ client }) => {
     const user = await User.findOrFail(1)
 
     const response = await client
-      .patch('/authentication/change-password')
+      .patch(route)
       .json({
         currentPassword: 'Secret123!',
         newPassword: 'Secret1!',
@@ -178,13 +102,13 @@ test.group('PATCH:authentication/change-password', () => {
     .tagResource('@user')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity if new password does not have at least one lowercase letter', async ({
+  test('unprocessable entity - new password does not have at least one lowercase letter', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
 
     const response = await client
-      .patch('/authentication/change-password')
+      .patch(route)
       .json({
         currentPassword: 'Secret123!',
         newPassword: 'TEST-PASSWORD-123',
@@ -208,13 +132,13 @@ test.group('PATCH:authentication/change-password', () => {
     .tagResource('@user')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity if new password does not at least one uppercase letter', async ({
+  test('unprocessable entity - new password does not have at least one uppercase letter', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
 
     const response = await client
-      .patch('/authentication/change-password')
+      .patch(route)
       .json({
         currentPassword: 'Secret123!',
         newPassword: 'test-password-123',
@@ -238,13 +162,13 @@ test.group('PATCH:authentication/change-password', () => {
     .tagResource('@user')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity if new password does not have at least one number', async ({
+  test('unprocessable entity - new password does not have at least one number', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
 
     const response = await client
-      .patch('/authentication/change-password')
+      .patch(route)
       .json({
         currentPassword: 'Secret123!',
         newPassword: 'Test-Password',
@@ -268,13 +192,13 @@ test.group('PATCH:authentication/change-password', () => {
     .tagResource('@user')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity if new password does not have at least one special character (#?!@$%^&*-)', async ({
+  test('unprocessable entity - new password does not have at least one special character (#?!@$%^&*-)', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
 
     const response = await client
-      .patch('/authentication/change-password')
+      .patch(route)
       .json({
         currentPassword: 'Secret123!',
         newPassword: 'TestPassword123',
@@ -298,13 +222,13 @@ test.group('PATCH:authentication/change-password', () => {
     .tagResource('@user')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity if new password has an unaccepted special character (#?!@$%^&*-)', async ({
+  test('unprocessable entity - new password has an unaccepted special character (#?!@$%^&*-)', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
 
     const response = await client
-      .patch('/authentication/change-password')
+      .patch(route)
       .json({
         currentPassword: 'Secret123!',
         newPassword: 'Test-Password+123',
@@ -327,4 +251,53 @@ test.group('PATCH:authentication/change-password', () => {
     .tagCrud('@update')
     .tagResource('@user')
     .tagUnprocessableEntity()
+
+  test('bad request - invalid current password', async ({ client }) => {
+    const user = await User.findOrFail(1)
+
+    const response = await client
+      .patch(route)
+      .json({
+        currentPassword: 'badpassword',
+        newPassword: 'Test-Password-123',
+        newPasswordConfirmation: 'Test-Password-123',
+      })
+      .loginAs(user)
+
+    response.assertStatus(400)
+    response.assertBody({
+      errors: [{ message: 'Invalid user credentials' }],
+    })
+  })
+    .tagCrud('@update')
+    .tagResource('@user')
+    .tagBadRequest()
+
+  test('success - change password', async ({ assert, client }) => {
+    const user = await User.findOrFail(1)
+
+    const response = await client
+      .patch(route)
+      .json({
+        currentPassword: 'Secret123!',
+        newPassword: 'Test-Password-123',
+        newPasswordConfirmation: 'Test-Password-123',
+      })
+      .loginAs(user)
+
+    response.assertStatus(200)
+
+    await user.refresh()
+
+    const isNewPasswordChanged = await hash.verify(user.password, 'Test-Password-123')
+
+    assert.isTrue(isNewPasswordChanged)
+
+    user.password = 'Secret123!'
+
+    await user.save()
+  })
+    .tagCrud('@update')
+    .tagResource('@user')
+    .tagSuccess()
 })

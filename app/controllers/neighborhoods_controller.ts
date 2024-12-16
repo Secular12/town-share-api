@@ -33,11 +33,16 @@ export default class NeighborhoodsController {
         }
       })
       .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins', 'admins.organizations']),
+        ArrayUtil.hasOrIsAnyFrom(payload.include, [
+          '*',
+          'admins',
+          'admins.*',
+          'admins.organizations',
+        ]),
         (includeAdminsQuery) => {
           includeAdminsQuery.preload('admins', (preloadAdminsQuery) => {
             preloadAdminsQuery.if(
-              ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins.organizations']),
+              ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins.*', 'admins.organizations']),
               (includeOrganizationsQuery) => {
                 includeOrganizationsQuery.preload('organizations')
               }
@@ -54,6 +59,20 @@ export default class NeighborhoodsController {
       .if(payload.orderBy, (orderByQuery) => {
         orderByQuery.orderBy(ArrayUtil.orderBy(payload.orderBy!))
       })
+      .if(payload.search, (searchQuery) => {
+        if (vine.helpers.isArray(payload.search)) {
+          searchQuery.where((searchWhereQuery) => {
+            // Just for type guarding
+            if (!vine.helpers.isArray(payload.search)) return
+
+            payload.search.forEach(({ column, value }) => {
+              searchWhereQuery.orWhereILike(column, `%${value}%`)
+            })
+          })
+        } else {
+          searchQuery.whereILike(payload.search!.column, `%${payload.search!.value}%`)
+        }
+      })
       .paginate(payload.page, payload.perPage)
 
     return NeighborhoodSerializer.serialize(neighborhoods, {
@@ -68,8 +87,9 @@ export default class NeighborhoodsController {
   /**
    * Handle form submission for the create action
    */
-  async store({ bouncer }: HttpContext) {
+  async store({ bouncer, response }: HttpContext) {
     await bouncer.with(NeighborhoodPolicy).authorize('create')
+    return response.notImplemented()
   }
 
   /**
@@ -95,11 +115,16 @@ export default class NeighborhoodsController {
         }
       })
       .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins', 'admins.organizations']),
+        ArrayUtil.hasOrIsAnyFrom(payload.include, [
+          '*',
+          'admins',
+          'admin.*',
+          'admins.organizations',
+        ]),
         (includeAdminsQuery) => {
           includeAdminsQuery.preload('admins', (preloadAdminsQuery) => {
             preloadAdminsQuery.if(
-              ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins.organizations']),
+              ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins.*', 'admins.organizations']),
               (includeOrganizationsQuery) => {
                 includeOrganizationsQuery.preload('organizations')
               }
@@ -108,6 +133,7 @@ export default class NeighborhoodsController {
         }
       )
       .where('id', params.id)
+      .firstOrFail()
 
     return NeighborhoodSerializer.serialize(neighborhood, {
       authUser: auth.user,
@@ -121,7 +147,9 @@ export default class NeighborhoodsController {
   /**
    * Handle form submission for the edit action
    */
-  async update({ bouncer, params }: HttpContext) {
+  async update({ bouncer, params, response }: HttpContext) {
     await bouncer.with(NeighborhoodPolicy).authorize('edit', params.id)
+
+    return response.notImplemented()
   }
 }

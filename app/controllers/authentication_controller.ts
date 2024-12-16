@@ -66,7 +66,7 @@ export default class AuthenticationController {
     const resetPasswordToken = await User.resetTokens.verify(new Secret(token))
 
     if (!resetPasswordToken) {
-      return response.unprocessableEntity({
+      return response.badRequest({
         errors: [{ message: 'The provided token is invalid or expired' }],
       })
     }
@@ -74,7 +74,7 @@ export default class AuthenticationController {
     const user = await User.find(resetPasswordToken?.tokenableId)
 
     if (!user) {
-      return response.unprocessableEntity({
+      return response.badRequest({
         errors: [{ message: 'The provided token is invalid or expired' }],
       })
     }

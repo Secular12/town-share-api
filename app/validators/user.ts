@@ -11,8 +11,10 @@ export const countOptions = [
 export const includeOptions = [
   'adminedNeighborhoods',
   'locations',
+  'locations.*',
   'locations.neighborhood',
   'organizationLocations',
+  'organizationLocations.*',
   'organizationLocations.neighborhood',
   'organizations',
 ] as const
@@ -44,10 +46,10 @@ export const index = vine.compile(
       organizationLocationId: vine.number().min(1).optional(),
       page: vine.number().min(1),
       perPage: vine.number().max(100).min(1),
-      search: vine.string().minLength(1).optional(),
     })
     .merge(
-      ValidatorUtil.orderBy([
+      ValidatorUtil.orderByGroup([
+        'id',
         'email',
         'firstName',
         'isApplicationAdmin',
@@ -60,16 +62,27 @@ export const index = vine.compile(
     )
     .merge(counts)
     .merge(includes)
+    .merge(
+      ValidatorUtil.searchGroup([
+        'email',
+        'firstName',
+        'fullName',
+        'lastName',
+        'middleName',
+        'name',
+        'nameSuffix',
+      ] as const)
+    )
 )
 
 export const show = vine.compile(vine.object({}).merge(counts).merge(includes))
 
 export const update = vine.compile(
   vine.object({
-    firstName: vine.string().minLength(1).optional(),
+    firstName: vine.string().optional(),
     isApplicationAdmin: vine.boolean().optional(),
-    lastName: vine.string().minLength(1).optional(),
-    middleName: vine.string().minLength(1).nullable().optional(),
-    nameSuffix: vine.string().minLength(1).nullable().optional(),
+    lastName: vine.string().optional(),
+    middleName: vine.string().nullable().optional(),
+    nameSuffix: vine.string().nullable().optional(),
   })
 )

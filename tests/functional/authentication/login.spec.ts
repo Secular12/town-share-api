@@ -1,21 +1,69 @@
 import User from '#models/user'
 import { test } from '@japa/runner'
 
-test.group('POST:authentication/login', () => {
-  test('successful login', async ({ client }) => {
-    const response = await client.post('/authentication/login').json({
-      email: 'admin@test.com',
-      password: 'Secret123!',
-    })
+const route = '/authentication/login'
 
-    response.assertStatus(200)
+test.group(`POST:${route}`, () => {
+  test('bad request - has: active session', async ({ client }) => {
+    const user = await User.findOrFail(1)
+
+    const response = await client.post(route).loginAs(user)
+
+    response.assertStatus(400)
+    response.assertBody({
+      errors: [{ message: 'Request contains an active session' }],
+    })
   })
     .tagCrud('@create')
     .tagResource('@session')
-    .tagSuccess()
+    .tagBadRequest()
 
-  test('bad request with invalid email', async ({ client }) => {
-    const response = await client.post('/authentication/login').json({
+  test('unprocessable entity - missing: email, timezone', async ({ client }) => {
+    const response = await client.post(route).json({})
+
+    response.assertStatus(422)
+    response.assertBody({
+      errors: [
+        {
+          field: 'email',
+          message: 'The email field must be defined',
+          rule: 'required',
+        },
+        {
+          field: 'password',
+          message: 'The password field must be defined',
+          rule: 'required',
+        },
+      ],
+    })
+  })
+    .tagCrud('@create')
+    .tagResource('@session')
+    .tagUnprocessableEntity()
+
+  test('unprocessable entity - invalid format: email', async ({ client }) => {
+    const response = await client.post(route).json({
+      email: 'bademail',
+      password: 'Secret123!',
+    })
+
+    response.assertStatus(422)
+    response.assertBody({
+      errors: [
+        {
+          field: 'email',
+          message: 'The email field must be a valid email address',
+          rule: 'email',
+        },
+      ],
+    })
+  })
+    .tagCrud('@create')
+    .tagResource('@session')
+    .tagUnprocessableEntity()
+
+  test('bad request - invalid: email', async ({ client }) => {
+    const response = await client.post(route).json({
       email: 'bademail@test.com',
       password: 'Secret123!',
     })
@@ -29,8 +77,8 @@ test.group('POST:authentication/login', () => {
     .tagResource('@session')
     .tagBadRequest()
 
-  test('bad request with invalid password', async ({ client }) => {
-    const response = await client.post('/authentication/login').json({
+  test('bad request - invalid: password', async ({ client }) => {
+    const response = await client.post(route).json({
       email: 'admin@test.com',
       password: 'badpassword',
     })
@@ -44,17 +92,15 @@ test.group('POST:authentication/login', () => {
     .tagResource('@session')
     .tagBadRequest()
 
-  test('bad request with active session', async ({ client }) => {
-    const user = await User.findOrFail(1)
-
-    const response = await client.post('/authentication/login').loginAs(user)
-
-    response.assertStatus(400)
-    response.assertBody({
-      errors: [{ message: 'Request contains an active session' }],
+  test('success - login', async ({ client }) => {
+    const response = await client.post(route).json({
+      email: 'admin@test.com',
+      password: 'Secret123!',
     })
+
+    response.assertStatus(200)
   })
     .tagCrud('@create')
     .tagResource('@session')
-    .tagBadRequest()
+    .tagSuccess()
 })

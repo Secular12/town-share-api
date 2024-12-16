@@ -67,10 +67,11 @@ import type { CrudTag, ResourceTag } from '#types/test_tags'
 declare module '@japa/runner/core' {
   interface Test {
     tagBadRequest(): this
-    tagCrud(crudTags: CrudTag | CrudTag[]): this
+    tagCrud(crudTags: CrudTag): this
+    tagCrudResource(tags: [CrudTag, ResourceTag | ResourceTag[]][]): this
     tagEmail(): this
     tagForbidden(): this
-    tagResource(authorizationTags: ResourceTag | ResourceTag[]): this
+    tagResource(resourceTags: ResourceTag | ResourceTag[]): this
     tagSuccess(): this
     tagUnauthorized(): this
     tagUnprocessableEntity(): this
@@ -82,9 +83,8 @@ Test.macro('tagBadRequest', function (this: Test) {
   return this
 })
 
-Test.macro('tagCrud', function (this: Test, crudTags: CrudTag | CrudTag[]) {
-  const tags = Array.isArray(crudTags) ? crudTags : [crudTags]
-  this.tags(['@crud', ...tags], 'append')
+Test.macro('tagCrud', function (this: Test, crudTag: CrudTag) {
+  this.tags(['@crud', crudTag], 'append')
   return this
 })
 

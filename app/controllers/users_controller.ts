@@ -34,17 +34,26 @@ export default class UsersController {
         }
       })
       .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, ['adminedNeighborhoods', '*']),
+        ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'adminedNeighborhoods']),
         (includeAdminedNeighborhoodsQuery) => {
           includeAdminedNeighborhoodsQuery.preload('adminedNeighborhoods')
         }
       )
       .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, ['locations', 'locations.neighborhood', '*']),
+        ArrayUtil.hasOrIsAnyFrom(payload.include, [
+          '*',
+          'locations',
+          'locations.*',
+          'locations.neighborhood',
+        ]),
         (includeLocationsQuery) => {
           includeLocationsQuery.preload('locations', (preloadLocationsQuery) => {
             preloadLocationsQuery.if(
-              ArrayUtil.hasOrIsAnyFrom(payload.include, ['locations.neighborhood', '*']),
+              ArrayUtil.hasOrIsAnyFrom(payload.include, [
+                '*',
+                'locations.*',
+                'locations.neighborhood',
+              ]),
               (includeNeighborhoodQuery) => {
                 includeNeighborhoodQuery.preload('neighborhood')
               }
@@ -54,9 +63,10 @@ export default class UsersController {
       )
       .if(
         ArrayUtil.hasOrIsAnyFrom(payload.include, [
-          'organizationLocations',
-          'organizationLocations.neighborhood',
           '*',
+          'organizationLocations',
+          'organizationLocations.*',
+          'organizationLocations.neighborhood',
         ]),
         (includeOrganizationLocationsQuery) => {
           includeOrganizationLocationsQuery.preload(
@@ -64,8 +74,9 @@ export default class UsersController {
             (preloadOrganizationLocationsQuery) => {
               preloadOrganizationLocationsQuery.if(
                 ArrayUtil.hasOrIsAnyFrom(payload.include, [
-                  'organizationLocations.neighborhood',
                   '*',
+                  'organizationLocations.*',
+                  'organizationLocations.neighborhood',
                 ]),
                 (includeNeighborhoodQuery) => {
                   includeNeighborhoodQuery.preload('neighborhood')
@@ -76,7 +87,7 @@ export default class UsersController {
         }
       )
       .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, ['organizations', '*']),
+        ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'organizations']),
         (includeOrganizationsQuery) => {
           includeOrganizationsQuery.preload('organizations')
         }
@@ -106,14 +117,38 @@ export default class UsersController {
         orderByQuery.orderBy(ArrayUtil.orderBy(payload.orderBy!))
       })
       .if(payload.search, (searchQuery) => {
-        searchQuery.where((whereQuery) => {
-          whereQuery
-            .whereILike('email', `%${payload.search!}%`)
-            .orWhereRaw(
-              `CONCAT_WS(' ', first_name, middle_name, last_name, name_suffix) ILIKE '%${payload.search}%'`
+        if (vine.helpers.isArray(payload.search)) {
+          searchQuery.where((searchWhereQuery) => {
+            // Just for type guarding
+            if (!vine.helpers.isArray(payload.search)) return
+
+            payload.search.forEach(({ column, value }) => {
+              if (column === 'fullName') {
+                searchWhereQuery.orWhereRaw(
+                  `CONCAT_WS(' ', first_name, middle_name, last_name, name_suffix) ILIKE '%${value}%'`
+                )
+              } else if (column === 'name') {
+                searchWhereQuery.orWhereRaw(
+                  `CONCAT_WS(' ', first_name, last_name, name_suffix) ILIKE '%${value}%'`
+                )
+              } else {
+                searchWhereQuery.orWhereILike(column, `%${value}%`)
+              }
+            })
+          })
+        } else {
+          if (payload.search!.column === 'fullName') {
+            searchQuery.orWhereRaw(
+              `CONCAT_WS(' ', first_name, middle_name, last_name, name_suffix) ILIKE '%${payload.search!.value}%'`
             )
-            .orWhereRaw(`CONCAT_WS(' ', first_name, last_name) ILIKE '%${payload.search}%'`)
-        })
+          } else if (payload.search!.column === 'name') {
+            searchQuery.orWhereRaw(
+              `CONCAT_WS(' ', first_name, last_name, name_suffix) ILIKE '%${payload.search!.value}%'`
+            )
+          } else {
+            searchQuery.orWhereILike(payload.search!.column, `%${payload.search!.value}%`)
+          }
+        }
       })
       .paginate(payload.page, payload.perPage)
 
@@ -135,7 +170,7 @@ export default class UsersController {
    */
   async store({ bouncer, response }: HttpContext) {
     await bouncer.with(UserPolicy).authorize('create')
-    response.notImplemented()
+    return response.notImplemented()
   }
 
   /**
@@ -166,11 +201,20 @@ export default class UsersController {
         }
       )
       .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, ['locations', 'locations.neighborhood', '*']),
+        ArrayUtil.hasOrIsAnyFrom(payload.include, [
+          '*',
+          'locations',
+          'locations.*',
+          'locations.neighborhood',
+        ]),
         (includeLocationsQuery) => {
           includeLocationsQuery.preload('locations', (locationsQuery) => {
             locationsQuery.if(
-              ArrayUtil.hasOrIsAnyFrom(payload.include, ['locations.neighborhood', '*']),
+              ArrayUtil.hasOrIsAnyFrom(payload.include, [
+                '*',
+                'locations.*',
+                'locations.neighborhood',
+              ]),
               (includeNeighborhoodQuery) => {
                 includeNeighborhoodQuery.preload('neighborhood')
               }
@@ -180,9 +224,10 @@ export default class UsersController {
       )
       .if(
         ArrayUtil.hasOrIsAnyFrom(payload.include, [
-          'organizationLocations',
-          'organizationLocations.neighborhood',
           '*',
+          'organizationLocations',
+          'organizationLocations.*',
+          'organizationLocations.neighborhood',
         ]),
         (includeOrganizationLocationsQuery) => {
           includeOrganizationLocationsQuery.preload(
@@ -190,8 +235,9 @@ export default class UsersController {
             (organizationLocationsQuery) => {
               organizationLocationsQuery.if(
                 ArrayUtil.hasOrIsAnyFrom(payload.include, [
-                  'organizationLocations.neighborhood',
                   '*',
+                  'organizationLocations.*',
+                  'organizationLocations.neighborhood',
                 ]),
                 (includeNeighborhoodQuery) => {
                   includeNeighborhoodQuery.preload('neighborhood')

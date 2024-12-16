@@ -23,7 +23,7 @@ changePassword.messagesProvider = new SimpleMessagesProvider({
 export const forgotPassword = vine.compile(
   vine.object({
     email: vine.string().trim().email(),
-    timezone: vine.string().timezone(),
+    timezone: vine.string().trim().timezone(),
   })
 )
 

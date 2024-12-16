@@ -3,7 +3,7 @@ import User from '#models/user'
 import { test } from '@japa/runner'
 
 test.group('PATCH:users/:id', () => {
-  test('unauthorized when logged out', async ({ client }) => {
+  test('unauthorized - missing session', async ({ client }) => {
     const response = await client.patch('/users/1').json({ lastName: 'Foo' })
 
     response.assertStatus(401)
@@ -14,6 +14,28 @@ test.group('PATCH:users/:id', () => {
     .tagCrud('@update')
     .tagResource('@user')
     .tagUnauthorized()
+
+  test('unprocessable entity - is not boolean: isApplicationAdmin', async ({ client }) => {
+    const user = await User.findOrFail(1)
+
+    const response = await client.patch('/users/1').json({ isApplicationAdmin: 'a' }).loginAs(user)
+
+    response.assertStatus(422)
+    response.assertBody({
+      errors: [
+        {
+          field: 'isApplicationAdmin',
+          message: 'The value must be a boolean',
+          rule: 'boolean',
+        },
+      ],
+    })
+  })
+    .tagCrud('@update')
+    .tagResource('@user')
+    .tagUnprocessableEntity()
+
+  test('not nullable: email').tagCrud('@update').tagResource('@user').tagUnprocessableEntity()
 
   test('forbidden when not user or application admin', async ({ client }) => {
     const user = await User.findOrFail(2)
@@ -29,7 +51,9 @@ test.group('PATCH:users/:id', () => {
     .tagResource('@user')
     .tagForbidden()
 
-  test('forbidden when editing isApplicationAdmin not an application admin', async ({ client }) => {
+  test('forbidden when editing isApplicationAdmin by a non application admin', async ({
+    client,
+  }) => {
     const user = await User.findOrFail(2)
 
     const response = await client.patch('/users/2').json({ isApplicationAdmin: true }).loginAs(user)
@@ -43,7 +67,51 @@ test.group('PATCH:users/:id', () => {
     .tagResource('@user')
     .tagForbidden()
 
-  test('successful when non-admin and editing own user', async ({ assert, client }) => {
+  test('success - not nullable: firstName, lastName', async ({ client }) => {
+    const user = await User.findOrFail(1)
+    const userSeedData = users[0]
+
+    const response = await client
+      .patch('/users/1')
+      .json({ firstName: null, lastName: null })
+      .loginAs(user)
+
+    response.assertStatus(200)
+    response.assertBodyContains({
+      firstName: userSeedData.firstName,
+      lastName: userSeedData.lastName,
+    })
+  })
+    .tagCrud('@update')
+    .tagResource('@user')
+    .tagSuccess()
+
+  test('success - nullable: middleName, nameSuffix', async ({ client }) => {
+    const user = await User.findOrFail(2)
+    const userSeedData = users[1]
+
+    const response = await client
+      .patch('/users/2')
+      .json({ middleName: null, nameSuffix: null })
+      .loginAs(user)
+
+    response.assertStatus(200)
+
+    response.assertBodyNotContains({
+      middleName: userSeedData.middleName,
+      nameSuffix: userSeedData.nameSuffix,
+    })
+
+    response.assertBodyContains({
+      middleName: null,
+      nameSuffix: null,
+    })
+  })
+    .tagCrud('@update')
+    .tagResource('@user')
+    .tagSuccess()
+
+  test('success - when non-admin and editing own user', async ({ assert, client }) => {
     const user = await User.findOrFail(2)
 
     const updateData = {
@@ -66,7 +134,7 @@ test.group('PATCH:users/:id', () => {
     .tagResource('@user')
     .tagSuccess()
 
-  test('successful when application admin and editing other user', async ({ assert, client }) => {
+  test('success - when application admin and editing other user', async ({ assert, client }) => {
     const user = await User.findOrFail(1)
 
     const updateData = {
@@ -89,7 +157,7 @@ test.group('PATCH:users/:id', () => {
     .tagResource('@user')
     .tagSuccess()
 
-  test('successful when application admin and editing other isApplicationAdmin', async ({
+  test('success - when application admin and editing other isApplicationAdmin', async ({
     assert,
     client,
   }) => {
@@ -112,4 +180,6 @@ test.group('PATCH:users/:id', () => {
 
     await updatedUser.merge(users[1]).save()
   })
+
+  test('change email').tagCrud('@update').tagResource('@user').tagSuccess()
 })

@@ -1,20 +1,11 @@
 import User from '#models/user'
 import { test } from '@japa/runner'
 
-test.group('DELETE:authentication/logout', () => {
-  test('successful logout', async ({ client }) => {
-    const user = await User.findOrFail(1)
+const route = '/authentication/logout'
 
-    const response = await client.delete('/authentication/logout').loginAs(user)
-
-    response.assertStatus(200)
-  })
-    .tagCrud('@delete')
-    .tagResource('@session')
-    .tagSuccess()
-
-  test('unauthorized when already logged out', async ({ client }) => {
-    const response = await client.delete('/authentication/logout')
+test.group(`DELETE:${route}`, () => {
+  test('unauthorized - missing: session', async ({ client }) => {
+    const response = await client.delete(route)
 
     response.assertStatus(401)
     response.assertBody({
@@ -24,4 +15,15 @@ test.group('DELETE:authentication/logout', () => {
     .tagCrud('@delete')
     .tagResource('@session')
     .tagUnauthorized()
+
+  test('success - logout', async ({ client }) => {
+    const user = await User.findOrFail(1)
+
+    const response = await client.delete(route).loginAs(user)
+
+    response.assertStatus(200)
+  })
+    .tagCrud('@delete')
+    .tagResource('@session')
+    .tagSuccess()
 })

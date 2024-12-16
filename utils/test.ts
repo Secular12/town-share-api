@@ -5,3 +5,29 @@ export const conditionalLoginAsRequest = async (request: ApiRequest, authUserId?
   const user = authUserId ? await User.findOrFail(authUserId) : null
   return user ? request.loginAs(user) : request
 }
+
+export const paginateSeedData = <T extends Record<string, any>>(
+  seedData: T[],
+  options?: {
+    page?: number
+    perPage?: number
+  }
+) => {
+  const opts = {
+    ...{
+      page: 1,
+      perPage: 100,
+    },
+    ...options,
+  }
+
+  const startIndex = opts.perPage * (opts.page - 1)
+  const endIndex = opts.perPage * opts.page
+
+  const data = seedData.slice(startIndex, endIndex)
+
+  return data.map((item, itemIndex) => ({
+    ...item,
+    id: itemIndex + startIndex + 1,
+  }))
+}

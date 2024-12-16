@@ -17,6 +17,11 @@ export const neighborhoods = [
     name: 'Downtown',
     state: 'Washington',
   },
+  {
+    city: 'Sedona',
+    name: 'Sedona Central',
+    state: 'Arizona',
+  },
 ]
 
 export default class extends BaseSeeder {
