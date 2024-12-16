@@ -4,8 +4,8 @@ import TownShareBasePolicy from '#policies/town_share_base_policy'
 import { AuthorizerResponse } from '@adonisjs/bouncer/types'
 
 export default class NeighborhoodPolicy extends TownShareBasePolicy {
-  create(authUser: User): AuthorizerResponse {
-    return authUser.isApplicationAdmin
+  create(_authUser: User): AuthorizerResponse {
+    return false
   }
 
   async edit(authUser: User, neighborhood: Neighborhood | number) {
