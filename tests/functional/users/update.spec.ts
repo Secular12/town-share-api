@@ -35,9 +35,14 @@ test.group('PATCH:users/:id', () => {
     .tagResource('@user')
     .tagUnprocessableEntity()
 
+  test('unprocessable entity - is not date: suspendedAt')
+    .tagCrud('@update')
+    .tagResource('@user')
+    .tagForbidden()
+
   test('not nullable: email').tagCrud('@update').tagResource('@user').tagUnprocessableEntity()
 
-  test('forbidden when not user or application admin', async ({ client }) => {
+  test('forbidden - not user or application admin', async ({ client }) => {
     const user = await User.findOrFail(2)
 
     const response = await client.patch('/users/1').json({ lastName: 'Foo' }).loginAs(user)
@@ -51,9 +56,17 @@ test.group('PATCH:users/:id', () => {
     .tagResource('@user')
     .tagForbidden()
 
-  test('forbidden when editing isApplicationAdmin by a non application admin', async ({
-    client,
-  }) => {
+  test('forbidden - suspending by a non application admin')
+    .tagCrud('@update')
+    .tagResource('@user')
+    .tagForbidden()
+
+  test('forbidden - removing suspension by a non application admin')
+    .tagCrud('@update')
+    .tagResource('@user')
+    .tagForbidden()
+
+  test('forbidden - editing isApplicationAdmin by a non application admin', async ({ client }) => {
     const user = await User.findOrFail(2)
 
     const response = await client.patch('/users/2').json({ isApplicationAdmin: true }).loginAs(user)
