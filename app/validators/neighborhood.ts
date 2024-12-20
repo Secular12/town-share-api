@@ -51,10 +51,10 @@ export const show = vine.compile(vine.object({}).merge(counts).merge(includes))
 
 export const update = vine.compile(
   vine.object({
-    city: vine.string(),
-    country: vine.string(),
-    name: vine.string(),
-    state: vine.string(),
-    zip: vine.string().nullable(),
+    city: vine.string().optional(),
+    country: vine.string().optional(),
+    name: vine.string().optional(),
+    state: vine.string().optional(),
+    zip: vine.string().nullable().optional(),
   })
 )

@@ -147,9 +147,19 @@ export default class NeighborhoodsController {
   /**
    * Handle form submission for the edit action
    */
-  async update({ bouncer, params, response }: HttpContext) {
+  async update({ auth, bouncer, params, request }: HttpContext) {
     await bouncer.with(NeighborhoodPolicy).authorize('edit', params.id)
 
-    return response.notImplemented()
+    const payload = await NeighborhoodValidator.update.validate(request.body())
+
+    const neighborhood = await Neighborhood.findOrFail(params.id)
+
+    neighborhood.merge(payload)
+
+    await neighborhood.save()
+
+    await neighborhood.refresh()
+
+    return NeighborhoodSerializer.serialize(neighborhood, { authUser: auth.user })
   }
 }
