@@ -5,6 +5,7 @@ export const NeighborhoodFactory = factory
   .define(Neighborhood, async ({ faker }) => {
     return {
       city: faker.location.city(),
+      country: 'United States of America',
       name: faker.lorem.words({ min: 1, max: 3 }),
       state: faker.location.state(),
     }

@@ -8,8 +8,10 @@ export default class extends BaseSchema {
       table.increments('id')
 
       table.string('city').notNullable()
+      table.string('country').notNullable()
       table.string('name').notNullable().unique()
       table.string('state').notNullable()
+      table.string('zip')
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()

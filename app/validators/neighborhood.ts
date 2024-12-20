@@ -31,11 +31,30 @@ export const index = vine.compile(
       userId: vine.number().min(1).optional(),
     })
     .merge(
-      ValidatorUtil.orderByGroup(['id', 'city', 'name', 'state', 'createdAt', 'updatedAt'] as const)
+      ValidatorUtil.orderByGroup([
+        'id',
+        'city',
+        'country',
+        'name',
+        'state',
+        'zip',
+        'createdAt',
+        'updatedAt',
+      ] as const)
     )
     .merge(counts)
     .merge(includes)
-    .merge(ValidatorUtil.searchGroup(['city', 'name', 'state'] as const))
+    .merge(ValidatorUtil.searchGroup(['city', 'country', 'name', 'state', 'zip'] as const))
 )
 
 export const show = vine.compile(vine.object({}).merge(counts).merge(includes))
+
+export const update = vine.compile(
+  vine.object({
+    city: vine.string(),
+    country: vine.string(),
+    name: vine.string(),
+    state: vine.string(),
+    zip: vine.string().nullable(),
+  })
+)

@@ -6,21 +6,25 @@ export const neighborhoods = [
     city: 'Pittsburgh',
     name: 'North Hills',
     state: 'Pennsylvania',
+    zip: '15090',
   },
   {
     city: 'Pittsburgh',
     name: 'East Side',
     state: 'Pennsylvania',
+    zip: '15112',
   },
   {
     city: 'Seattle',
     name: 'Downtown',
     state: 'Washington',
+    zip: '98101',
   },
   {
     city: 'Sedona',
     name: 'Sedona Central',
     state: 'Arizona',
+    zip: '86336',
   },
 ]
 

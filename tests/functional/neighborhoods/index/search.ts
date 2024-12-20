@@ -108,7 +108,7 @@ export default (route: string) => {
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity - search.column is not an acceptable options: city, name, state', async ({
+  test('unprocessable entity - search.column is not an acceptable options: city, country, name, state, zip', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -125,7 +125,7 @@ export default (route: string) => {
           field: 'search.column',
           message: 'The selected column is invalid',
           meta: {
-            choices: ['city', 'name', 'state'],
+            choices: ['city', 'country', 'name', 'state', 'zip'],
           },
           rule: 'enum',
         },
@@ -136,7 +136,7 @@ export default (route: string) => {
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity - search[].column is not an acceptable options: city, name, state', async ({
+  test('unprocessable entity - search[].column is not an acceptable options: city, country, name, state, zip', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -160,7 +160,7 @@ export default (route: string) => {
           field: 'search.1.column',
           message: 'The selected column is invalid',
           meta: {
-            choices: ['city', 'name', 'state'],
+            choices: ['city', 'country', 'name', 'state', 'zip'],
           },
           rule: 'enum',
         },

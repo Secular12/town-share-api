@@ -18,10 +18,16 @@ export default class Neighborhood extends BaseModel {
   declare city: string
 
   @column()
+  declare country: string
+
+  @column()
   declare name: string
 
   @column()
   declare state: string
+
+  @column()
+  declare zip: string
 
   /* Timestamps */
   @column.dateTime({ autoCreate: true })

@@ -57,7 +57,7 @@ export default (route: string) => {
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity - orderBy.column is not an acceptable option: id, city, name, state, createdAt, updatedAt', async ({
+  test('unprocessable entity - orderBy.column is not an acceptable option: id, city, country, name, state, zip, createdAt, updatedAt', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -78,7 +78,7 @@ export default (route: string) => {
           field: 'orderBy.column',
           message: 'The selected column is invalid',
           meta: {
-            choices: ['id', 'city', 'name', 'state', 'createdAt', 'updatedAt'],
+            choices: ['id', 'city', 'country', 'name', 'state', 'zip', 'createdAt', 'updatedAt'],
           },
           rule: 'enum',
         },
@@ -89,7 +89,7 @@ export default (route: string) => {
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity - orderBy[].column is not an acceptable option: id, city, name, state, createdAt, updatedAt', async ({
+  test('unprocessable entity - orderBy[].column is not an acceptable option: id, city, country, name, state, zip, createdAt, updatedAt', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -111,7 +111,7 @@ export default (route: string) => {
           field: 'orderBy.1.column',
           message: 'The selected column is invalid',
           meta: {
-            choices: ['id', 'city', 'name', 'state', 'createdAt', 'updatedAt'],
+            choices: ['id', 'city', 'country', 'name', 'state', 'zip', 'createdAt', 'updatedAt'],
           },
           rule: 'enum',
         },
