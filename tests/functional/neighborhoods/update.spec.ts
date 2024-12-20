@@ -40,15 +40,34 @@ test.group('PATCH:neighborhoods/:id', () => {
     .tagResource('@neighborhood')
     .tagForbidden()
 
-  test('unprocessable entity - is not unique: name')
+  test('unprocessable entity - is not unique: name', async ({ assert, client }) => {
+    const user = await User.findOrFail(1)
+
+    const response = await client
+      .patch('neighborhoods/2')
+      .json({ name: 'North Hills' })
+      .loginAs(user)
+
+    response.assertStatus(422)
+
+    response.assertBody({
+      errors: [
+        {
+          field: 'name',
+          message: 'The name field must be unique',
+          rule: 'unique',
+        },
+      ],
+    })
+  })
     .tagCrud('@update')
     .tagResource('@neighborhood')
-    .tagForbidden()
+    .tagUnprocessableEntity()
 
   test('unprocessable entity - is not date: suspendedAt')
     .tagCrud('@update')
     .tagResource('@neighborhood')
-    .tagForbidden()
+    .tagUnprocessableEntity()
 
   test('success - not nullable: city, country, name, state', async ({ client }) => {
     const user = await User.findOrFail(1)

@@ -49,12 +49,13 @@ export const index = vine.compile(
 
 export const show = vine.compile(vine.object({}).merge(counts).merge(includes))
 
-export const update = vine.compile(
-  vine.object({
-    city: vine.string().optional(),
-    country: vine.string().optional(),
-    name: vine.string().optional(),
-    state: vine.string().optional(),
-    zip: vine.string().nullable().optional(),
-  })
-)
+export const update = (id: number) =>
+  vine.compile(
+    vine.object({
+      city: vine.string().optional(),
+      country: vine.string().optional(),
+      name: vine.string().unique({ column: 'name', id, table: 'neighborhoods' }),
+      state: vine.string().optional(),
+      zip: vine.string().nullable().optional(),
+    })
+  )

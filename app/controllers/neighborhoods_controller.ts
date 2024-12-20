@@ -150,7 +150,7 @@ export default class NeighborhoodsController {
   async update({ auth, bouncer, params, request }: HttpContext) {
     await bouncer.with(NeighborhoodPolicy).authorize('edit', params.id)
 
-    const payload = await NeighborhoodValidator.update.validate(request.body())
+    const payload = await NeighborhoodValidator.update(params.id).validate(request.body())
 
     const neighborhood = await Neighborhood.findOrFail(params.id)
 
