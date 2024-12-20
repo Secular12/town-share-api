@@ -29,6 +29,17 @@ test.group('GET:users/:id', () => {
     const { email } = users[0]
     response.assertStatus(200)
     assert.containsSubset(body, { id: 1, email })
+    assert.onlyProperties(body, [
+      'id',
+      'email',
+      'firstName',
+      'middleName',
+      'firstName',
+      'lastName',
+      'nameSuffix',
+      'createdAt',
+      'updatedAt',
+    ])
   })
     .tagCrud('@read')
     .tagResource('@user')

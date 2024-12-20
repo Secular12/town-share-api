@@ -29,6 +29,16 @@ test.group(`GET:neighborhoods/:id`, () => {
     const { name } = neighborhoods[0]
     response.assertStatus(200)
     assert.containsSubset(body, { id: 1, name })
+    assert.onlyProperties(body, [
+      'id',
+      'city',
+      'country',
+      'name',
+      'state',
+      'zip',
+      'createdAt',
+      'updatedAt',
+    ])
   })
     .tagCrud('@read')
     .tagResource('@neighborhood')
