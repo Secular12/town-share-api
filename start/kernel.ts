@@ -11,6 +11,7 @@
 import router from '@adonisjs/core/services/router'
 import server from '@adonisjs/core/services/server'
 import '#start/vine/timezone'
+import '#start/vine/unique'
 
 /**
  * The error handler is used to convert an exception
