@@ -27,7 +27,7 @@ export default class Neighborhood extends BaseModel {
   declare state: string
 
   @column()
-  declare zip: string
+  declare zip: string | null
 
   /* Timestamps */
   @column.dateTime({ autoCreate: true })
