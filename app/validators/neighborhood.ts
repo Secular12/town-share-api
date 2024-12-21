@@ -54,7 +54,7 @@ export const update = (id: number) =>
     vine.object({
       city: vine.string().optional(),
       country: vine.string().optional(),
-      name: vine.string().unique({ column: 'name', id, table: 'neighborhoods' }),
+      name: vine.string().unique({ column: 'name', id, table: 'neighborhoods' }).optional(),
       state: vine.string().optional(),
       zip: vine.string().nullable().optional(),
     })
