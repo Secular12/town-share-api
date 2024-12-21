@@ -73,6 +73,7 @@ declare module '@japa/runner/core' {
     tagForbidden(): this
     tagResource(resourceTags: ResourceTag | ResourceTag[]): this
     tagSuccess(): this
+    tagToDo(): this
     tagUnauthorized(): this
     tagUnprocessableEntity(): this
   }
@@ -106,6 +107,11 @@ Test.macro('tagResource', function (this: Test, resourceTags: ResourceTag | Reso
 
 Test.macro('tagSuccess', function (this: Test) {
   this.tags(['@success'], 'append')
+  return this
+})
+
+Test.macro('tagToDo', function (this: Test) {
+  this.tags(['@toDo'], 'append')
   return this
 })
 

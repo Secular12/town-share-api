@@ -34,13 +34,15 @@ test.group('PATCH:neighborhoods/:id', () => {
     .tagCrud('@update')
     .tagResource('@neighborhood')
     .tagForbidden()
+    .tagToDo()
 
   test('forbidden - removing suspension by a non application admin')
     .tagCrud('@update')
     .tagResource('@neighborhood')
     .tagForbidden()
+    .tagToDo()
 
-  test('unprocessable entity - is not unique: name', async ({ assert, client }) => {
+  test('unprocessable entity - is not unique: name', async ({ client }) => {
     const user = await User.findOrFail(1)
 
     const response = await client
@@ -68,6 +70,7 @@ test.group('PATCH:neighborhoods/:id', () => {
     .tagCrud('@update')
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()
+    .tagToDo()
 
   test('success - not nullable: city, country, name, state', async ({ client }) => {
     const user = await User.findOrFail(1)
@@ -95,6 +98,8 @@ test.group('PATCH:neighborhoods/:id', () => {
     const neighborhoodSeedData = neighborhoods[0]
 
     const response = await client.patch('/neighborhoods/1').json({ zip: null }).loginAs(user)
+
+    console.log(response.body())
 
     response.assertStatus(200)
 

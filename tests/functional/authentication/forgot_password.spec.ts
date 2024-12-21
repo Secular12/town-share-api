@@ -126,4 +126,5 @@ test.group(`POST:${route}`, () => {
     .tagResource('@userAccessToken')
     .tagSuccess()
     .tagEmail()
+    .tagToDo()
 })

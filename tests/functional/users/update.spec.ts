@@ -39,8 +39,13 @@ test.group('PATCH:users/:id', () => {
     .tagCrud('@update')
     .tagResource('@user')
     .tagForbidden()
+    .tagToDo()
 
-  test('not nullable: email').tagCrud('@update').tagResource('@user').tagUnprocessableEntity()
+  test('not nullable: email')
+    .tagCrud('@update')
+    .tagResource('@user')
+    .tagUnprocessableEntity()
+    .tagToDo()
 
   test('forbidden - not user or application admin', async ({ client }) => {
     const user = await User.findOrFail(2)
@@ -60,11 +65,13 @@ test.group('PATCH:users/:id', () => {
     .tagCrud('@update')
     .tagResource('@user')
     .tagForbidden()
+    .tagToDo()
 
   test('forbidden - removing suspension by a non application admin')
     .tagCrud('@update')
     .tagResource('@user')
     .tagForbidden()
+    .tagToDo()
 
   test('forbidden - editing isApplicationAdmin by a non application admin', async ({ client }) => {
     const user = await User.findOrFail(2)
@@ -194,5 +201,5 @@ test.group('PATCH:users/:id', () => {
     await updatedUser.merge(users[1]).save()
   })
 
-  test('change email').tagCrud('@update').tagResource('@user').tagSuccess()
+  test('change email').tagCrud('@update').tagResource('@user').tagSuccess().tagToDo()
 })
