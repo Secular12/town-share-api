@@ -99,8 +99,6 @@ test.group('PATCH:neighborhoods/:id', () => {
 
     const response = await client.patch('/neighborhoods/1').json({ zip: null }).loginAs(user)
 
-    console.log(response.body())
-
     response.assertStatus(200)
 
     response.assertBodyNotContains({

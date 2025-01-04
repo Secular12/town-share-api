@@ -1,6 +1,6 @@
 import vine from '@vinejs/vine'
 
-export const combineUnique = <T>(...args: T[][]): T[] => {
+const combineUnique = <T>(...args: T[][]): T[] => {
   const arrayItems = args.reduce((items, arr) => {
     return [...items, ...arr]
   }, [] as T[])
@@ -8,17 +8,14 @@ export const combineUnique = <T>(...args: T[][]): T[] => {
   return [...new Set(arrayItems)]
 }
 
-export const hasAnyFrom = <SourceArray extends readonly unknown[], FromArray extends SourceArray>(
+const hasAnyFrom = <SourceArray extends readonly unknown[], FromArray extends SourceArray>(
   sourceArray?: SourceArray,
   fromArray?: FromArray
 ) => {
   return fromArray?.some((fromItem) => sourceArray?.includes(fromItem))
 }
 
-export const hasOrIsAnyFrom = <
-  Source extends unknown[] | unknown,
-  From extends unknown[] | unknown,
->(
+const hasOrIsAnyFrom = <Source extends unknown[] | unknown, From extends unknown[] | unknown>(
   source?: Source,
   from?: From
 ) => {
@@ -33,6 +30,13 @@ export const hasOrIsAnyFrom = <
       : from === source
 }
 
-export const orderBy = <T>(value: T | T[]) => {
+const orderBy = <T>(value: T | T[]) => {
   return vine.helpers.isArray(value) ? value : [value]
+}
+
+export default {
+  combineUnique,
+  hasAnyFrom,
+  hasOrIsAnyFrom,
+  orderBy,
 }

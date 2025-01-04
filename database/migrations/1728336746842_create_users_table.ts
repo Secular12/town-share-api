@@ -7,6 +7,8 @@ export default class extends BaseSchema {
     this.schema.createTable(this.usersTable, (table) => {
       table.increments('id').notNullable()
 
+      table.integer('sponsor_id').nullable().unsigned().references('id').inTable('users')
+
       table.string('email', 254).notNullable().unique()
       table.string('first_name').notNullable()
       table.boolean('is_application_admin').defaultTo(false).notNullable()

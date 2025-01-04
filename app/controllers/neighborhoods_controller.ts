@@ -1,9 +1,6 @@
 import Neighborhood from '#models/neighborhood'
 import NeighborhoodPolicy from '#policies/neighborhood_policy'
-import NeighborhoodSerializer from '#serializers/neighborhood_serializer'
-import OrganizationSerializer from '#serializers/organization_serializer'
-import UserSerializer from '#serializers/user_serializer'
-import * as ArrayUtil from '#utils/array'
+import ArrayUtil from '#utils/array'
 import * as NeighborhoodValidator from '#validators/neighborhood'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
@@ -12,7 +9,7 @@ export default class NeighborhoodsController {
   /**
    * Display a list of resource
    */
-  async index({ auth, bouncer, request }: HttpContext) {
+  async index({ bouncer, request }: HttpContext) {
     await bouncer.with(NeighborhoodPolicy).authorize('readMany')
 
     const payload = await NeighborhoodValidator.index.validate(request.qs())
@@ -75,13 +72,7 @@ export default class NeighborhoodsController {
       })
       .paginate(payload.page, payload.perPage)
 
-    return NeighborhoodSerializer.serialize(neighborhoods, {
-      authUser: auth.user,
-      relatedSerializers: {
-        'admins': UserSerializer,
-        'admins.organizations': OrganizationSerializer,
-      },
-    })
+    return neighborhoods
   }
 
   /**
@@ -95,7 +86,7 @@ export default class NeighborhoodsController {
   /**
    * Show individual record
    */
-  async show({ auth, bouncer, params, request }: HttpContext) {
+  async show({ bouncer, params, request }: HttpContext) {
     await bouncer.with(NeighborhoodPolicy).authorize('read', params.id)
 
     const payload = await NeighborhoodValidator.show.validate(request.qs())
@@ -135,19 +126,13 @@ export default class NeighborhoodsController {
       .where('id', params.id)
       .firstOrFail()
 
-    return NeighborhoodSerializer.serialize(neighborhood, {
-      authUser: auth.user,
-      relatedSerializers: {
-        'admins': UserSerializer,
-        'admins.organizations': OrganizationSerializer,
-      },
-    })
+    return neighborhood
   }
 
   /**
    * Handle form submission for the edit action
    */
-  async update({ auth, bouncer, params, request }: HttpContext) {
+  async update({ bouncer, params, request }: HttpContext) {
     await bouncer.with(NeighborhoodPolicy).authorize('edit', params.id)
 
     const payload = await NeighborhoodValidator.update(params.id).validate(request.body())
@@ -160,6 +145,6 @@ export default class NeighborhoodsController {
 
     await neighborhood.refresh()
 
-    return NeighborhoodSerializer.serialize(neighborhood, { authUser: auth.user })
+    return neighborhood
   }
 }

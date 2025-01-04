@@ -31,10 +31,11 @@ test.group('GET:users/:id', () => {
     assert.containsSubset(body, { id: 1, email })
     assert.onlyProperties(body, [
       'id',
+      'sponsorId',
       'email',
       'firstName',
       'middleName',
-      'firstName',
+      'isApplicationAdmin',
       'lastName',
       'nameSuffix',
       'createdAt',

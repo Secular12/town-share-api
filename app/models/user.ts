@@ -7,8 +7,8 @@ import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { compose } from '@adonisjs/core/helpers'
 import hash from '@adonisjs/core/services/hash'
-import { BaseModel, column, hasMany, manyToMany, scope } from '@adonisjs/lucid/orm'
-import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany, manyToMany, scope } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import vine from '@vinejs/vine'
 import { DateTime } from 'luxon'
 
@@ -23,6 +23,8 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare id: number
 
   /* Relationship IDs */
+  @column()
+  declare sponsorId: number | null
 
   /* Attributes */
   @column()
@@ -72,6 +74,16 @@ export default class User extends compose(BaseModel, AuthFinder) {
     pivotColumns: ['is_organization_admin'],
   })
   declare organizations: ManyToMany<typeof Organization>
+
+  @belongsTo(() => User, {
+    foreignKey: 'sponsorId',
+  })
+  declare sponsor: BelongsTo<typeof User>
+
+  @hasMany(() => User, {
+    foreignKey: 'sponsorId',
+  })
+  declare sponsoredUsers: HasMany<typeof User>
 
   /* Scopes */
   static existsWithNeighborhood = scope((query, neighborhoodId: number | number[]) => {

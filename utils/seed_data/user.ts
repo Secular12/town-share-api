@@ -5,6 +5,7 @@ import { organizationLocationUsers } from '#database/seeders/test/organization_l
 import { organizations } from '#database/seeders/test/organization_seeder'
 import { organizationUsers } from '#database/seeders/test/organization_user_seeder'
 import { userLocations } from '#database/seeders/test/user_location_seeder'
+import { users } from '#database/seeders/test/user_seeder'
 
 export const getAdminedNeighborhoods = (userId: number) =>
   neighborhoods.reduce(
@@ -112,3 +113,35 @@ export const getOrganizationsCount = (userId: number) =>
   organizationUsers.reduce((count: number, organizationUser) => {
     return organizationUser.user_id === userId ? count + 1 : count
   }, 0)
+
+export const getSponsor = (userId: number) => {
+  const sponsorId = users[userId - 1].sponsorId
+
+  const sponsor = sponsorId ? users[sponsorId - 1] : null
+
+  return sponsor
+    ? {
+        id: sponsorId,
+        email: sponsor.email,
+      }
+    : null
+}
+
+export const getSponsoredUsers = (userId: number) => {
+  return users.reduce(
+    (sponsoredUsers: Record<string, unknown>[], sponsoredUser, sponsoredUserIndex) => {
+      const sponsoredUserId = sponsoredUserIndex + 1
+
+      if (sponsoredUser.sponsorId === userId) {
+        sponsoredUsers.push({
+          id: sponsoredUserId,
+          sponsorId: sponsoredUser.sponsorId,
+          email: sponsoredUser.email,
+        })
+      }
+
+      return sponsoredUsers
+    },
+    []
+  )
+}

@@ -7,7 +7,7 @@ import User from '#models/user'
 import { test } from '@japa/runner'
 
 export default (route: string) => {
-  test('unprocessable entity - not correct type: isApplicationAdmin, neighborhoodId, organizationId, organizationLocationId', async ({
+  test('unprocessable entity - not correct type: isApplicationAdmin, neighborhoodId, organizationId, organizationLocationId, sponsorId', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -19,6 +19,7 @@ export default (route: string) => {
         neighborhoodId: 'b',
         organizationId: 'c',
         organizationLocationId: 'd',
+        sponsorId: 'e',
         page: 1,
         perPage: 100,
       })
@@ -47,6 +48,11 @@ export default (route: string) => {
           message: 'The organizationLocationId field must be a number',
           rule: 'number',
         },
+        {
+          field: 'sponsorId',
+          message: 'The sponsorId field must be a number',
+          rule: 'number',
+        },
       ],
     })
   })
@@ -54,7 +60,7 @@ export default (route: string) => {
     .tagResource('@user')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity - under number minimum: neighborhoodId, organizationId, organizationLocationId', async ({
+  test('unprocessable entity - under number minimum: neighborhoodId, organizationId, organizationLocationId, sponsorId', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -65,6 +71,7 @@ export default (route: string) => {
         neighborhoodId: 0,
         organizationId: 0,
         organizationLocationId: 0,
+        sponsorId: 0,
         page: 1,
         perPage: 100,
       })
@@ -88,6 +95,12 @@ export default (route: string) => {
         {
           field: 'organizationLocationId',
           message: 'The organizationLocationId field must be at least 1',
+          meta: { min: 1 },
+          rule: 'min',
+        },
+        {
+          field: 'sponsorId',
+          message: 'The sponsorId field must be at least 1',
           meta: { min: 1 },
           rule: 'min',
         },
@@ -215,6 +228,40 @@ export default (route: string) => {
             organizationLocationUser.organization_location_id === organizationLocationId &&
             organizationLocationUser.user_id === userId
         )
+      })
+
+    response.assertStatus(200)
+    assert.equal(body.data.length, usersData.length)
+    assert.containsSubset(response.body().data, usersData)
+  })
+    .tagCrud('@read')
+    .tagResource('@user')
+    .tagSuccess()
+
+  test('success - filter by sponsorId', async ({ assert, client }) => {
+    const user = await User.findOrFail(1)
+    const sponsorId = 1
+
+    const response = await client
+      .get(route)
+      .qs({
+        sponsorId,
+        perPage: 100,
+        page: 1,
+      })
+      .loginAs(user)
+
+    const body = response.body()
+
+    const usersData = users
+      .slice(0, 100)
+      .map(({ sponsorId: userSponsorId, email }, userIndex) => ({
+        id: userIndex + 1,
+        sponsorId: userSponsorId,
+        email,
+      }))
+      .filter(({ sponsorId: userSponsorId }) => {
+        return sponsorId === userSponsorId
       })
 
     response.assertStatus(200)

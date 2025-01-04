@@ -24,7 +24,7 @@ const hasAnyKey = (object: JsObject, key: Property[]) => {
   return key.some((k) => k in object)
 }
 
-function mapEntries<T>(object: T, cb: (value: unknown, key: Property, index: number) => T) {
+const mapEntries = <T>(object: T, cb: (value: unknown, key: Property, index: number) => T) => {
   return Object.entries(object as JsObject).reduce((acc, [key, value], index) => {
     const entry = cb(value, key, index)
 
@@ -35,9 +35,12 @@ function mapEntries<T>(object: T, cb: (value: unknown, key: Property, index: num
   }, {} as T)
 }
 
-function mapKeys<T>(object: T, cb: (value: unknown, key: Property, index: number) => Property) {
-  return Object.entries(object as JsObject).reduce((acc, [key, value], index) => {
-    const mappedKey = cb(value, key, index)
+const mapKeys = <T extends Record<keyof T, T[keyof T]>, K extends Property>(
+  obj: T,
+  cb: (value: T[keyof T], key: keyof T, index: number) => K
+) => {
+  return Object.entries(obj).reduce((acc, [key, value], index) => {
+    const mappedKey = cb(value as T[keyof T], key as keyof T, index)
 
     return {
       ...acc,
@@ -46,9 +49,12 @@ function mapKeys<T>(object: T, cb: (value: unknown, key: Property, index: number
   }, {} as T)
 }
 
-function mapValues<T>(object: T, cb: (value: unknown, key: Property, index: number) => unknown) {
-  return Object.entries(object as JsObject).reduce((acc, [key, value], index) => {
-    const mappedValue = cb(value, key, index)
+const mapValues = <T extends Record<keyof T, T[keyof T]>, V>(
+  obj: T,
+  cb: (value: T[keyof T], key: keyof T, index: number) => V
+): Record<keyof T, V> => {
+  return Object.entries(obj).reduce((acc, [key, value], index) => {
+    const mappedValue = cb(value as T[keyof T], key as keyof T, index)
 
     return {
       ...acc,
@@ -65,6 +71,19 @@ const some = (object: JsObject, cb: (value: unknown, key: Property, index: numbe
   return Object.entries(object).some(([key, value], index) => cb(value, key, index))
 }
 
+const toArray = <T extends Record<keyof T, T[keyof T]>, V>(
+  obj: T,
+  cb?: (value: T[keyof T], key: keyof T, index: number) => V
+) => {
+  return Object.entries(obj).reduce((acc, [key, value], index) => {
+    const mappedValue = cb ? cb(value as T[keyof T], key as keyof T, index) : (value as T[keyof T])
+
+    acc.push(mappedValue)
+
+    return acc
+  }, [] as V[])
+}
+
 export default {
   every,
   filter,
@@ -74,4 +93,5 @@ export default {
   mapKeys,
   mapValues,
   some,
+  toArray,
 }

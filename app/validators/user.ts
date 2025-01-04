@@ -17,6 +17,8 @@ export const includeOptions = [
   'organizationLocations.*',
   'organizationLocations.neighborhood',
   'organizations',
+  'sponsor',
+  'sponsoredUsers',
 ] as const
 
 const counts = vine.group([
@@ -44,6 +46,7 @@ export const index = vine.compile(
       neighborhoodId: vine.number().min(1).optional(),
       organizationId: vine.number().min(1).optional(),
       organizationLocationId: vine.number().min(1).optional(),
+      sponsorId: vine.number().min(1).optional(),
       page: vine.number().min(1),
       perPage: vine.number().max(100).min(1),
     })

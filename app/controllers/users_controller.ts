@@ -1,11 +1,6 @@
 import User from '#models/user'
 import UserPolicy from '#policies/user_policy'
-import NeighborhoodSerializer from '#serializers/neighborhood_serializer'
-import OrganizationLocationSerializer from '#serializers/organization_location_serializer'
-import OrganizationSerializer from '#serializers/organization_serializer'
-import UserLocationSerializer from '#serializers/user_location_serializer'
-import UserSerializer from '#serializers/user_serializer'
-import * as ArrayUtil from '#utils/array'
+import ArrayUtil from '#utils/array'
 import * as UserValidator from '#validators/user'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
@@ -14,7 +9,7 @@ export default class UsersController {
   /**
    * Display a list of resource
    */
-  async index({ auth, bouncer, request }: HttpContext) {
+  async index({ bouncer, request }: HttpContext) {
     await bouncer.with(UserPolicy).authorize('readMany')
 
     const payload = await UserValidator.index.validate(request.qs())
@@ -92,6 +87,15 @@ export default class UsersController {
           includeOrganizationsQuery.preload('organizations')
         }
       )
+      .if(ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'sponsor']), (includeSponsorQuery) => {
+        includeSponsorQuery.preload('sponsor')
+      })
+      .if(
+        ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'sponsoredUsers']),
+        (includeSponsoredUsersQuery) => {
+          includeSponsoredUsersQuery.preload('sponsoredUsers')
+        }
+      )
       .if(
         payload.isApplicationAdmin! === true || payload.isApplicationAdmin === false,
         (isApplicationAdminQuery) => {
@@ -112,6 +116,9 @@ export default class UsersController {
         organizationLocationIdQuery.withScopes((scopes) => {
           scopes.existsWithOrganizationLocation(payload.organizationLocationId!)
         })
+      })
+      .if(payload.sponsorId, (sponsorIdQuery) => {
+        sponsorIdQuery.where('sponsorId', payload.sponsorId!)
       })
       .if(payload.orderBy, (orderByQuery) => {
         orderByQuery.orderBy(ArrayUtil.orderBy(payload.orderBy!))
@@ -152,17 +159,7 @@ export default class UsersController {
       })
       .paginate(payload.page, payload.perPage)
 
-    return UserSerializer.serialize(users, {
-      authUser: auth.user,
-      relatedSerializers: {
-        'adminedNeighborhoods': NeighborhoodSerializer,
-        'locations': UserLocationSerializer,
-        'locations.neighborhood': NeighborhoodSerializer,
-        'organizationLocations': OrganizationLocationSerializer,
-        'organizationLocations.neighborhood': NeighborhoodSerializer,
-        'organizations': OrganizationSerializer,
-      },
-    })
+    return users
   }
 
   /**
@@ -176,7 +173,7 @@ export default class UsersController {
   /**
    * Show individual record
    */
-  async show({ auth, bouncer, params, request }: HttpContext) {
+  async show({ bouncer, params, request }: HttpContext) {
     await bouncer.with(UserPolicy).authorize('read', params.id)
     const payload = await UserValidator.show.validate(request.qs())
 
@@ -253,26 +250,25 @@ export default class UsersController {
           includeOrganizationsQuery.preload('organizations')
         }
       )
+      .if(ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'sponsor']), (includeSponsorQuery) => {
+        includeSponsorQuery.preload('sponsor')
+      })
+      .if(
+        ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'sponsoredUsers']),
+        (includeSponsoredUsersQuery) => {
+          includeSponsoredUsersQuery.preload('sponsoredUsers')
+        }
+      )
       .where('id', params.id)
       .firstOrFail()
 
-    return UserSerializer.serialize(user, {
-      authUser: auth.user,
-      relatedSerializers: {
-        'adminedNeighborhoods': NeighborhoodSerializer,
-        'locations': UserLocationSerializer,
-        'locations.neighborhood': NeighborhoodSerializer,
-        'organizationLocations': OrganizationLocationSerializer,
-        'organizationLocations.neighborhood': NeighborhoodSerializer,
-        'organizations': OrganizationSerializer,
-      },
-    })
+    return user
   }
 
   /**
    * Handle form submission for the edit action
    */
-  async update({ auth, bouncer, params, request }: HttpContext) {
+  async update({ bouncer, params, request }: HttpContext) {
     await bouncer.with(UserPolicy).authorize('edit', params.id)
 
     const user = await User.findOrFail(params.id)
@@ -287,6 +283,6 @@ export default class UsersController {
 
     await user.refresh()
 
-    return UserSerializer.serialize(user, { authUser: auth.user })
+    return user
   }
 }

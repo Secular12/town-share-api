@@ -36,6 +36,8 @@ export default (route: string) => {
               'organizationLocations.*',
               'organizationLocations.neighborhood',
               'organizations',
+              'sponsor',
+              'sponsoredUsers',
             ],
           },
           rule: 'enum',
@@ -78,6 +80,8 @@ export default (route: string) => {
               'organizationLocations.*',
               'organizationLocations.neighborhood',
               'organizations',
+              'sponsor',
+              'sponsoredUsers',
             ],
           },
           rule: 'enum',
@@ -190,7 +194,7 @@ export default (route: string) => {
     .tagResource(['@neighborhood', '@organizationLocation', '@user', '@userLocation'])
     .tagSuccess()
 
-  test('success - include adminedNeighborhoods, locations, organizationLocations, organizations', async ({
+  test('success - include adminedNeighborhoods, locations, organizationLocations, organizations, sponsor, sponsoredUsers', async ({
     assert,
     client,
   }) => {
@@ -199,7 +203,14 @@ export default (route: string) => {
     const response = await client
       .get(route)
       .qs({
-        include: ['adminedNeighborhoods', 'locations', 'organizationLocations', 'organizations'],
+        include: [
+          'adminedNeighborhoods',
+          'locations',
+          'organizationLocations',
+          'organizations',
+          'sponsor',
+          'sponsoredUsers',
+        ],
         page: 1,
         perPage: 100,
       })
@@ -210,14 +221,18 @@ export default (route: string) => {
     const usersData = users.slice(0, 100).map((userData, userIndex) => {
       const userId = userIndex + 1
 
-      return {
+      const data = {
         id: userId,
         email: userData.email,
         adminedNeighborhoods: UserSeedDataUtil.getAdminedNeighborhoods(userId),
         locations: UserSeedDataUtil.getLocations(userId),
         organizationLocations: UserSeedDataUtil.getOrganizationLocations(userId),
         organizations: UserSeedDataUtil.getOrganizations(userId),
+        sponsor: UserSeedDataUtil.getSponsor(userId),
+        sponsoredUsers: UserSeedDataUtil.getSponsoredUsers(userId),
       }
+
+      return data
     })
 
     response.assertStatus(200)
@@ -274,6 +289,8 @@ export default (route: string) => {
           }
         ),
         organizations: UserSeedDataUtil.getOrganizations(userId),
+        sponsor: UserSeedDataUtil.getSponsor(userId),
+        sponsoredUsers: UserSeedDataUtil.getSponsoredUsers(userId),
       }
     })
 

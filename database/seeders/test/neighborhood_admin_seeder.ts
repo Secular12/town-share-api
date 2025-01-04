@@ -7,8 +7,8 @@ export const neighborhoodAdmins = [
   { neighborhood_id: 2, admin_id: 7 },
   { neighborhood_id: 2, admin_id: 10 },
   { neighborhood_id: 2, admin_id: 14 },
-  { neighborhood_id: 3, admin_id: 13 },
   { neighborhood_id: 3, admin_id: 9 },
+  { neighborhood_id: 3, admin_id: 13 },
 ]
 
 export default class extends BaseSeeder {
