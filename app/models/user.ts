@@ -297,6 +297,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
       organizationLocationsCount?: number
       organizationsCount?: number
       phoneNumbersCount?: number
+      receivedAdminInvitationsCount?: number
       sentAdminInvitationsCount?: number
     } = {}
 
@@ -322,6 +323,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
     if (this.$extras.phoneNumbers_count !== undefined) {
       extraColumns.phoneNumbersCount = +this.$extras.phoneNumbers_count
+    }
+
+    if (this.$extras.receivedAdminInvitations_count !== undefined) {
+      extraColumns.receivedAdminInvitationsCount = +this.$extras.receivedAdminInvitations_count
     }
 
     if (this.$extras.sentAdminInvitations_count !== undefined) {

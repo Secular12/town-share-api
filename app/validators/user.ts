@@ -10,6 +10,7 @@ const countOptions = [
   'organizationLocations',
   'organizations',
   'phoneNumbers',
+  'receivedAdminInvitations',
   'sentAdminInvitations',
 ] as const
 

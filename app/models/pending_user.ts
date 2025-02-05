@@ -32,4 +32,15 @@ export default class PendingUser extends BaseModel {
   /* Lucid Properties */
 
   /* Lucid Methods */
+  serializeExtras() {
+    const extraColumns: {
+      receivedAdminInvitationsCount?: number
+    } = {}
+
+    if (this.$extras.receivedAdminInvitations_count !== undefined) {
+      extraColumns.receivedAdminInvitationsCount = +this.$extras.receivedAdminInvitations_count
+    }
+
+    return extraColumns
+  }
 }

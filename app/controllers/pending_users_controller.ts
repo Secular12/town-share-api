@@ -3,6 +3,7 @@ import PendingUserPolicy from '#policies/pending_user_policy'
 import ArrayUtil from '#utils/array'
 import PendingUserValidator from '#validators/pending_user'
 import type { HttpContext } from '@adonisjs/core/http'
+import vine from '@vinejs/vine'
 
 export default class PendingUsersController {
   async index({ bouncer, request }: HttpContext) {
@@ -11,6 +12,19 @@ export default class PendingUsersController {
     const payload = await PendingUserValidator.index.validate(request.qs())
 
     return PendingUser.query()
+      .if((payload.count?.length ?? 0) > 0, (countQuery) => {
+        if (vine.helpers.isArray(payload.count)) {
+          payload.count!.forEach((countBy) => {
+            countQuery.withCount(countBy)
+          })
+        } else if (payload.count === '*') {
+          PendingUserValidator.countOptions.forEach((countBy) => {
+            countQuery.withCount(countBy)
+          })
+        } else {
+          countQuery.withCount(payload.count!)
+        }
+      })
       .if(
         ArrayUtil.hasOrIsAnyFrom(payload.include, [
           '*',
@@ -45,6 +59,19 @@ export default class PendingUsersController {
     const payload = await PendingUserValidator.show.validate(request.qs())
 
     return PendingUser.query()
+      .if((payload.count?.length ?? 0) > 0, (countQuery) => {
+        if (vine.helpers.isArray(payload.count)) {
+          payload.count!.forEach((countBy) => {
+            countQuery.withCount(countBy)
+          })
+        } else if (payload.count === '*') {
+          PendingUserValidator.countOptions.forEach((countBy) => {
+            countQuery.withCount(countBy)
+          })
+        } else {
+          countQuery.withCount(payload.count!)
+        }
+      })
       .if(
         ArrayUtil.hasOrIsAnyFrom(payload.include, [
           '*',
