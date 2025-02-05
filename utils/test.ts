@@ -1,12 +1,12 @@
 import User from '#models/user'
 import { ApiRequest } from '@japa/api-client'
 
-export const conditionalLoginAsRequest = async (request: ApiRequest, authUserId?: number) => {
+const conditionalLoginAsRequest = async (request: ApiRequest, authUserId?: number) => {
   const user = authUserId ? await User.findOrFail(authUserId) : null
   return user ? request.loginAs(user) : request
 }
 
-export const paginateSeedData = <T extends Record<string, any>>(
+const paginateSeedData = <T extends Record<string, any>>(
   seedData: T[],
   options?: {
     page?: number
@@ -30,4 +30,9 @@ export const paginateSeedData = <T extends Record<string, any>>(
     ...item,
     id: itemIndex + startIndex + 1,
   }))
+}
+
+export default {
+  conditionalLoginAsRequest,
+  paginateSeedData,
 }

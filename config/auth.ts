@@ -1,13 +1,42 @@
+import User from '#models/user'
 import { defineConfig } from '@adonisjs/auth'
-import { sessionGuard, sessionUserProvider } from '@adonisjs/auth/session'
+import { sessionGuard, SessionLucidUserProvider } from '@adonisjs/auth/session'
 import type { InferAuthEvents, Authenticators } from '@adonisjs/auth/types'
+import { SessionGuardUser } from '@adonisjs/auth/types/session'
+
+class CustomUserProvider extends SessionLucidUserProvider<typeof User> {
+  /**
+   * Finds a user by the user id
+   */
+  override async findById(
+    identifier: string | number | BigInt
+  ): Promise<SessionGuardUser<User> | null> {
+    const model = await this.getModel()
+    const user = await model
+      .query()
+      .where('id', Number(identifier))
+      .preload('adminedNeighborhoods', (adminedNeighborhoodsQuery) => {
+        adminedNeighborhoodsQuery.select('id')
+      })
+      .preload('organizations', (organizationsQuery) => {
+        organizationsQuery.where('organization_user.is_organization_admin', true).select('id')
+      })
+      .first()
+
+    if (!user) {
+      return null
+    }
+
+    return this.createUserForGuard(user)
+  }
+}
 
 const authConfig = defineConfig({
   default: 'web',
   guards: {
     web: sessionGuard({
       useRememberMeTokens: false,
-      provider: sessionUserProvider({
+      provider: new CustomUserProvider({
         model: () => import('#models/user'),
       }),
     }),

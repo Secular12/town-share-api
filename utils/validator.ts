@@ -1,20 +1,29 @@
 import vine from '@vinejs/vine'
+import { DateTime } from 'luxon'
 
-const orderByObject = <T extends readonly string[]>(columns: T) => {
-  return vine.object({
-    column: vine.enum(columns),
-    order: vine.enum(['asc', 'desc'] as const).optional(),
-  })
+const countGroup = <T extends readonly string[]>(countOptions: T) => {
+  return vine.group([
+    vine.group.if((data) => vine.helpers.isArray(data.count), {
+      count: vine.array(vine.enum(countOptions)).minLength(1),
+    }),
+    vine.group.else({
+      count: vine.enum(['*', ...countOptions] as const).optional(),
+    }),
+  ])
 }
 
-const searchObject = <T extends readonly string[]>(columns: T) => {
-  return vine.object({
-    column: vine.enum(columns),
-    value: vine.string().trim().minLength(1),
-  })
+const includeGroup = <T extends readonly string[]>(includeOptions: T) => {
+  return vine.group([
+    vine.group.if((data) => vine.helpers.isArray(data.include), {
+      include: vine.array(vine.enum(includeOptions)).minLength(1),
+    }),
+    vine.group.else({
+      include: vine.enum(['*', ...includeOptions] as const).optional(),
+    }),
+  ])
 }
 
-export const orderByGroup = <T extends readonly string[]>(columns: T) => {
+const orderByGroup = <T extends readonly string[]>(columns: T) => {
   return vine.group([
     vine.group.if((data) => 'orderBy' in data && vine.helpers.isObject(data.orderBy), {
       orderBy: orderByObject(columns).optional(),
@@ -25,13 +34,36 @@ export const orderByGroup = <T extends readonly string[]>(columns: T) => {
   ])
 }
 
-export const searchGroup = <T extends readonly string[]>(columns: T) => {
+const orderByObject = <T extends readonly string[]>(columns: T) => {
+  return vine.object({
+    column: vine.enum(columns),
+    order: vine.enum(['asc', 'desc'] as const).optional(),
+  })
+}
+
+const search = () => vine.string().trim().minLength(1).optional().requiredIfExists('searchBy')
+
+const searchByGroup = <T extends readonly string[]>(searchByOptions: T) => {
   return vine.group([
-    vine.group.if((data) => 'search' in data && vine.helpers.isObject(data.search), {
-      search: searchObject(columns).optional(),
+    vine.group.if((data) => 'searchBy' in data && vine.helpers.isObject(data.searchBy), {
+      searchBy: vine.array(vine.enum(searchByOptions)).minLength(1),
     }),
     vine.group.else({
-      search: vine.array(searchObject(columns)).distinct('column').optional(),
+      searchBy: vine.enum(searchByOptions).optional(),
     }),
   ])
+}
+
+const transformToLuxonDateTime = (date: Date | null) => {
+  return date ? DateTime.fromJSDate(date).toUTC() : null
+}
+
+export default {
+  countGroup,
+  includeGroup,
+  orderByGroup,
+  orderByObject,
+  search,
+  searchByGroup,
+  transformToLuxonDateTime,
 }

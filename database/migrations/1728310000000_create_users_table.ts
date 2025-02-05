@@ -15,9 +15,10 @@ export default class extends BaseSchema {
       table.string('last_name').notNullable()
       table.string('middle_name').nullable()
       table.string('name_suffix').nullable()
-      table.string('password').notNullable()
+      table.string('password').nullable()
 
       table.timestamp('created_at').notNullable()
+      table.timestamp('deactivated_at').nullable()
       table.timestamp('updated_at').nullable()
     })
   }

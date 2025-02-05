@@ -66,7 +66,7 @@ test.group('PATCH:neighborhoods/:id', () => {
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity - is not date: suspendedAt')
+  test('unprocessable entity - is not date: deactivatedAt')
     .tagCrud('@update')
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()

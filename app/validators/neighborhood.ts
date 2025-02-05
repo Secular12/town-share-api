@@ -1,33 +1,25 @@
-import * as ValidatorUtil from '#utils/validator'
+import ValidatorUtil from '#utils/validator'
 import vine from '@vinejs/vine'
 
-export const countOptions = ['admins', 'organizationLocations', 'userLocations'] as const
-export const includeOptions = ['admins', 'admins.*', 'admins.organizations'] as const
+const countOptions = ['admins', 'organizationLocations', 'userLocations'] as const
+const includeOptions = [
+  'admins',
+  'admins.*',
+  'admins.phoneNumbers',
+  'admins.organizations',
+] as const
+const searchByOptions = ['city', 'country', 'name', 'state', 'zip'] as const
 
-const counts = vine.group([
-  vine.group.if((data) => vine.helpers.isArray(data.count), {
-    count: vine.array(vine.enum(countOptions)).minLength(1),
-  }),
-  vine.group.else({
-    count: vine.enum(['*', ...countOptions] as const).optional(),
-  }),
-])
+const counts = ValidatorUtil.countGroup(countOptions)
+const includes = ValidatorUtil.includeGroup(includeOptions)
 
-const includes = vine.group([
-  vine.group.if((data) => vine.helpers.isArray(data.include), {
-    include: vine.array(vine.enum(includeOptions)).minLength(1),
-  }),
-  vine.group.else({
-    include: vine.enum(['*', ...includeOptions] as const).optional(),
-  }),
-])
-
-export const index = vine.compile(
+const index = vine.compile(
   vine
     .object({
       organizationId: vine.number().min(1).optional(),
       page: vine.number().min(1),
       perPage: vine.number().max(100).min(1),
+      search: ValidatorUtil.search(),
       userId: vine.number().min(1).optional(),
     })
     .merge(
@@ -44,12 +36,12 @@ export const index = vine.compile(
     )
     .merge(counts)
     .merge(includes)
-    .merge(ValidatorUtil.searchGroup(['city', 'country', 'name', 'state', 'zip'] as const))
+    .merge(ValidatorUtil.searchByGroup(searchByOptions))
 )
 
-export const show = vine.compile(vine.object({}).merge(counts).merge(includes))
+const show = vine.compile(vine.object({}).merge(counts).merge(includes))
 
-export const update = (id: number) =>
+const update = (id: number) =>
   vine.compile(
     vine.object({
       city: vine.string().optional(),
@@ -59,3 +51,12 @@ export const update = (id: number) =>
       zip: vine.string().nullable().optional(),
     })
   )
+
+export default {
+  countOptions,
+  includeOptions,
+  index,
+  searchByOptions,
+  show,
+  update,
+}

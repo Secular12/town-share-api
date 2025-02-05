@@ -2,30 +2,12 @@ import { OrganizationLocationFactory } from '#database/factories/organization_lo
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 
 export const organizationLocations = [
-  {
-    organizationId: 1,
-    neighborhoodId: 1,
-    city: 'Pittsburgh',
-    state: 'Pennsylvania',
-  },
-  {
-    organizationId: 1,
-    neighborhoodId: 1,
-    city: 'Pittsburgh',
-    state: 'Pennsylvania',
-  },
-  {
-    organizationId: 2,
-    neighborhoodId: 2,
-    city: 'Seattle',
-    state: 'Washington',
-  },
-  {
-    organizationId: 3,
-    neighborhoodId: 2,
-    city: 'Seattle',
-    state: 'Washington',
-  },
+  // {
+  //   organizationId: 1,
+  //   neighborhoodId: 1,
+  //   city: 'Pittsburgh',
+  //   state: 'Pennsylvania',
+  // },
 ]
 
 export default class extends BaseSeeder {

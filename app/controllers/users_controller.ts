@@ -1,20 +1,83 @@
+import AdminInvitation from '#models/admin_invitation'
 import User from '#models/user'
 import UserPolicy from '#policies/user_policy'
 import ArrayUtil from '#utils/array'
-import * as UserValidator from '#validators/user'
+import UserValidator from '#validators/user'
 import type { HttpContext } from '@adonisjs/core/http'
+import db from '@adonisjs/lucid/services/db'
 import vine from '@vinejs/vine'
+import { DateTime } from 'luxon'
 
 export default class UsersController {
-  /**
-   * Display a list of resource
-   */
-  async index({ bouncer, request }: HttpContext) {
+  async deactivate({ bouncer, params }: HttpContext) {
+    await bouncer.with(UserPolicy).authorize('deactivate')
+
+    const dateTimeNow = DateTime.utc()
+
+    const user = await User.findOrFail(params.id)
+
+    user.deactivatedAt = dateTimeNow
+
+    return db.transaction(async (trx) => {
+      user.useTransaction(trx)
+
+      await user.save()
+
+      const receivedAdminInvitations = await user
+        .related('receivedAdminInvitations')
+        .query()
+        .withScopes((scopes) => scopes.isPending())
+        .where('userId', params.id)
+
+      // TODO: deactivate neighborhood invitations and delete neighborhood invitation tokens
+      for await (const adminInvitation of receivedAdminInvitations) {
+        const receivedAdminInvitationsTokens =
+          await AdminInvitation.adminInvitationTokens.all(adminInvitation)
+
+        for await (const token of receivedAdminInvitationsTokens) {
+          await AdminInvitation.adminInvitationTokens.delete(adminInvitation, token.identifier)
+        }
+      }
+
+      const adminInvitations = receivedAdminInvitations.map(({ id }: { id: number }) => ({
+        id,
+        revokedAt: dateTimeNow,
+      }))
+
+      await AdminInvitation.updateOrCreateMany('id', adminInvitations)
+
+      await user.refresh()
+
+      return user
+    })
+  }
+
+  async demoteAdmin({ bouncer, params, response }: HttpContext) {
+    await bouncer.with(UserPolicy).authorize('demoteAdmin')
+
+    const user = await User.findOrFail(params.id)
+
+    if (!user.isApplicationAdmin) {
+      return response.badRequest({
+        errors: [{ message: 'This user is not an application admin' }],
+      })
+    }
+
+    user.isApplicationAdmin = false
+
+    await user.save()
+
+    await user.refresh()
+
+    return user
+  }
+
+  async index({ auth, bouncer, request }: HttpContext) {
     await bouncer.with(UserPolicy).authorize('readMany')
 
     const payload = await UserValidator.index.validate(request.qs())
 
-    const users = await User.query()
+    return User.query()
       .if((payload.count?.length ?? 0) > 0, (countQuery) => {
         if (vine.helpers.isArray(payload.count)) {
           payload.count!.forEach((countBy) => {
@@ -87,6 +150,76 @@ export default class UsersController {
           includeOrganizationsQuery.preload('organizations')
         }
       )
+      .if(
+        ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'phoneNumbers']),
+        (includePhoneNumbersQuery) => {
+          includePhoneNumbersQuery.preload('phoneNumbers')
+        }
+      )
+      .if(
+        auth.user!.isApplicationAdmin &&
+          ArrayUtil.hasOrIsAnyFrom(payload.include, [
+            '*',
+            'receivedAdminInvitations',
+            'receivedAdminInvitations.*',
+            'receivedAdminInvitations.inviter',
+          ]),
+        (includeReceivedAdminInvitationQuery) => {
+          includeReceivedAdminInvitationQuery.preload(
+            'receivedAdminInvitations',
+            (preloadReceivedAdminInvitationQuery) => {
+              preloadReceivedAdminInvitationQuery.if(
+                ArrayUtil.hasOrIsAnyFrom(payload.include, [
+                  '*',
+                  'receivedAdminInvitations.*',
+                  'receivedAdminInvitations.inviter',
+                ]),
+                (includeInviterQuery) => {
+                  includeInviterQuery.preload('inviter')
+                }
+              )
+            }
+          )
+        }
+      )
+      .if(
+        auth.user!.isApplicationAdmin &&
+          ArrayUtil.hasOrIsAnyFrom(payload.include, [
+            '*',
+            'sentAdminInvitations',
+            'sentAdminInvitations.*',
+            'sentAdminInvitations.pendingUser',
+            'sentAdminInvitations.user',
+          ]),
+        (includeSentAdminInvitations) => {
+          includeSentAdminInvitations.preload(
+            'sentAdminInvitations',
+            (preloadSentAdminInvitationsQuery) => {
+              preloadSentAdminInvitationsQuery
+                .if(
+                  ArrayUtil.hasOrIsAnyFrom(payload.include, [
+                    '*',
+                    'sentAdminInvitations.*',
+                    'sendAdminInvitations.pendingUser',
+                  ]),
+                  (preloadPendingUserQuery) => {
+                    preloadPendingUserQuery.preload('pendingUser')
+                  }
+                )
+                .if(
+                  ArrayUtil.hasOrIsAnyFrom(payload.include, [
+                    '*',
+                    'sentAdminInvitations.*',
+                    'sentAdminInvitations.user',
+                  ]),
+                  (preloadUserQuery) => {
+                    preloadUserQuery.preload('user')
+                  }
+                )
+            }
+          )
+        }
+      )
       .if(ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'sponsor']), (includeSponsorQuery) => {
         includeSponsorQuery.preload('sponsor')
       })
@@ -96,6 +229,12 @@ export default class UsersController {
           includeSponsoredUsersQuery.preload('sponsoredUsers')
         }
       )
+      .if(payload.isActive === true, (isActiveQuery) => {
+        isActiveQuery.withScopes((scopes) => scopes.isActive())
+      })
+      .if(payload.isActive === false, (isNotActiveQuery) => {
+        isNotActiveQuery.withScopes((scopes) => scopes.isNotActive())
+      })
       .if(
         payload.isApplicationAdmin! === true || payload.isApplicationAdmin === false,
         (isApplicationAdminQuery) => {
@@ -124,60 +263,22 @@ export default class UsersController {
         orderByQuery.orderBy(ArrayUtil.orderBy(payload.orderBy!))
       })
       .if(payload.search, (searchQuery) => {
-        if (vine.helpers.isArray(payload.search)) {
-          searchQuery.where((searchWhereQuery) => {
-            // Just for type guarding
-            if (!vine.helpers.isArray(payload.search)) return
-
-            payload.search.forEach(({ column, value }) => {
-              if (column === 'fullName') {
-                searchWhereQuery.orWhereRaw(
-                  `CONCAT_WS(' ', first_name, middle_name, last_name, name_suffix) ILIKE '%${value}%'`
-                )
-              } else if (column === 'name') {
-                searchWhereQuery.orWhereRaw(
-                  `CONCAT_WS(' ', first_name, last_name, name_suffix) ILIKE '%${value}%'`
-                )
-              } else {
-                searchWhereQuery.orWhereILike(column, `%${value}%`)
-              }
-            })
-          })
-        } else {
-          if (payload.search!.column === 'fullName') {
-            searchQuery.orWhereRaw(
-              `CONCAT_WS(' ', first_name, middle_name, last_name, name_suffix) ILIKE '%${payload.search!.value}%'`
-            )
-          } else if (payload.search!.column === 'name') {
-            searchQuery.orWhereRaw(
-              `CONCAT_WS(' ', first_name, last_name, name_suffix) ILIKE '%${payload.search!.value}%'`
-            )
-          } else {
-            searchQuery.orWhereILike(payload.search!.column, `%${payload.search!.value}%`)
-          }
-        }
+        searchQuery.withScopes((scopes) => {
+          scopes.search(payload)
+        })
       })
       .paginate(payload.page, payload.perPage)
-
-    return users
   }
 
-  /**
-   * Handle form submission for the create action
-   */
-  async store({ bouncer, response }: HttpContext) {
-    await bouncer.with(UserPolicy).authorize('create')
-    return response.notImplemented()
-  }
+  async show({ auth, bouncer, params, request }: HttpContext) {
+    await bouncer.with(UserPolicy).authorize('read')
 
-  /**
-   * Show individual record
-   */
-  async show({ bouncer, params, request }: HttpContext) {
-    await bouncer.with(UserPolicy).authorize('read', params.id)
     const payload = await UserValidator.show.validate(request.qs())
 
-    const user = await User.query()
+    const canSeeApplicationAdminInvitations =
+      auth.user!.isApplicationAdmin || auth.user!.id === params.id
+
+    return User.query()
       .if((payload.count?.length ?? 0) > 0, (countQuery) => {
         if (vine.helpers.isArray(payload.count)) {
           payload.count!.forEach((countBy) => {
@@ -250,6 +351,70 @@ export default class UsersController {
           includeOrganizationsQuery.preload('organizations')
         }
       )
+      .if(
+        canSeeApplicationAdminInvitations &&
+          ArrayUtil.hasOrIsAnyFrom(payload.include, [
+            '*',
+            'receivedAdminInvitations',
+            'receivedAdminInvitations.*',
+            'receivedAdminInvitations.inviter',
+          ]),
+        (inclueReceivedAdminInvitationQuery) => {
+          inclueReceivedAdminInvitationQuery.preload(
+            'receivedAdminInvitations',
+            (preloadReceivedAdminInvitationQuery) => {
+              preloadReceivedAdminInvitationQuery.if(
+                ArrayUtil.hasOrIsAnyFrom(payload.include, [
+                  '*',
+                  'receivedAdminInvitations.*',
+                  'receivedAdminInvitations.inviter',
+                ]),
+                (includeInviterQuery) => {
+                  includeInviterQuery.preload('inviter')
+                }
+              )
+            }
+          )
+        }
+      )
+      .if(
+        canSeeApplicationAdminInvitations &&
+          ArrayUtil.hasOrIsAnyFrom(payload.include, [
+            '*',
+            'sentAdminInvitations',
+            'sentAdminInvitations.*',
+            'sentAdminInvitations.pendingUser',
+            'sentAdminInvitations.user',
+          ]),
+        (includeSentAdminInvitations) => {
+          includeSentAdminInvitations.preload(
+            'sentAdminInvitations',
+            (preloadSentAdminInvitationsQuery) => {
+              preloadSentAdminInvitationsQuery
+                .if(
+                  ArrayUtil.hasOrIsAnyFrom(payload.include, [
+                    '*',
+                    'sentAdminInvitations.*',
+                    'sendAdminInvitations.pendingUser',
+                  ]),
+                  (preloadPendingUserQuery) => {
+                    preloadPendingUserQuery.preload('pendingUser')
+                  }
+                )
+                .if(
+                  ArrayUtil.hasOrIsAnyFrom(payload.include, [
+                    '*',
+                    'sentAdminInvitations.*',
+                    'sentAdminInvitations.user',
+                  ]),
+                  (preloadUserQuery) => {
+                    preloadUserQuery.preload('user')
+                  }
+                )
+            }
+          )
+        }
+      )
       .if(ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'sponsor']), (includeSponsorQuery) => {
         includeSponsorQuery.preload('sponsor')
       })
@@ -261,21 +426,14 @@ export default class UsersController {
       )
       .where('id', params.id)
       .firstOrFail()
-
-    return user
   }
 
-  /**
-   * Handle form submission for the edit action
-   */
   async update({ bouncer, params, request }: HttpContext) {
     await bouncer.with(UserPolicy).authorize('edit', params.id)
 
     const user = await User.findOrFail(params.id)
 
     const payload = await UserValidator.update.validate(request.body())
-
-    await bouncer.with(UserPolicy).authorize('editIsApplicationAdmin', payload)
 
     user.merge(payload)
 

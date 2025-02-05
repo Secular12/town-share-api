@@ -1,0 +1,30 @@
+@mjml()
+  <mjml>
+    <mj-body>
+      <mj-section>
+        <mj-column>
+          <mj-text>
+            <h1 style="font-weight: bold;">Hello!</h1>
+          </mj-text>
+          <mj-text>
+            <p>You have been invited to become an Application Admin for TownShare by {{ inviter.name }}.</p>
+            @if(message)
+              <p>They left the following message:</p>
+            @endif
+          </mj-text>
+          @if(message)
+            <mj-text container-background-color="#eeeeee" padding="20px">
+              {{ message }}
+            </mj-text>
+          @endif
+          @if(expiration)
+            <mj-text>
+              The invitation link expires on {{ expiration }}
+            </mj-text>
+          @endif
+          <mj-button href="{{ invitationLink }}">Respond</mj-button>
+        </mj-column>
+      </mj-section>
+    </mj-body>
+  </mjml>
+@end

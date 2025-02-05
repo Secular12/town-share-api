@@ -1,7 +1,7 @@
 import Neighborhood from '#models/neighborhood'
 import NeighborhoodPolicy from '#policies/neighborhood_policy'
 import ArrayUtil from '#utils/array'
-import * as NeighborhoodValidator from '#validators/neighborhood'
+import NeighborhoodValidator from '#validators/neighborhood'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 
@@ -14,7 +14,7 @@ export default class NeighborhoodsController {
 
     const payload = await NeighborhoodValidator.index.validate(request.qs())
 
-    const neighborhoods = await Neighborhood.query()
+    return await Neighborhood.query()
       .select('neighborhoods.*')
       .if((payload.count?.length ?? 0) > 0, (countQuery) => {
         if (vine.helpers.isArray(payload.count)) {
@@ -34,16 +34,28 @@ export default class NeighborhoodsController {
           '*',
           'admins',
           'admins.*',
+          'admin.phoneNumbers',
           'admins.organizations',
         ]),
         (includeAdminsQuery) => {
           includeAdminsQuery.preload('admins', (preloadAdminsQuery) => {
-            preloadAdminsQuery.if(
-              ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins.*', 'admins.organizations']),
-              (includeOrganizationsQuery) => {
-                includeOrganizationsQuery.preload('organizations')
-              }
-            )
+            preloadAdminsQuery
+              .if(
+                ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins.*', 'admins.phoneNumbers']),
+                (includePhoneNumbersQuery) => {
+                  includePhoneNumbersQuery.preload('phoneNumbers')
+                }
+              )
+              .if(
+                ArrayUtil.hasOrIsAnyFrom(payload.include, [
+                  '*',
+                  'admins.*',
+                  'admins.organizations',
+                ]),
+                (includeOrganizationsQuery) => {
+                  includeOrganizationsQuery.preload('organizations')
+                }
+              )
           })
         }
       )
@@ -57,22 +69,21 @@ export default class NeighborhoodsController {
         orderByQuery.orderBy(ArrayUtil.orderBy(payload.orderBy!))
       })
       .if(payload.search, (searchQuery) => {
-        if (vine.helpers.isArray(payload.search)) {
+        if (vine.helpers.isString(payload.searchBy) && payload.searchBy.length > 0) {
+          searchQuery.whereILike(payload.searchBy as string, `%${payload.search!}%`)
+        } else {
           searchQuery.where((searchWhereQuery) => {
-            // Just for type guarding
-            if (!vine.helpers.isArray(payload.search)) return
+            const columns = vine.helpers.isArray(payload.searchBy)
+              ? payload.searchBy
+              : NeighborhoodValidator.searchByOptions
 
-            payload.search.forEach(({ column, value }) => {
-              searchWhereQuery.orWhereILike(column, `%${value}%`)
+            columns.forEach((column) => {
+              searchWhereQuery.orWhereILike(column, `%${payload.search}%`)
             })
           })
-        } else {
-          searchQuery.whereILike(payload.search!.column, `%${payload.search!.value}%`)
         }
       })
       .paginate(payload.page, payload.perPage)
-
-    return neighborhoods
   }
 
   /**
@@ -109,17 +120,29 @@ export default class NeighborhoodsController {
         ArrayUtil.hasOrIsAnyFrom(payload.include, [
           '*',
           'admins',
-          'admin.*',
+          'admins.*',
+          'admins.phoneNumbers',
           'admins.organizations',
         ]),
         (includeAdminsQuery) => {
           includeAdminsQuery.preload('admins', (preloadAdminsQuery) => {
-            preloadAdminsQuery.if(
-              ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins.*', 'admins.organizations']),
-              (includeOrganizationsQuery) => {
-                includeOrganizationsQuery.preload('organizations')
-              }
-            )
+            preloadAdminsQuery
+              .if(
+                ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins.*', 'admins.phoneNumbers']),
+                (includePhoneNumbersQuery) => {
+                  includePhoneNumbersQuery.preload('phoneNumbers')
+                }
+              )
+              .if(
+                ArrayUtil.hasOrIsAnyFrom(payload.include, [
+                  '*',
+                  'admins.*',
+                  'admins.organizations',
+                ]),
+                (includeOrganizationsQuery) => {
+                  includeOrganizationsQuery.preload('organizations')
+                }
+              )
           })
         }
       )

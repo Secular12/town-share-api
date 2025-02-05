@@ -1,38 +1,40 @@
 import { UserFactory } from '#database/factories/user_factory'
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
+import {
+  appStart,
+  inviteAuburnNeighborhoodAdmin,
+  joinedAuburnNeighborhoodAdmin,
+} from '#database/seeders/development/dates'
 
 export default class extends BaseSeeder {
   async run() {
     const userItems = [
       {
+        // id: 1
+        // userLocations:
+        // userLocations.neighborhoods:
+        // organizations:
+        // organizationLocations:
+        // organizationLocation.neighborhoods:
         email: 'application-admin@townshare.com',
         isApplicationAdmin: true,
         password: 'Secret123!',
+        createdAt: appStart,
+        updatedAt: appStart,
       },
       {
-        email: 'user@example.com',
+        // id: 2
+        // userLocations:
+        // userLocations.neighborhoods: 1
+        // organizations:
+        // organizationLocations:
+        // organizationLocation.neighborhoods:
+        sponsorId: 1,
+        email: 'seattle-neighborhood-admin@townshare.com',
         isApplicationAdmin: false,
         password: 'Secret123!',
-      },
-      {
-        email: 'admin@pittsburgh-share.com',
-        isApplicationAdmin: true,
-        password: 'Secret123!',
-      },
-      {
-        email: 'user@pittsburgh-share.com',
-        isApplicationAdmin: false,
-        password: 'Secret123!',
-      },
-      {
-        email: 'admin@seattle-share.com',
-        isApplicationAdmin: true,
-        password: 'Secret123!',
-      },
-      {
-        email: 'user@seattle-share.com',
-        isApplicationAdmin: false,
-        password: 'Secret123!',
+        createdAt: inviteAuburnNeighborhoodAdmin,
+        updatedAt: joinedAuburnNeighborhoodAdmin,
       },
     ]
 

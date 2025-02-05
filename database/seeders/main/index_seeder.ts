@@ -17,12 +17,14 @@ export default class extends BaseSeeder {
     if (app.inDev) {
       await this.seed('development', [
         'user_seeder',
-        'neighborhood_seeder',
-        'user_location_seeder',
-        'organization_seeder',
-        'organization_user_seeder',
-        'organization_location_seeder',
-        'organization_location_user_seeder',
+        'pending_user_seeder',
+        'admin_invitation_seeder',
+        // 'neighborhood_seeder',
+        // 'user_location_seeder',
+        // 'organization_seeder',
+        // 'organization_user_seeder',
+        // 'organization_location_seeder',
+        // 'organization_location_user_seeder',
       ])
     }
 

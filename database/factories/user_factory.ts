@@ -1,6 +1,6 @@
 import factory from '@adonisjs/lucid/factories'
 import User from '#models/user'
-import * as FakerUtils from '#utils/faker'
+import FakerUtils from '#utils/faker'
 
 export const UserFactory = factory
   .define(User, async ({ faker }) => {
@@ -15,6 +15,7 @@ export const UserFactory = factory
       middleName: FakerUtils.randomCall(faker.person.middleName, 0.2),
       nameSuffix: FakerUtils.randomCall(faker.person.suffix, 0.1),
       password: 'Change-Me-1',
+      deactivatedAt: null,
     }
   })
   .build()

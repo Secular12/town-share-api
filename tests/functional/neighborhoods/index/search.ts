@@ -1,6 +1,6 @@
 import { neighborhoods } from '#database/seeders/test/neighborhood_seeder'
 import User from '#models/user'
-import { paginateSeedData } from '#utils/test'
+import TestUtil from '#utils/test'
 import { test } from '@japa/runner'
 
 export default (route: string) => {
@@ -277,7 +277,7 @@ export default (route: string) => {
 
     const body = response.body()
 
-    const neighborhoodsData = paginateSeedData(neighborhoods).filter((neighborhood) => {
+    const neighborhoodsData = TestUtil.paginateSeedData(neighborhoods).filter((neighborhood) => {
       return neighborhood.name.toLowerCase().includes('north')
     })
 
@@ -308,7 +308,7 @@ export default (route: string) => {
 
     const body = response.body()
 
-    const neighborhoodsData = paginateSeedData(neighborhoods).filter((neighborhood) => {
+    const neighborhoodsData = TestUtil.paginateSeedData(neighborhoods).filter((neighborhood) => {
       return (
         neighborhood.name.toLowerCase().includes('hills') ||
         neighborhood.city.toLowerCase().includes('sedona') ||

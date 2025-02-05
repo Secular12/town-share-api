@@ -76,5 +76,6 @@ export default await Env.create(new URL('../', import.meta.url), {
   | Variables for configuring tokens
   |----------------------------------------------------------
   */
-  TOKEN_FORGOT_PASSWORD_EXPIRATION: customSchema.prettyMsTime,
+  TOKEN_INVITATION_EXPIRATION: customSchema.prettyMsTime,
+  TOKEN_RESET_PASSWORD_EXPIRATION: customSchema.prettyMsTime,
 })

@@ -1,16 +1,15 @@
 import { NeighborhoodFactory } from '#database/factories/neighborhood_factory'
+import { appStart } from '#database/seeders/development/dates'
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 
 export const neighborhoods = [
   {
-    city: 'Pittsburgh',
-    name: 'North Hills',
-    state: 'Pennsylvania',
-  },
-  {
+    // id: 1
     city: 'Seattle',
-    name: 'Downtown',
+    name: 'Auburn',
     state: 'Washington',
+    createdAt: appStart,
+    updatedAt: appStart,
   },
 ]
 

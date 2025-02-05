@@ -3,11 +3,11 @@ import env from '#start/env'
 import app from '@adonisjs/core/services/app'
 import { BaseMail } from '@adonisjs/mail'
 
-type ForgotPasswordNotificationRecipients = {
-  user: User
-}
-
 type ForgotPasswordNotificationPayload = {
+  recipients: {
+    user: User
+  }
+  resetLinkUrl: string
   token: {
     expiration: string | null
     value: string
@@ -17,15 +17,12 @@ type ForgotPasswordNotificationPayload = {
 export default class ForgotPasswordNotification extends BaseMail {
   subject = `[${env.get('APP_NAME')}] Please reset you password`
 
-  constructor(
-    private recipients: ForgotPasswordNotificationRecipients,
-    private payload: ForgotPasswordNotificationPayload
-  ) {
+  constructor(private payload: ForgotPasswordNotificationPayload) {
     super()
   }
 
   private get email() {
-    return app.inProduction ? this.recipients.user.email : env.get('MAIL_TO_OVERRIDE_EMAIL')
+    return app.inProduction ? this.payload.recipients.user.email : env.get('MAIL_TO_OVERRIDE_EMAIL')
   }
 
   /**
@@ -33,12 +30,15 @@ export default class ForgotPasswordNotification extends BaseMail {
    * the email is sent or queued.
    */
   prepare() {
-    const resetLink = `${env.get('UI_URL')}/${env.get('UI_RESET_PASSWORD_ROUTE')}?token=${encodeURIComponent(this.payload.token.value)}`
+    const resetLink = this.payload.resetLinkUrl.replace(
+      '{TOKEN}',
+      encodeURIComponent(this.payload.token.value)
+    )
 
     const viewState = {
       expiration: this.payload.token.expiration,
       resetLink,
-      user: this.recipients.user,
+      user: this.payload.recipients.user,
     }
 
     this.message

@@ -10,6 +10,7 @@
 
 import router from '@adonisjs/core/services/router'
 import server from '@adonisjs/core/services/server'
+import '#start/vine/numeric'
 import '#start/vine/timezone'
 import '#start/vine/unique'
 
@@ -48,4 +49,5 @@ router.use([
 export const middleware = router.named({
   guest: () => import('#middleware/guest_middleware'),
   auth: () => import('#middleware/auth_middleware'),
+  silentAuth: () => import('#middleware/silent_auth_middleware'),
 })

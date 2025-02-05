@@ -35,7 +35,7 @@ test.group('PATCH:users/:id', () => {
     .tagResource('@user')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity - is not date: suspendedAt')
+  test('unprocessable entity - is not date: deactivatedAt')
     .tagCrud('@update')
     .tagResource('@user')
     .tagForbidden()

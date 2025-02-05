@@ -1,7 +1,7 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'user_access_tokens'
+  protected tableName = 'admin_invitation_tokens'
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
@@ -12,7 +12,7 @@ export default class extends BaseSchema {
         .notNullable()
         .unsigned()
         .references('id')
-        .inTable('users')
+        .inTable('admin_invitations')
         .onDelete('CASCADE')
 
       table.text('abilities').notNullable()

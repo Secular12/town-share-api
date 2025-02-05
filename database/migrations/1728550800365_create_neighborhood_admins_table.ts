@@ -5,9 +5,9 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.primary(['neighborhood_id', 'admin_id'])
-      table.integer('neighborhood_id').unsigned().references(`neighborhoods.id`).notNullable()
+      table.primary(['admin_id', 'neighborhood_id'])
       table.integer('admin_id').unsigned().references(`users.id`).notNullable()
+      table.integer('neighborhood_id').unsigned().references(`neighborhoods.id`).notNullable()
     })
   }
 

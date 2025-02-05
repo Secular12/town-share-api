@@ -1,5 +1,5 @@
 import User from '#models/user'
-import * as HelpersUtil from '#utils/helpers'
+import HelpersUtil from '#utils/helpers'
 import { test } from '@japa/runner'
 
 const route = '/authentication/reset-password'
@@ -27,7 +27,7 @@ test.group(`PATCH:${route}`, () => {
     })
   })
     .tagCrud('@update')
-    .tagResource(['@user', '@userAccessToken'])
+    .tagResource(['@user', '@userToken'])
     .tagBadRequest()
 
   test('unprocessable entity - missing: password, token', async ({ client }) => {
@@ -50,7 +50,7 @@ test.group(`PATCH:${route}`, () => {
     })
   })
     .tagCrud('@update')
-    .tagResource(['@user', '@userAccessToken'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity - missing: password confirmation', async ({ client }) => {
@@ -77,7 +77,7 @@ test.group(`PATCH:${route}`, () => {
     })
   })
     .tagCrud('@update')
-    .tagResource(['@user', '@userAccessToken'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity - password is not at least 10 characters', async ({ client }) => {
@@ -106,7 +106,7 @@ test.group(`PATCH:${route}`, () => {
     await User.resetTokens.delete(user, token.identifier)
   })
     .tagCrud('@update')
-    .tagResource(['@user', '@userAccessToken'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity - password does not have at least one lowercase letter', async ({
@@ -137,7 +137,7 @@ test.group(`PATCH:${route}`, () => {
     await User.resetTokens.delete(user, token.identifier)
   })
     .tagCrud('@update')
-    .tagResource(['@user', '@userAccessToken'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity - password does not at least one uppercase letter', async ({
@@ -168,7 +168,7 @@ test.group(`PATCH:${route}`, () => {
     await User.resetTokens.delete(user, token.identifier)
   })
     .tagCrud('@update')
-    .tagResource(['@user', '@userAccessToken'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity - password does not have at least one number', async ({ client }) => {
@@ -197,7 +197,7 @@ test.group(`PATCH:${route}`, () => {
     await User.resetTokens.delete(user, token.identifier)
   })
     .tagCrud('@update')
-    .tagResource(['@user', '@userAccessToken'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity - password does not have at least one special character (#?!@$%^&*-)', async ({
@@ -228,7 +228,7 @@ test.group(`PATCH:${route}`, () => {
     await User.resetTokens.delete(user, token.identifier)
   })
     .tagCrud('@update')
-    .tagResource(['@user', '@userAccessToken'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('unprocessable entity - password has an unaccepted special character (#?!@$%^&*-)', async ({
@@ -259,7 +259,7 @@ test.group(`PATCH:${route}`, () => {
     await User.resetTokens.delete(user, token.identifier)
   })
     .tagCrud('@update')
-    .tagResource(['@user', '@userAccessToken'])
+    .tagResource(['@user', '@userToken'])
     .tagUnprocessableEntity()
 
   test('bad request - invalid: token', async ({ client }) => {
@@ -281,7 +281,7 @@ test.group(`PATCH:${route}`, () => {
     })
   })
     .tagCrud('@update')
-    .tagResource(['@user', '@userAccessToken'])
+    .tagResource(['@user', '@userToken'])
     .tagBadRequest()
 
   test('bad request - expired: token', async ({ client }) => {
@@ -307,7 +307,7 @@ test.group(`PATCH:${route}`, () => {
     })
   })
     .tagCrud('@update')
-    .tagResource(['@user', '@userAccessToken'])
+    .tagResource(['@user', '@userToken'])
     .tagBadRequest()
 
   test('success - reset password', async ({ client }) => {
@@ -330,6 +330,6 @@ test.group(`PATCH:${route}`, () => {
     await user.save()
   })
     .tagCrud('@update')
-    .tagResource(['@user', '@userAccessToken'])
+    .tagResource(['@user', '@userToken'])
     .tagSuccess()
 })

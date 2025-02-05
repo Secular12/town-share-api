@@ -1,14 +1,19 @@
-import * as ValidatorUtil from '#utils/validator'
-import vine from '@vinejs/vine'
+import ValidatorUtil from '#utils/validator'
+import vine, { SimpleMessagesProvider } from '@vinejs/vine'
 
-export const countOptions = [
+type IndexPayload = Awaited<ReturnType<(typeof index)['validate']>>
+type UpdatePayload = Awaited<ReturnType<(typeof update)['validate']>>
+
+const countOptions = [
   'adminedNeighborhoods',
   'locations',
   'organizationLocations',
   'organizations',
+  'phoneNumbers',
+  'sentAdminInvitations',
 ] as const
 
-export const includeOptions = [
+const includeOptions = [
   'adminedNeighborhoods',
   'locations',
   'locations.*',
@@ -17,38 +22,43 @@ export const includeOptions = [
   'organizationLocations.*',
   'organizationLocations.neighborhood',
   'organizations',
+  'phoneNumbers',
+  'receivedAdminInvitations',
+  'receivedAdminInvitations.*',
+  'receivedAdminInvitations.inviter',
+  'sentAdminInvitations',
+  'sentAdminInvitations.*',
+  'sentAdminInvitations.pendingUser',
+  'sentAdminInvitations.user',
   'sponsor',
   'sponsoredUsers',
 ] as const
 
-const counts = vine.group([
-  vine.group.if((data) => vine.helpers.isArray(data.count), {
-    count: vine.array(vine.enum(countOptions)).minLength(1),
-  }),
-  vine.group.else({
-    count: vine.enum(['*', ...countOptions] as const).optional(),
-  }),
-])
+const searchByOptions = [
+  'email',
+  'firstName',
+  'fullName',
+  'lastName',
+  'middleName',
+  'name',
+  'nameSuffix',
+] as const
 
-const includes = vine.group([
-  vine.group.if((data) => vine.helpers.isArray(data.include), {
-    include: vine.array(vine.enum(includeOptions)).minLength(1),
-  }),
-  vine.group.else({
-    include: vine.enum(['*', ...includeOptions] as const).optional(),
-  }),
-])
+const counts = ValidatorUtil.countGroup(countOptions)
+const includes = ValidatorUtil.includeGroup(includeOptions)
 
-export const index = vine.compile(
+const index = vine.compile(
   vine
     .object({
+      isActive: vine.boolean().optional(),
       isApplicationAdmin: vine.boolean().optional(),
       neighborhoodId: vine.number().min(1).optional(),
       organizationId: vine.number().min(1).optional(),
       organizationLocationId: vine.number().min(1).optional(),
-      sponsorId: vine.number().min(1).optional(),
       page: vine.number().min(1),
       perPage: vine.number().max(100).min(1),
+      search: ValidatorUtil.search(),
+      sponsorId: vine.number().min(1).optional(),
     })
     .merge(
       ValidatorUtil.orderByGroup([
@@ -65,27 +75,32 @@ export const index = vine.compile(
     )
     .merge(counts)
     .merge(includes)
-    .merge(
-      ValidatorUtil.searchGroup([
-        'email',
-        'firstName',
-        'fullName',
-        'lastName',
-        'middleName',
-        'name',
-        'nameSuffix',
-      ] as const)
-    )
+    .merge(ValidatorUtil.searchByGroup(searchByOptions))
 )
 
-export const show = vine.compile(vine.object({}).merge(counts).merge(includes))
+const show = vine.compile(vine.object({}).merge(counts).merge(includes))
 
-export const update = vine.compile(
+const update = vine.compile(
   vine.object({
     firstName: vine.string().optional(),
-    isApplicationAdmin: vine.boolean().optional(),
     lastName: vine.string().optional(),
     middleName: vine.string().nullable().optional(),
     nameSuffix: vine.string().nullable().optional(),
   })
 )
+
+update.messagesProvider = new SimpleMessagesProvider({
+  'isApplicationAdmin.literal':
+    'The {{field}} must be false. To set to true, make a POST request to /admin-invitations instead.',
+})
+
+export type { IndexPayload, UpdatePayload }
+
+export default {
+  countOptions,
+  includeOptions,
+  index,
+  searchByOptions,
+  show,
+  update,
+}

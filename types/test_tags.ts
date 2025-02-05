@@ -6,4 +6,4 @@ export type ResourceTag =
   | '@session'
   | '@userLocation'
   | '@user'
-  | '@userAccessToken'
+  | '@userToken'

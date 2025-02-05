@@ -19,7 +19,7 @@ test.group(`POST:${route}`, () => {
     })
   })
     .tagCrud('@create')
-    .tagResource('@userAccessToken')
+    .tagResource('@userToken')
     .tagBadRequest()
 
   test('unprocessable entity - missing: email, timezone', async ({ client }) => {
@@ -42,7 +42,7 @@ test.group(`POST:${route}`, () => {
     })
   })
     .tagCrud('@create')
-    .tagResource('@userAccessToken')
+    .tagResource('@userToken')
     .tagUnprocessableEntity()
 
   test('unprocessable entity - invalid formats: email, timezone', async ({ client }) => {
@@ -68,7 +68,7 @@ test.group(`POST:${route}`, () => {
     })
   })
     .tagCrud('@create')
-    .tagResource('@userAccessToken')
+    .tagResource('@userToken')
     .tagUnprocessableEntity()
 
   test('success - does not send email when provided non-existing email', async ({
@@ -90,7 +90,7 @@ test.group(`POST:${route}`, () => {
     })
   })
     .tagCrud('@create')
-    .tagResource('@userAccessToken')
+    .tagResource('@userToken')
     .tagSuccess()
     .tagEmail()
 
@@ -117,13 +117,13 @@ test.group(`POST:${route}`, () => {
     })
   })
     .tagCrud('@create')
-    .tagResource('@userAccessToken')
+    .tagResource('@userToken')
     .tagSuccess()
     .tagEmail()
 
   test('success - forgot password email contains working token')
     .tagCrud('@create')
-    .tagResource('@userAccessToken')
+    .tagResource('@userToken')
     .tagSuccess()
     .tagEmail()
     .tagToDo()

@@ -1,6 +1,6 @@
 import { users } from '#database/seeders/test/user_seeder'
 import User from '#models/user'
-import { paginateSeedData } from '#utils/test'
+import TestUtil from '#utils/test'
 import { test } from '@japa/runner'
 
 export default (route: string) => {
@@ -293,7 +293,7 @@ export default (route: string) => {
 
     const body = response.body()
 
-    const usersData = paginateSeedData(users)
+    const usersData = TestUtil.paginateSeedData(users)
       .filter((userData) => {
         return userData.email.toLowerCase().includes('admin')
       })
@@ -337,7 +337,7 @@ export default (route: string) => {
 
     const body = response.body()
 
-    const usersData = paginateSeedData(users)
+    const usersData = TestUtil.paginateSeedData(users)
       .filter((userData) => {
         const name = [userData.firstName, userData.lastName, userData.nameSuffix]
           .filter((namePart) => !!namePart)
