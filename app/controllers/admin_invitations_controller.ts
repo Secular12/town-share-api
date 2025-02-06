@@ -31,8 +31,6 @@ export default class AdminInvitationsController {
 
     const payload = await AdminInvitationValidator.accept(adminInvitation).validate(request.body())
 
-    adminInvitation.acceptedAt = DateTime.utc()
-
     const pendingUser = adminInvitation.pendingUserId
       ? await PendingUser.find(adminInvitation.pendingUserId)
       : null
@@ -43,7 +41,7 @@ export default class AdminInvitationsController {
       })
     }
 
-    return db.transaction(async (trx) => {
+    await db.transaction(async (trx) => {
       const user = adminInvitation.userId
         ? await User.query({ client: trx })
             .withScopes((scopes) => scopes.isActive())
@@ -76,29 +74,62 @@ export default class AdminInvitationsController {
 
       await user.save()
 
-      if (pendingUser) {
-        adminInvitation.pendingUserId = null
-        adminInvitation.userId = user.id
+      const adminInvitations = await AdminInvitation.query({ client: trx })
+        .select(['id', 'pendingUserId', 'userId'])
+        .if(
+          pendingUser,
+          (pendingUserQuery) => {
+            pendingUserQuery.where('pendingUserId', pendingUser!.id)
+          },
+          (userQuery) => {
+            userQuery.where('userId', user.id)
+          }
+        )
+        .withScopes((scopes) => scopes.isPending())
 
-        adminInvitation.useTransaction(trx)
-        pendingUser.useTransaction(trx)
+      const dateTimeNow = DateTime.utc()
 
-        await adminInvitation.save()
-        await pendingUser.delete()
+      const updatedAdminInvitations = await AdminInvitation.updateOrCreateMany(
+        'id',
+        adminInvitations.map(({ id, userId }) => {
+          if (userId) {
+            return {
+              id,
+              acceptedAt: dateTimeNow,
+            }
+          }
+
+          return {
+            id,
+            pendingUserId: null,
+            userId: user.id,
+            acceptedAt: dateTimeNow,
+          }
+        }),
+        { client: trx }
+      )
+
+      for await (const updatedAdminInvitation of updatedAdminInvitations) {
+        const currentTokens =
+          await AdminInvitation.adminInvitationTokens.all(updatedAdminInvitation)
+
+        for await (const currentToken of currentTokens) {
+          await AdminInvitation.adminInvitationTokens.delete(
+            updatedAdminInvitation,
+            currentToken.identifier
+          )
+        }
       }
-
-      // TODO: Update all other adminInvitations as accepted
-      const currentTokens = await AdminInvitation.adminInvitationTokens.all(adminInvitation)
-
-      for await (const currentToken of currentTokens) {
-        await AdminInvitation.adminInvitationTokens.delete(adminInvitation, currentToken.identifier)
-      }
-
-      await adminInvitation.refresh()
-      await adminInvitation.load('user', (userLoadQuery) => userLoadQuery.preload('phoneNumbers'))
-
-      return adminInvitation
     })
+
+    if (pendingUser) {
+      await pendingUser.delete()
+    }
+
+    await adminInvitation.refresh()
+    await adminInvitation.load('user', (userLoadQuery) => userLoadQuery.preload('phoneNumbers'))
+
+    return adminInvitation
   }
 
   async deny({ bouncer, request, response }: HttpContext) {
@@ -118,23 +149,56 @@ export default class AdminInvitationsController {
 
     await bouncer.with(AdminInvitationPolicy).authorize('acceptOrDeny', adminInvitation)
 
-    adminInvitation.deniedAt = DateTime.utc()
+    await db.transaction(async (trx) => {
+      const adminInvitations = await AdminInvitation.query({ client: trx })
+        .select('id')
+        .if(
+          adminInvitation.pendingUserId,
+          (pendingUserQuery) => {
+            pendingUserQuery.where('pendingUserId', adminInvitation.pendingUserId!)
+          },
+          (userQuery) => {
+            userQuery.where('userId', adminInvitation.userId!)
+          }
+        )
+        .withScopes((scopes) => scopes.isPending())
 
-    return db.transaction(async (trx) => {
-      adminInvitation.useTransaction(trx)
+      const dateTimeNow = DateTime.utc()
 
-      await adminInvitation.save()
+      const updatedAdminInvitations = await AdminInvitation.updateOrCreateMany(
+        'id',
+        adminInvitations.map(({ id, userId }) => {
+          if (userId) {
+            return {
+              id,
+              deniedAt: dateTimeNow,
+            }
+          }
 
-      await adminInvitation.refresh()
+          return {
+            id,
+            deniedAt: dateTimeNow,
+          }
+        }),
+        { client: trx }
+      )
 
-      const currentTokens = await AdminInvitation.adminInvitationTokens.all(adminInvitation)
+      for await (const updatedAdminInvitation of updatedAdminInvitations) {
+        const currentTokens =
+          await AdminInvitation.adminInvitationTokens.all(updatedAdminInvitation)
 
-      for await (const currentToken of currentTokens) {
-        await AdminInvitation.adminInvitationTokens.delete(adminInvitation, currentToken.identifier)
+        for await (const currentToken of currentTokens) {
+          await AdminInvitation.adminInvitationTokens.delete(
+            updatedAdminInvitation,
+            currentToken.identifier
+          )
+        }
       }
-
-      return adminInvitation
     })
+
+    await adminInvitation.refresh()
+
+    return adminInvitation
   }
 
   async index({ bouncer, request }: HttpContext) {
