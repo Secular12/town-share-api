@@ -38,7 +38,7 @@ export default class AuthenticationController {
 
       await mail.send(
         new ForgotPasswordNotification({
-          recipients: { user },
+          recipients: { to: user.email },
           resetLinkUrl,
           token: {
             expiration: token.expiresAt
@@ -48,6 +48,7 @@ export default class AuthenticationController {
               : null,
             value: token.value!.release(),
           },
+          user: user,
         })
       )
     }

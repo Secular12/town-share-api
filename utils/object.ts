@@ -16,12 +16,22 @@ const filter = (
   }, {} as JsObject)
 }
 
+const forEach = (object: JsObject, cb: (value: unknown, key: Property, index: number) => void) => {
+  Object.entries(object).forEach(([key, value], index) => {
+    cb(value, key, index)
+  })
+}
+
 const hasAllKeys = (object: JsObject, key: Property[]) => {
   return key.every((k) => k in object)
 }
 
 const hasAnyKey = (object: JsObject, key: Property[]) => {
   return key.some((k) => k in object)
+}
+
+const isEmpty = (object?: JsObject | null) => {
+  return !object || !Object.keys(object).length
 }
 
 const mapEntries = <T>(object: T, cb: (value: unknown, key: Property, index: number) => T) => {
@@ -87,8 +97,10 @@ const toArray = <T extends Record<keyof T, T[keyof T]>, V>(
 export default {
   every,
   filter,
+  forEach,
   hasAllKeys,
   hasAnyKey,
+  isEmpty,
   mapEntries,
   mapKeys,
   mapValues,

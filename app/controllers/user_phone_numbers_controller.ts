@@ -1,6 +1,7 @@
 import UserPhoneNumber from '#models/user_phone_number'
 import UserPhoneNumberPolicy from '#policies/user_phone_number_policy'
 import ArrayUtil from '#utils/array'
+import QueryUtil from '#utils/query'
 import UserPhoneNumberValidator from '#validators/user_phone_number'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -25,6 +26,7 @@ export default class UserPhoneNumbersController {
       .if(ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'user']), (includeUserQuery) => {
         includeUserQuery.preload('user')
       })
+      .where(QueryUtil.dateFilter(payload))
       .paginate(payload.page, payload.perPage)
   }
 

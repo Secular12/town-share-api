@@ -1,6 +1,6 @@
 Hello!
 
-You have been invited to become an Application Admin for TownShare by {{ inviter.name }}.
+You have been invited to become an Application Admin for {{ env('APP_NAME') }} by {{ inviter.name }}.
 
 @if(message)
   They left the following message:
@@ -10,4 +10,4 @@ You have been invited to become an Application Admin for TownShare by {{ inviter
 
 The invitation link expires on {{ expiration }}
 
-Invitation Link: {{ inviteLink }}
+Invitation link: {{ inviteLink }}

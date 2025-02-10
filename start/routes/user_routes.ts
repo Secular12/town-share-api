@@ -13,6 +13,7 @@ router
   .group(() => {
     router.patch(':id/deactivate', [UsersController, 'deactivate'])
     router.patch(':id/demote-admin', [UsersController, 'demoteAdmin'])
+    router.patch(':id/reactivate', [UsersController, 'reactivate'])
   })
   .prefix('users')
   .use(middleware.auth())

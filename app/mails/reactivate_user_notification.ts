@@ -3,23 +3,18 @@ import env from '#start/env'
 import app from '@adonisjs/core/services/app'
 import { BaseMail } from '@adonisjs/mail'
 
-type ForgotPasswordNotificationPayload = {
+type ReactivateUserNotificationPayload = {
   recipients: {
     to: string
   }
-  resetLinkUrl: string
   user: User
-  token: {
-    expiration: string | null
-    value: string
-  }
 }
 
-export default class ForgotPasswordNotification extends BaseMail {
+export default class ReactivateUserNotification extends BaseMail {
   form = env.get('MAIL_FROM_NOTIFICATIONS_DEFAULT_EMAIL')
-  subject = `[${env.get('APP_NAME')}] Please reset you password`
+  subject = `[${env.get('APP_NAME')}] Your account has been reactivated`
 
-  constructor(private payload: ForgotPasswordNotificationPayload) {
+  constructor(private payload: ReactivateUserNotificationPayload) {
     super()
   }
 
@@ -32,21 +27,14 @@ export default class ForgotPasswordNotification extends BaseMail {
    * the email is sent or queued.
    */
   prepare() {
-    const resetLink = this.payload.resetLinkUrl.replace(
-      '{TOKEN}',
-      encodeURIComponent(this.payload.token.value)
-    )
-
     const viewState = {
-      expiration: this.payload.token.expiration,
-      resetLink,
       user: this.payload.user,
     }
 
     this.message
       .to(this.email)
       .replyTo(env.get('MAIL_NO_REPLY_EMAIL'))
-      .htmlView('emails/forgot_password_html', viewState)
-      .textView('emails/forgot_password_text', viewState)
+      .htmlView('emails/reactivate_user_html', viewState)
+      .textView('emails/reactivate_user_text', viewState)
   }
 }

@@ -19,6 +19,10 @@ export default class UserPolicy extends TownShareBasePolicy {
     return authUser.id === (typeof user === 'number' ? user : user.id)
   }
 
+  reactivate(_authUser: User): AuthorizerResponse {
+    return false
+  }
+
   read(_authUser: User): AuthorizerResponse {
     return true
   }

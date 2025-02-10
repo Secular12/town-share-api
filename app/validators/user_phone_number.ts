@@ -2,9 +2,11 @@ import vine from '@vinejs/vine'
 import ValidatorUtil from '#utils/validator'
 import PhoneNumberValidatorSchema from '#validators/schemas/phone_number'
 
+const dateFilters = ValidatorUtil.dateFiltersSchema(['createdAt', 'updatedAt'] as const)
+
 const includeOptions = ['user'] as const
 
-const includes = ValidatorUtil.includeGroup(includeOptions)
+const includes = ValidatorUtil.includeSchema(includeOptions)
 
 const index = vine.compile(
   vine
@@ -12,9 +14,10 @@ const index = vine.compile(
       page: vine.number().min(1),
       perPage: vine.number().max(100).min(1),
       userId: vine.number().min(1).optional(),
+      ...dateFilters.getProperties(),
     })
     .merge(
-      ValidatorUtil.orderByGroup([
+      ValidatorUtil.singleOrMultipleOrderBySchema([
         'id',
         'countryCode',
         'extension',

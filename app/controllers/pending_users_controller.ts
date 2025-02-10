@@ -1,6 +1,7 @@
 import PendingUser from '#models/pending_user'
 import PendingUserPolicy from '#policies/pending_user_policy'
 import ArrayUtil from '#utils/array'
+import QueryUtil from '#utils/query'
 import PendingUserValidator from '#validators/pending_user'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
@@ -50,6 +51,7 @@ export default class PendingUsersController {
           )
         }
       )
+      .where(QueryUtil.dateFilter(payload))
       .paginate(payload.page, payload.perPage)
   }
 

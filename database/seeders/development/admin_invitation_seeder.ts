@@ -33,7 +33,7 @@ export default class extends BaseSeeder {
 
       await mail.send(
         new AdminInvitationNotification({
-          recipient: adminInvitation.user?.email ?? adminInvitation.pendingUser?.email,
+          recipients: { to: adminInvitation.user?.email ?? adminInvitation.pendingUser?.email },
           invitationLinkUrl: 'https://townshare.dev/admin-invitation?token={TOKEN}',
           inviter: adminInvitation.inviter,
           message: adminInvitation.message,

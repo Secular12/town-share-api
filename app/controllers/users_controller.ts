@@ -1,10 +1,13 @@
+import ReactivateUserNotification from '#mails/reactivate_user_notification'
 import AdminInvitation from '#models/admin_invitation'
 import User from '#models/user'
 import UserPolicy from '#policies/user_policy'
 import ArrayUtil from '#utils/array'
+import QueryUtil from '#utils/query'
 import UserValidator from '#validators/user'
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
+import mail from '@adonisjs/mail/services/main'
 import vine from '@vinejs/vine'
 import { DateTime } from 'luxon'
 
@@ -267,7 +270,30 @@ export default class UsersController {
           scopes.search(payload)
         })
       })
+      .where(QueryUtil.dateFilter(payload))
       .paginate(payload.page, payload.perPage)
+  }
+
+  async reactivate({ bouncer, params, response }: HttpContext) {
+    await bouncer.with(UserPolicy).authorize('reactivate')
+
+    const user = await User.findOrFail(params.id)
+
+    if (user.isActive) {
+      return response.badRequest({
+        errors: [{ message: 'This user is already active.' }],
+      })
+    }
+
+    user.deactivatedAt = null
+
+    await user.save()
+
+    await mail.send(new ReactivateUserNotification({ recipients: { to: user.email }, user }))
+
+    await user.refresh()
+
+    return user
   }
 
   async show({ auth, bouncer, params, request }: HttpContext) {

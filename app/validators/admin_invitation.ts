@@ -4,6 +4,14 @@ import PasswordValidatorSchema from '#validators/schemas/password'
 import PhoneNumberValidatorSchema from '#validators/schemas/phone_number'
 import vine, { SimpleMessagesProvider } from '@vinejs/vine'
 
+const dateFilters = ValidatorUtil.dateFiltersSchema([
+  'acceptedAt',
+  'createdAt',
+  'deniedAt',
+  'revokedAt',
+  'updatedAt',
+] as const)
+
 const includeOptions = [
   'inviter',
   'user',
@@ -17,7 +25,7 @@ const searchByOptions = ['email', 'inviterName', 'userName'] as const
 
 type IndexPayload = Awaited<ReturnType<(typeof index)['validate']>>
 
-const includes = ValidatorUtil.includeGroup(includeOptions)
+const includes = ValidatorUtil.includeSchema(includeOptions)
 
 const storeUserGroup = vine.group([
   vine.group.if((data) => data.userId, {
@@ -72,11 +80,12 @@ const index = vine.compile(
       isPending: vine.boolean().optional(),
       page: vine.number().min(1),
       perPage: vine.number().max(100).min(1),
-      search: ValidatorUtil.search(),
+      search: ValidatorUtil.searchSchema(),
       userId: vine.number().min(1).optional(),
+      ...dateFilters.getProperties(),
     })
     .merge(
-      ValidatorUtil.orderByGroup([
+      ValidatorUtil.singleOrMultipleOrderBySchema([
         'id',
         'inviterName',
         'userName',
@@ -87,7 +96,7 @@ const index = vine.compile(
       ])
     )
     .merge(includes)
-    .merge(ValidatorUtil.searchByGroup(searchByOptions))
+    .merge(ValidatorUtil.searchBySchema(searchByOptions))
 )
 
 const resend = vine.compile(

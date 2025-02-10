@@ -1,6 +1,7 @@
 import Neighborhood from '#models/neighborhood'
 import NeighborhoodPolicy from '#policies/neighborhood_policy'
 import ArrayUtil from '#utils/array'
+import QueryUtil from '#utils/query'
 import NeighborhoodValidator from '#validators/neighborhood'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
@@ -83,6 +84,7 @@ export default class NeighborhoodsController {
           })
         }
       })
+      .where(QueryUtil.dateFilter(payload))
       .paginate(payload.page, payload.perPage)
   }
 

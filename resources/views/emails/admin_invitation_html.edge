@@ -7,7 +7,7 @@
             <h1 style="font-weight: bold;">Hello!</h1>
           </mj-text>
           <mj-text>
-            <p>You have been invited to become an Application Admin for TownShare by {{ inviter.name }}.</p>
+            <p>You have been invited to become an Application Admin for {{ env('APP_NAME') }} by {{ inviter.name }}.</p>
             @if(message)
               <p>They left the following message:</p>
             @endif

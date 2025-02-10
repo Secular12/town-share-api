@@ -7,7 +7,7 @@ type AdminInvitationNotificationPayload = {
   invitationLinkUrl: string
   inviter: User
   message?: string | null
-  recipient: string
+  recipients: { to: string }
   token: {
     expiration: string | null
     value: string
@@ -15,15 +15,15 @@ type AdminInvitationNotificationPayload = {
 }
 
 export default class AdminInvitationNotification extends BaseMail {
-  from = ''
-  subject = `[${env.get('APP_NAME')}] You're invited to be an admin.`
+  form = env.get('MAIL_FROM_NOTIFICATIONS_DEFAULT_EMAIL')
+  subject = `[${env.get('APP_NAME')}] You're invited to be an admin`
 
   constructor(private payload: AdminInvitationNotificationPayload) {
     super()
   }
 
   private get email() {
-    return app.inProduction ? this.payload.recipient : env.get('MAIL_TO_OVERRIDE_EMAIL')
+    return app.inProduction ? this.payload.recipients.to : env.get('MAIL_TO_OVERRIDE_EMAIL')!
   }
 
   /**
@@ -45,6 +45,7 @@ export default class AdminInvitationNotification extends BaseMail {
 
     this.message
       .to(this.email)
+      .replyTo(env.get('MAIL_NO_REPLY_EMAIL'))
       .htmlView('emails/admin_invitation_html', viewState)
       .textView('emails/admin_invitation_text', viewState)
   }

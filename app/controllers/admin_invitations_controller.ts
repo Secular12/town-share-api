@@ -4,6 +4,7 @@ import PendingUser from '#models/pending_user'
 import User from '#models/user'
 import AdminInvitationPolicy from '#policies/admin_invitation_policy'
 import ArrayUtil from '#utils/array'
+import QueryUtil from '#utils/query'
 import AdminInvitationValidator from '#validators/admin_invitation'
 import { Secret } from '@adonisjs/core/helpers'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -260,6 +261,7 @@ export default class AdminInvitationsController {
           scopes.search(payload)
         })
       })
+      .where(QueryUtil.dateFilter(payload))
       .paginate(payload.page, payload.perPage)
   }
 
@@ -287,7 +289,7 @@ export default class AdminInvitationsController {
 
     await mail.send(
       new AdminInvitationNotification({
-        recipient: email,
+        recipients: { to: email },
         invitationLinkUrl: payload.invitationLinkUrl,
         inviter: adminInvitation.inviter,
         message: payload.message,
@@ -474,7 +476,7 @@ export default class AdminInvitationsController {
 
       await mail.send(
         new AdminInvitationNotification({
-          recipient: trxResponse.user.email,
+          recipients: { to: trxResponse.user.email },
           invitationLinkUrl: payload.invitationLinkUrl,
           inviter: auth.user!,
           message: payload.message,

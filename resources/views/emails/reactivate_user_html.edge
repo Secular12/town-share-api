@@ -1,0 +1,18 @@
+@mjml()
+  <mjml>
+    <mj-body>
+      <mj-section>
+        <mj-column>
+          <mj-text>
+            Hello, {{ user.name }}.
+          </mj-text>
+          @if(expiration)
+            <mj-text>
+              Your {{env('APP_NAME')}} user account has been reactivated!
+            </mj-text>
+          @endif
+        </mj-column>
+      </mj-section>
+    </mj-body>
+  </mjml>
+@end

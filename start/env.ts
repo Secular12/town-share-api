@@ -11,6 +11,7 @@
 
 import { Env } from '@adonisjs/core/env'
 import stringHelpers from '@adonisjs/core/helpers/string'
+import app from '@adonisjs/core/services/app'
 
 const customSchema = {
   prettyMsTime(name: string, value?: string) {
@@ -58,7 +59,11 @@ export default await Env.create(new URL('../', import.meta.url), {
   | Variables for configuring the mail package
   |----------------------------------------------------------
   */
-  MAIL_TO_OVERRIDE_EMAIL: Env.schema.string({ format: 'email' }),
+  MAIL_FROM_NOTIFICATIONS_DEFAULT_EMAIL: Env.schema.string({ format: 'email' }),
+  MAIL_NO_REPLY_EMAIL: Env.schema.string({ format: 'email' }),
+  MAIL_TO_OVERRIDE_EMAIL: app.inProduction
+    ? Env.schema.string.optional({ format: 'email' })
+    : Env.schema.string({ format: 'email' }),
   SMTP_HOST: Env.schema.string({ format: 'host' }),
   SMTP_PASSWORD: Env.schema.string(),
   SMTP_PORT: Env.schema.string(),

@@ -45,8 +45,15 @@ const searchByOptions = [
   'nameSuffix',
 ] as const
 
-const counts = ValidatorUtil.countGroup(countOptions)
-const includes = ValidatorUtil.includeGroup(includeOptions)
+const counts = ValidatorUtil.countSchema(countOptions)
+
+const dateFilters = ValidatorUtil.dateFiltersSchema([
+  'createdAt',
+  'deactivatedAt',
+  'updatedAt',
+] as const)
+
+const includes = ValidatorUtil.includeSchema(includeOptions)
 
 const index = vine.compile(
   vine
@@ -58,11 +65,12 @@ const index = vine.compile(
       organizationLocationId: vine.number().min(1).optional(),
       page: vine.number().min(1),
       perPage: vine.number().max(100).min(1),
-      search: ValidatorUtil.search(),
+      search: ValidatorUtil.searchSchema(),
       sponsorId: vine.number().min(1).optional(),
+      ...dateFilters.getProperties(),
     })
     .merge(
-      ValidatorUtil.orderByGroup([
+      ValidatorUtil.singleOrMultipleOrderBySchema([
         'id',
         'email',
         'firstName',
@@ -76,7 +84,7 @@ const index = vine.compile(
     )
     .merge(counts)
     .merge(includes)
-    .merge(ValidatorUtil.searchByGroup(searchByOptions))
+    .merge(ValidatorUtil.searchBySchema(searchByOptions))
 )
 
 const show = vine.compile(vine.object({}).merge(counts).merge(includes))
