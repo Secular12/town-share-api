@@ -13,6 +13,7 @@ export default class extends BaseSeeder {
         // id: 1
         // userLocations:
         // userLocations.neighborhoods:
+        // userPhoneNumbers: 1, 2
         // organizations:
         // organizationLocations:
         // organizationLocation.neighborhoods:
@@ -26,6 +27,7 @@ export default class extends BaseSeeder {
         // id: 2
         // userLocations:
         // userLocations.neighborhoods: 1
+        // userPhoneNumbers: 3
         // organizations:
         // organizationLocations:
         // organizationLocation.neighborhoods:
