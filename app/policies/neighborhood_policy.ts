@@ -8,8 +8,7 @@ export default class NeighborhoodPolicy extends TownShareBasePolicy {
     return false
   }
 
-  async edit(authUser: User, neighborhood: Neighborhood | number) {
-    await authUser.load('adminedNeighborhoods')
+  edit(authUser: User, neighborhood: Neighborhood | number) {
     const adminedNeighborhoodIds = authUser.adminedNeighborhoods.map(({ id }) => id)
 
     return adminedNeighborhoodIds.includes(

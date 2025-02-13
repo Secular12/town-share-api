@@ -35,7 +35,7 @@ export default class NeighborhoodsController {
           '*',
           'admins',
           'admins.*',
-          'admin.phoneNumbers',
+          'admins.phoneNumbers',
           'admins.organizations',
         ]),
         (includeAdminsQuery) => {

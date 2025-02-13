@@ -1,4 +1,4 @@
 import env from '#start/env'
 import edge from 'edge.js'
 
-edge.global('env', env)
+edge.global('appName', env.get('APP_NAME'))

@@ -70,7 +70,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare deactivatedAt: DateTime | null
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 
   /* Computed */
   @computed()

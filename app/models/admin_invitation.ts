@@ -43,8 +43,8 @@ export default class AdminInvitation extends BaseModel {
   @column.dateTime()
   declare revokedAt: DateTime | null
 
-  @column.dateTime({ autoUpdate: true })
-  declare updatedAt: DateTime | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
 
   /* Computed */
   @computed()

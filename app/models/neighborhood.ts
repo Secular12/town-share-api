@@ -33,8 +33,8 @@ export default class Neighborhood extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoUpdate: true })
-  declare updatedAt: DateTime | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
 
   /* Computed */
 

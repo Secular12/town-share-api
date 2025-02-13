@@ -1,37 +1,31 @@
 import { AdminInvitationFactory } from '#database/factories/admin_invitation_factory'
 import AdminInvitationNotification from '#mails/admin_invitation_notification'
 import AdminInvitation from '#models/admin_invitation'
-import { BaseSeeder } from '@adonisjs/lucid/seeders'
+import { AdminInvitationSeederData } from '#types/seeder'
+import BaseSeeder from '#database/seeders/base_seeder'
 import mail from '@adonisjs/mail/services/main'
 import { DateTime } from 'luxon'
-import { invitePendingApplicationAdmin } from './dates.js'
 
-export default class extends BaseSeeder {
-  async run() {
-    const adminInvitationItems = [
-      {
-        // id: 1
-        inviterId: 1,
-        pendingUserId: 1,
-        userId: null,
-        message: 'From seeding.',
-        createdAt: invitePendingApplicationAdmin,
-        updatedAt: invitePendingApplicationAdmin,
-      },
-    ]
+export default class AdminInvitationSeeder extends BaseSeeder {
+  public static async runWith(adminInvitationData: AdminInvitationSeederData[]) {
+    const adminInvitationItems = this.getItems(adminInvitationData)
 
     const adminInvitations = await AdminInvitationFactory.merge(adminInvitationItems).createMany(
-      adminInvitationItems.length
+      adminInvitationData.length
     )
 
     for await (const adminInvitation of adminInvitations) {
+      await adminInvitation.refresh()
+
+      if (!adminInvitation.isPending) continue
+
       const token = await AdminInvitation.adminInvitationTokens.create(adminInvitation)
 
       await adminInvitation.load('inviter')
       await adminInvitation.load('pendingUser')
       await adminInvitation.load('user')
 
-      await mail.send(
+      mail.send(
         new AdminInvitationNotification({
           recipients: { to: adminInvitation.user?.email ?? adminInvitation.pendingUser?.email },
           invitationLinkUrl: 'https://townshare.dev/admin-invitation?token={TOKEN}',
@@ -48,5 +42,24 @@ export default class extends BaseSeeder {
         })
       )
     }
+
+    return adminInvitations
+  }
+
+  private static getItems(adminInvitationData: AdminInvitationSeederData[]) {
+    return this.mapData(adminInvitationData, (data) => {
+      return {
+        id: data.id,
+        inviterId: data.inviterId,
+        pendingUserId: 'pendingUserId' in data ? data.pendingUserId : undefined,
+        userId: 'userId' in data ? data.userId : undefined,
+        message: data.message,
+        acceptedAt: 'acceptedAt' in data ? data.acceptedAt : undefined,
+        createdAt: data.createdAt,
+        deniedAt: 'deniedAt' in data ? data.deniedAt : undefined,
+        revokedAt: data.revokedAt,
+        updatedAt: data.updatedAt,
+      }
+    })
   }
 }

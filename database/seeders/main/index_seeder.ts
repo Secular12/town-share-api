@@ -16,11 +16,9 @@ export default class extends BaseSeeder {
   async run() {
     if (app.inDev) {
       await this.seed('development', [
-        'user_seeder',
-        'user_phone_number_seeder',
-        'pending_user_seeder',
-        'admin_invitation_seeder',
-        // 'neighborhood_seeder',
+        'main_seeder',
+        // 'neighborhood_admin_invitation_seeder',
+        // 'neighborhood_admin_seeder',
         // 'user_location_seeder',
         // 'organization_seeder',
         // 'organization_user_seeder',
