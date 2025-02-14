@@ -1,7 +1,7 @@
-import { UserLocationFactory } from '#database/factories/user_location_factory'
+import { NeighborhoodUserLocationFactory } from '#database/factories/neighborhood_user_location_factory'
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 
-export const userLocations = [
+export const neighborhoodUserLocations = [
   {
     neighborhoodId: 1,
     userId: 2,
@@ -84,6 +84,8 @@ export const userLocations = [
 
 export default class extends BaseSeeder {
   async run() {
-    await UserLocationFactory.merge(userLocations).createMany(userLocations.length)
+    await NeighborhoodUserLocationFactory.merge(neighborhoodUserLocations).createMany(
+      neighborhoodUserLocations.length
+    )
   }
 }

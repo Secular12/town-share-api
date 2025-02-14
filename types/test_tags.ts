@@ -4,6 +4,6 @@ export type ResourceTag =
   | '@organizationLocation'
   | '@organization'
   | '@session'
-  | '@userLocation'
+  | '@neighborhoodUserLocation'
   | '@user'
   | '@userToken'

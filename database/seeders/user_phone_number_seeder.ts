@@ -1,8 +1,8 @@
 import { UserPhoneNumberFactory } from '#database/factories/user_phone_number_factory'
 import { UserPhoneNumberSeederData } from '#types/seeder'
-import BaseSeeder from '#database/seeders/base_seeder'
+import AppBaseSeeder from '#database/seeders/app_base_seeder'
 
-export default class UserPhoneNumberSeeder extends BaseSeeder {
+export default class UserPhoneNumberSeeder extends AppBaseSeeder {
   public static async runWith(userPhoneNumberData: UserPhoneNumberSeederData[]) {
     const userPhoneNumberItems = this.getItems(userPhoneNumberData)
 

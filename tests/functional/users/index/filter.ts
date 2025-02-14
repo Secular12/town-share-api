@@ -1,7 +1,7 @@
 import { organizationLocations } from '#database/seeders/test/organization_location_seeder'
 import { organizationLocationUsers } from '#database/seeders/test/organization_location_user_seeder'
 import { organizationUsers } from '#database/seeders/test/organization_user_seeder'
-import { userLocations } from '#database/seeders/test/user_location_seeder'
+import { neighborhoodUserLocations } from '#database/seeders/test/neighborhood_user_location_seeder'
 import { users } from '#database/seeders/test/user_seeder'
 import User from '#models/user'
 import { test } from '@japa/runner'
@@ -133,9 +133,14 @@ export default (route: string) => {
         email,
       }))
       .filter(({ id: userId }) => {
-        const hasUserLocationNeighborhood = userLocations.some((userLocation) => {
-          return userLocation.userId === userId && userLocation.neighborhoodId === neighborhoodId
-        })
+        const hasUserLocationNeighborhood = neighborhoodUserLocations.some(
+          (neighborhoodUserLocation) => {
+            return (
+              neighborhoodUserLocation.userId === userId &&
+              neighborhoodUserLocation.neighborhoodId === neighborhoodId
+            )
+          }
+        )
 
         const hasOrganizationLocationNeighborhood = organizationLocations.some(
           (organizationLocation, organizationLocationIndex) => {

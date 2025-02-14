@@ -1,6 +1,6 @@
 import { neighborhoodAdmins } from '#database/seeders/test/neighborhood_admin_seeder'
 import { organizationLocations } from '#database/seeders/test/organization_location_seeder'
-import { userLocations } from '#database/seeders/test/user_location_seeder'
+import { neighborhoodUserLocations } from '#database/seeders/test/neighborhood_user_location_seeder'
 import { users } from '#database/seeders/test/user_seeder'
 
 export const getAdmins = (neighborhoodId: number) =>
@@ -62,26 +62,29 @@ export const getOrganizationLocationsCount = (neighborhoodId: number) =>
   }, 0)
 
 export const getUserLocations = (neighborhoodId: number) =>
-  userLocations.reduce(
-    (neighborhoodUserLocations: Record<string, unknown>[], userLocation, userLocationIndex) => {
-      const userLocationId = userLocationIndex + 1
-      if (userLocation.neighborhoodId === neighborhoodId) {
-        neighborhoodUserLocations.push({
-          id: userLocationId,
-          ...userLocation,
+  neighborhoodUserLocations.reduce(
+    (acc: Record<string, unknown>[], neighborhoodUserLocation, neighborhoodUserLocationIndex) => {
+      const neighborhoodUserLocationId = neighborhoodUserLocationIndex + 1
+      if (neighborhoodUserLocation.neighborhoodId === neighborhoodId) {
+        acc.push({
+          id: neighborhoodUserLocationId,
+          ...neighborhoodUserLocation,
         })
       }
 
-      return neighborhoodUserLocations
+      return acc
     },
     []
   )
 
 export const getUserLocationsCount = (neighborhoodId: number) =>
-  userLocations.reduce((userLocationsCount: number, userLocation) => {
-    if (userLocation.neighborhoodId === neighborhoodId) {
-      return userLocationsCount + 1
-    }
+  neighborhoodUserLocations.reduce(
+    (neighborhoodUserLocationsCount: number, neighborhoodUserLocation) => {
+      if (neighborhoodUserLocation.neighborhoodId === neighborhoodId) {
+        return neighborhoodUserLocationsCount + 1
+      }
 
-    return userLocationsCount
-  }, 0)
+      return neighborhoodUserLocationsCount
+    },
+    0
+  )

@@ -1,8 +1,8 @@
 import { NeighborhoodFactory } from '#database/factories/neighborhood_factory'
-import BaseSeeder from '#database/seeders/base_seeder'
+import AppBaseSeeder from '#database/seeders/app_base_seeder'
 import { NeighborhoodSeederData } from '#types/seeder'
 
-export default class NeighborhoodSeeder extends BaseSeeder {
+export default class NeighborhoodSeeder extends AppBaseSeeder {
   public static async runWith(neighborhoodData: NeighborhoodSeederData[]) {
     const neighborhoodItems = this.getItems(neighborhoodData)
 

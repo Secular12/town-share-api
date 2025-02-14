@@ -14,6 +14,12 @@ export default class extends BaseSchema {
         .unsigned()
         .references('id')
         .inTable('neighborhoods')
+      table
+        .integer('pending_user_id')
+        .nullable()
+        .unsigned()
+        .references('id')
+        .inTable('pending_users')
       table.integer('user_id').nullable().unsigned().references('id').inTable('users')
 
       table.text('message').nullable()
@@ -21,6 +27,7 @@ export default class extends BaseSchema {
       table.timestamp('accepted_at').nullable()
       table.timestamp('created_at').notNullable()
       table.timestamp('denied_at').nullable()
+      table.timestamp('revoked_at').nullable()
       table.timestamp('updated_at').nullable()
     })
   }

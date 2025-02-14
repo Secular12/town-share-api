@@ -5,7 +5,7 @@ import * as UserSeedDataUtil from '#utils/seed_data/user'
 import { test } from '@japa/runner'
 
 export default (route: string) => {
-  test('unprocessable entity - include string is not an acceptable option: *, adminedNeighborhoods, locations, locations.*, locations.neighborhood, organizationLocations, organizationLocations.*, organizationLocations.neighborhood, organizations', async ({
+  test('unprocessable entity - include string is not an acceptable option: *, adminedNeighborhoods, neighborhoodLocations, neighborhoodLocations.*, neighborhoodLocations.neighborhood, organizationLocations, organizationLocations.*, organizationLocations.neighborhood, organizations', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -28,9 +28,9 @@ export default (route: string) => {
             choices: [
               '*',
               'adminedNeighborhoods',
-              'locations',
-              'locations.*',
-              'locations.neighborhood',
+              'neighborhoodLocations',
+              'neighborhoodLocations.*',
+              'neighborhoodLocations.neighborhood',
               'organizationLocations',
               'organizationLocations.*',
               'organizationLocations.neighborhood',
@@ -71,9 +71,9 @@ export default (route: string) => {
           meta: {
             choices: [
               'adminedNeighborhoods',
-              'locations',
-              'locations.*',
-              'locations.neighborhood',
+              'neighborhoodLocations',
+              'neighborhoodLocations.*',
+              'neighborhoodLocations.neighborhood',
               'organizationLocations',
               'organizationLocations.*',
               'organizationLocations.neighborhood',
@@ -91,7 +91,7 @@ export default (route: string) => {
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()
 
-  test('success - include: locations.neighborhood, organizationLocations.neighborhood', async ({
+  test('success - include: neighborhoodLocations.neighborhood, organizationLocations.neighborhood', async ({
     assert,
     client,
   }) => {
@@ -101,7 +101,7 @@ export default (route: string) => {
     const response = await client
       .get(`${route}/${userId}`)
       .qs({
-        include: ['locations.neighborhood', 'organizationLocations.neighborhood'],
+        include: ['neighborhoodLocations.neighborhood', 'organizationLocations.neighborhood'],
       })
       .loginAs(user)
 
@@ -112,12 +112,12 @@ export default (route: string) => {
     const userData = {
       id: userId,
       email: userSeedData.email,
-      locations: UserSeedDataUtil.getLocations(userId).map((location) => {
+      neighborhoodLocations: UserSeedDataUtil.getLocations(userId).map((neighborhoodLocation) => {
         return {
-          id: location.id,
-          city: location.city,
-          state: location.state,
-          neighborhood: neighborhoods[location.neighborhoodId - 1],
+          id: neighborhoodLocation.id,
+          city: neighborhoodLocation.city,
+          state: neighborhoodLocation.state,
+          neighborhood: neighborhoods[neighborhoodLocation.neighborhoodId - 1],
         }
       }),
       organizationLocations: UserSeedDataUtil.getOrganizationLocations(userId).map(
@@ -136,17 +136,20 @@ export default (route: string) => {
     assert.containsSubset(body, userData)
   })
     .tagCrud('@read')
-    .tagResource(['@neighborhood', '@organizationLocation', '@user', '@userLocation'])
+    .tagResource(['@neighborhood', '@organizationLocation', '@user', '@neighborhoodUserLocation'])
     .tagSuccess()
 
-  test('success - include locations.*, organizationsLocations.*', async ({ assert, client }) => {
+  test('success - include neighborhoodLocations.*, organizationsLocations.*', async ({
+    assert,
+    client,
+  }) => {
     const user = await User.findOrFail(1)
     const userId = 9
 
     const response = await client
       .get(`${route}/${userId}`)
       .qs({
-        include: ['locations.*', 'organizationLocations.*'],
+        include: ['neighborhoodLocations.*', 'organizationLocations.*'],
       })
       .loginAs(user)
 
@@ -157,12 +160,12 @@ export default (route: string) => {
     const userData = {
       id: userId,
       email: userSeedData.email,
-      locations: UserSeedDataUtil.getLocations(userId).map((location) => {
+      neighborhoodLocations: UserSeedDataUtil.getLocations(userId).map((neighborhoodLocation) => {
         return {
-          id: location.id,
-          city: location.city,
-          state: location.state,
-          neighborhood: neighborhoods[location.neighborhoodId - 1],
+          id: neighborhoodLocation.id,
+          city: neighborhoodLocation.city,
+          state: neighborhoodLocation.state,
+          neighborhood: neighborhoods[neighborhoodLocation.neighborhoodId - 1],
         }
       }),
       organizationLocations: UserSeedDataUtil.getOrganizationLocations(userId).map(
@@ -181,10 +184,10 @@ export default (route: string) => {
     assert.containsSubset(body, userData)
   })
     .tagCrud('@read')
-    .tagResource(['@neighborhood', '@organizationLocation', '@user', '@userLocation'])
+    .tagResource(['@neighborhood', '@organizationLocation', '@user', '@neighborhoodUserLocation'])
     .tagSuccess()
 
-  test('success - include adminedNeighborhoods, locations, organizationLocations, organizations, sponsor, sponsoredUsers', async ({
+  test('success - include adminedNeighborhoods, neighborhoodLocations, organizationLocations, organizations, sponsor, sponsoredUsers', async ({
     assert,
     client,
   }) => {
@@ -197,7 +200,7 @@ export default (route: string) => {
       .qs({
         include: [
           'adminedNeighborhoods',
-          'locations',
+          'neighborhoodLocations',
           'organizationLocations',
           'organizations',
           'sponsor',
@@ -214,7 +217,7 @@ export default (route: string) => {
       id: userId,
       email: userSeedData.email,
       adminedNeighborhoods: UserSeedDataUtil.getAdminedNeighborhoods(userId),
-      locations: UserSeedDataUtil.getLocations(userId),
+      neighborhoodLocations: UserSeedDataUtil.getLocations(userId),
       organizationLocations: UserSeedDataUtil.getOrganizationLocations(userId),
       organizations: UserSeedDataUtil.getOrganizations(userId),
       sponsor: UserSeedDataUtil.getSponsor(userId),
@@ -230,7 +233,7 @@ export default (route: string) => {
       '@organization',
       '@organizationLocation',
       '@user',
-      '@userLocation',
+      '@neighborhoodUserLocation',
     ])
     .tagSuccess()
 
@@ -248,12 +251,12 @@ export default (route: string) => {
       id: userId,
       email: userSeedData.email,
       adminedNeighborhoods: UserSeedDataUtil.getAdminedNeighborhoods(userId),
-      locations: UserSeedDataUtil.getLocations(userId).map((location) => {
+      neighborhoodLocations: UserSeedDataUtil.getLocations(userId).map((neighborhoodLocation) => {
         return {
-          id: location.id,
-          city: location.city,
-          state: location.state,
-          neighborhood: neighborhoods[location.neighborhoodId - 1],
+          id: neighborhoodLocation.id,
+          city: neighborhoodLocation.city,
+          state: neighborhoodLocation.state,
+          neighborhood: neighborhoods[neighborhoodLocation.neighborhoodId - 1],
         }
       }),
       organizationLocations: UserSeedDataUtil.getOrganizationLocations(userId).map(
@@ -280,7 +283,7 @@ export default (route: string) => {
       '@organization',
       '@organizationLocation',
       '@user',
-      '@userLocation',
+      '@neighborhoodUserLocation',
     ])
     .tagSuccess()
 }

@@ -1,9 +1,9 @@
 import { PendingUserFactory } from '#database/factories/pending_user_factory'
 import AdminInvitationSeeder from '#database/seeders/admin_invitation_seeder'
 import { PendingUserSeederData } from '#types/seeder'
-import BaseSeeder from '#database/seeders/base_seeder'
+import AppBaseSeeder from '#database/seeders/app_base_seeder'
 
-export default class PendingUserSeeder extends BaseSeeder {
+export default class PendingUserSeeder extends AppBaseSeeder {
   public static async runWith(pendingUserData: PendingUserSeederData[]) {
     const pendingUserItems = this.getItems(pendingUserData)
 

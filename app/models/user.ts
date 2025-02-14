@@ -2,7 +2,7 @@ import AdminInvitation from '#models/admin_invitation'
 import Neighborhood from '#models/neighborhood'
 import Organization from '#models/organization'
 import OrganizationLocation from '#models/organization_location'
-import UserLocation from '#models/user_location'
+import NeighborhoodUserLocation from '#models/neighborhood_user_location'
 import UserPhoneNumber from '#models/user_phone_number'
 import env from '#start/env'
 import type { IndexPayload } from '#validators/user'
@@ -105,8 +105,8 @@ export default class User extends compose(BaseModel, AuthFinder) {
   })
   declare adminedNeighborhoods: ManyToMany<typeof Neighborhood>
 
-  @hasMany(() => UserLocation)
-  declare locations: HasMany<typeof UserLocation>
+  @hasMany(() => NeighborhoodUserLocation)
+  declare neighborhoodLocations: HasMany<typeof NeighborhoodUserLocation>
 
   @manyToMany(() => OrganizationLocation)
   declare organizationLocations: ManyToMany<typeof OrganizationLocation>
@@ -133,20 +133,20 @@ export default class User extends compose(BaseModel, AuthFinder) {
   static existsWithNeighborhood = scope((query, neighborhoodId: number | number[]) => {
     query.whereExists((whereExistsQuery) => {
       whereExistsQuery
-        .select('user_locations.neighborhood_id')
-        .from('user_locations')
-        .whereColumn('user_locations.user_id', 'users.id')
+        .select('neighborhood_user_locations.neighborhood_id')
+        .from('neighborhood_user_locations')
+        .whereColumn('neighborhood_user_locations.user_id', 'users.id')
         .if(
           vine.helpers.isArray(neighborhoodId),
           (neighborhoodIdArrayQuery) => {
             neighborhoodIdArrayQuery.whereIn(
-              'user_locations.neighborhood_id',
+              'neighborhood_user_locations.neighborhood_id',
               neighborhoodId as number[]
             )
           },
           (neighborhoodIdNotArrayQuery) => {
             neighborhoodIdNotArrayQuery.where(
-              'user_locations.neighborhood_id',
+              'neighborhood_user_locations.neighborhood_id',
               neighborhoodId as number
             )
           }
@@ -293,7 +293,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
     const extraColumns: {
       adminedNeighborhoodsCount?: number
       isOrganizationAdmin?: boolean
-      locationsCount?: number
+      neighborhoodLocationsCount?: number
       organizationLocationsCount?: number
       organizationsCount?: number
       phoneNumbersCount?: number
@@ -309,8 +309,8 @@ export default class User extends compose(BaseModel, AuthFinder) {
       extraColumns.isOrganizationAdmin = this.$extras.pivot_is_organization_admin
     }
 
-    if (this.$extras.locations_count !== undefined) {
-      extraColumns.locationsCount = +this.$extras.locations_count
+    if (this.$extras.neighborhoodLocations_count !== undefined) {
+      extraColumns.neighborhoodLocationsCount = +this.$extras.neighborhoodLocations_count
     }
 
     if (this.$extras.organizationLocations_count !== undefined) {

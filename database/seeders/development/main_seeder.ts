@@ -48,6 +48,7 @@ export default class MainSeeder extends BaseSeeder {
 
     await PendingUserSeeder.runWith([
       {
+        id: 1,
         email: 'application-admin-2@townshare.com',
         createdAt: invitePendingApplicationAdmin,
         updatedAt: invitePendingApplicationAdmin,
@@ -63,6 +64,7 @@ export default class MainSeeder extends BaseSeeder {
 
     await NeighborhoodSeeder.runWith([
       {
+        id: 1,
         city: 'Seattle',
         name: 'Auburn',
         state: 'Washington',

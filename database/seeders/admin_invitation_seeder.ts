@@ -2,11 +2,11 @@ import { AdminInvitationFactory } from '#database/factories/admin_invitation_fac
 import AdminInvitationNotification from '#mails/admin_invitation_notification'
 import AdminInvitation from '#models/admin_invitation'
 import { AdminInvitationSeederData } from '#types/seeder'
-import BaseSeeder from '#database/seeders/base_seeder'
+import AppBaseSeeder from '#database/seeders/app_base_seeder'
 import mail from '@adonisjs/mail/services/main'
 import { DateTime } from 'luxon'
 
-export default class AdminInvitationSeeder extends BaseSeeder {
+export default class AdminInvitationSeeder extends AppBaseSeeder {
   public static async runWith(adminInvitationData: AdminInvitationSeederData[]) {
     const adminInvitationItems = this.getItems(adminInvitationData)
 

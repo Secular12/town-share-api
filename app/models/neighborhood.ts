@@ -1,5 +1,5 @@
 import OrganizationLocation from '#models/organization_location'
-import UserLocation from '#models/user_location'
+import NeighborhoodUserLocation from '#models/neighborhood_user_location'
 import { BaseModel, column, hasMany, manyToMany, scope } from '@adonisjs/lucid/orm'
 import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
@@ -48,8 +48,8 @@ export default class Neighborhood extends BaseModel {
   @hasMany(() => OrganizationLocation)
   declare organizationLocations: HasMany<typeof OrganizationLocation>
 
-  @hasMany(() => UserLocation)
-  declare userLocations: HasMany<typeof UserLocation>
+  @hasMany(() => NeighborhoodUserLocation)
+  declare userLocations: HasMany<typeof NeighborhoodUserLocation>
 
   /* Scopes */
   static existsWithOrganization = scope((query, organizationId: number | number[]) => {
@@ -78,16 +78,16 @@ export default class Neighborhood extends BaseModel {
   static existsWithUser = scope((query, userId: number | number[]) => {
     query.whereExists((whereExistsQuery) => {
       whereExistsQuery
-        .select('user_locations.neighborhood_id')
-        .from('user_locations')
-        .whereColumn('user_locations.neighborhood_id', 'neighborhoods.id')
+        .select('neighborhood_user_locations.neighborhood_id')
+        .from('neighborhood_user_locations')
+        .whereColumn('neighborhood_user_locations.neighborhood_id', 'neighborhoods.id')
         .if(
           vine.helpers.isArray(userId),
           (userIdArrayQuery) => {
-            userIdArrayQuery.whereIn('user_locations.user_id', userId as number[])
+            userIdArrayQuery.whereIn('neighborhood_user_locations.user_id', userId as number[])
           },
           (userIdNotArrayQuery) => {
-            userIdNotArrayQuery.where('user_locations.user_id', userId as number)
+            userIdNotArrayQuery.where('neighborhood_user_locations.user_id', userId as number)
           }
         )
         .union((unionQuery) => {

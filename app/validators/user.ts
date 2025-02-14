@@ -6,7 +6,7 @@ type UpdatePayload = Awaited<ReturnType<(typeof update)['validate']>>
 
 const countOptions = [
   'adminedNeighborhoods',
-  'locations',
+  'neighborhoodLocations',
   'organizationLocations',
   'organizations',
   'phoneNumbers',
@@ -16,9 +16,9 @@ const countOptions = [
 
 const includeOptions = [
   'adminedNeighborhoods',
-  'locations',
-  'locations.*',
-  'locations.neighborhood',
+  'neighborhoodLocations',
+  'neighborhoodLocations.*',
+  'neighborhoodLocations.neighborhood',
   'organizationLocations',
   'organizationLocations.*',
   'organizationLocations.neighborhood',

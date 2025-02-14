@@ -4,7 +4,7 @@ import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 
-export default class UserLocation extends BaseModel {
+export default class NeighborhoodUserLocation extends BaseModel {
   /* Primary IDs */
   @column({ isPrimary: true })
   declare id: number

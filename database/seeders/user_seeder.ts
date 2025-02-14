@@ -1,10 +1,10 @@
 import { UserFactory } from '#database/factories/user_factory'
 import AdminInvitationSeeder from '#database/seeders/admin_invitation_seeder'
-import BaseSeeder from '#database/seeders/base_seeder'
+import AppBaseSeeder from '#database/seeders/app_base_seeder'
 import UserPhoneNumberSeeder from '#database/seeders/user_phone_number_seeder'
 import { UserSeederData } from '#types/seeder'
 
-export default class UserSeeder extends BaseSeeder {
+export default class UserSeeder extends AppBaseSeeder {
   public static async runWith(userData: UserSeederData[]) {
     const userItems = this.getItems(userData)
 

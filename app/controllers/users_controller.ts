@@ -103,17 +103,17 @@ export default class UsersController {
       .if(
         ArrayUtil.hasOrIsAnyFrom(payload.include, [
           '*',
-          'locations',
-          'locations.*',
-          'locations.neighborhood',
+          'neighborhoodLocations',
+          'neighborhoodLocations.*',
+          'neighborhoodLocations.neighborhood',
         ]),
         (includeLocationsQuery) => {
-          includeLocationsQuery.preload('locations', (preloadLocationsQuery) => {
+          includeLocationsQuery.preload('neighborhoodLocations', (preloadLocationsQuery) => {
             preloadLocationsQuery.if(
               ArrayUtil.hasOrIsAnyFrom(payload.include, [
                 '*',
-                'locations.*',
-                'locations.neighborhood',
+                'neighborhoodLocations.*',
+                'neighborhoodLocations.neighborhood',
               ]),
               (includeNeighborhoodQuery) => {
                 includeNeighborhoodQuery.preload('neighborhood')
@@ -327,17 +327,17 @@ export default class UsersController {
       .if(
         ArrayUtil.hasOrIsAnyFrom(payload.include, [
           '*',
-          'locations',
-          'locations.*',
-          'locations.neighborhood',
+          'neighborhoodLocations',
+          'neighborhoodLocations.*',
+          'neighborhoodLocations.neighborhood',
         ]),
         (includeLocationsQuery) => {
-          includeLocationsQuery.preload('locations', (locationsQuery) => {
-            locationsQuery.if(
+          includeLocationsQuery.preload('neighborhoodLocations', (neighborhoodLocationsQuery) => {
+            neighborhoodLocationsQuery.if(
               ArrayUtil.hasOrIsAnyFrom(payload.include, [
                 '*',
-                'locations.*',
-                'locations.neighborhood',
+                'neighborhoodLocations.*',
+                'neighborhoodLocations.neighborhood',
               ]),
               (includeNeighborhoodQuery) => {
                 includeNeighborhoodQuery.preload('neighborhood')

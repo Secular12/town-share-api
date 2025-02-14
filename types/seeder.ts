@@ -30,7 +30,7 @@ export type NeighborhoodData = {
   createdAt?: DateTime
   updatedAt?: DateTime
   // adminIds?: number[]
-  // userLocations?: UserLocationData[]
+  // userLocations?: NeighborhoodUserLocationData[]
 }
 
 export type NeighborhoodSeederData = NeighborhoodData

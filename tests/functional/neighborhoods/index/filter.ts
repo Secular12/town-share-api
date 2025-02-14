@@ -1,7 +1,7 @@
 import { neighborhoods } from '#database/seeders/test/neighborhood_seeder'
 import { organizationLocations } from '#database/seeders/test/organization_location_seeder'
 import { organizationLocationUsers } from '#database/seeders/test/organization_location_user_seeder'
-import { userLocations } from '#database/seeders/test/user_location_seeder'
+import { neighborhoodUserLocations } from '#database/seeders/test/neighborhood_user_location_seeder'
 import User from '#models/user'
 import { test } from '@japa/runner'
 
@@ -136,7 +136,7 @@ export default (route: string) => {
         name,
       }))
       .filter(({ id: neighborhoodId }) => {
-        const hasUserLocationUser = userLocations.some((userLocation) => {
+        const hasUserLocationUser = neighborhoodUserLocations.some((userLocation) => {
           return userLocation.userId === userId && userLocation.neighborhoodId === neighborhoodId
         })
 

@@ -4,7 +4,7 @@ import { organizationLocations } from '#database/seeders/test/organization_locat
 import { organizationLocationUsers } from '#database/seeders/test/organization_location_user_seeder'
 import { organizations } from '#database/seeders/test/organization_seeder'
 import { organizationUsers } from '#database/seeders/test/organization_user_seeder'
-import { userLocations } from '#database/seeders/test/user_location_seeder'
+import { neighborhoodUserLocations } from '#database/seeders/test/neighborhood_user_location_seeder'
 import { users } from '#database/seeders/test/user_seeder'
 
 export const getAdminedNeighborhoods = (userId: number) =>
@@ -42,30 +42,33 @@ export const getAdminedNeighborhoodsCount = (userId: number) =>
   }, 0)
 
 export const getLocations = (userId: number) =>
-  userLocations.reduce(
+  neighborhoodUserLocations.reduce(
     (
-      locations: ({ id: number } & (typeof userLocations)[number])[],
-      userLocation,
-      userLocationIndex
+      neighborhoodLocations: ({ id: number } & (typeof neighborhoodUserLocations)[number])[],
+      neighborhoodUserLocation,
+      neighborhoodUserLocationIndex
     ) => {
-      if (userLocation.userId === userId) {
-        locations.push({ id: userLocationIndex + 1, ...userLocation })
+      if (neighborhoodUserLocation.userId === userId) {
+        neighborhoodLocations.push({
+          id: neighborhoodUserLocationIndex + 1,
+          ...neighborhoodUserLocation,
+        })
       }
 
-      return locations
+      return neighborhoodLocations
     },
     []
   )
 
 export const getLocationsCount = (userId: number) =>
-  userLocations.reduce((count: number, userLocation) => {
-    return userLocation.userId === userId ? count + 1 : count
+  neighborhoodUserLocations.reduce((count: number, neighborhoodUserLocation) => {
+    return neighborhoodUserLocation.userId === userId ? count + 1 : count
   }, 0)
 
 export const getOrganizationLocations = (userId: number) =>
   organizationLocations.reduce(
     (
-      locations: ({ id: number } & (typeof organizationLocations)[number])[],
+      neighborhoodLocations: ({ id: number } & (typeof organizationLocations)[number])[],
       organizationLocation,
       organizationLocationIndex
     ) => {
@@ -77,10 +80,10 @@ export const getOrganizationLocations = (userId: number) =>
             organization_location_id === organizationLocationId && user_id === userId
         )
       ) {
-        return [...locations, { id: organizationLocationId, ...organizationLocation }]
+        return [...neighborhoodLocations, { id: organizationLocationId, ...organizationLocation }]
       }
 
-      return locations
+      return neighborhoodLocations
     },
     []
   )
