@@ -17,7 +17,6 @@ changePassword.messagesProvider = new SimpleMessagesProvider({
 const forgotPassword = vine.compile(
   vine.object({
     email: vine.string().trim().email(),
-    resetLinkUrl: vine.string().trim().url().includes('{TOKEN}'),
     timezone: vine.string().trim().timezone(),
   })
 )

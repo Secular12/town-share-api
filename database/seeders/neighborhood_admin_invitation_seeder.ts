@@ -5,7 +5,6 @@ import { NeighborhoodAdminInvitationSeederData } from '#types/seeder'
 import AppBaseSeeder from '#database/seeders/app_base_seeder'
 import mail from '@adonisjs/mail/services/main'
 import { DateTime } from 'luxon'
-import env from '#start/env'
 
 export default class NeighborhoodAdminInvitationSeeder extends AppBaseSeeder {
   public static async runWith(
@@ -38,7 +37,6 @@ export default class NeighborhoodAdminInvitationSeeder extends AppBaseSeeder {
               neighborhoodAdminInvitation.user?.email ??
               neighborhoodAdminInvitation.pendingUser?.email,
           },
-          invitationLinkUrl: `${env.get('SEEDER_NOTIFICATION_UI_URL')}/neighborhood-admin-invitation?token={TOKEN}`,
           inviter: neighborhoodAdminInvitation.inviter,
           message: neighborhoodAdminInvitation.message,
           neighborhood: neighborhoodAdminInvitation.neighborhood,

@@ -24,7 +24,7 @@ export default class AuthenticationController {
   }
 
   async forgotPassword({ request }: HttpContext) {
-    const { email, resetLinkUrl, timezone } = await AuthenticationValidator.forgotPassword.validate(
+    const { email, timezone } = await AuthenticationValidator.forgotPassword.validate(
       request.body()
     )
 
@@ -39,7 +39,6 @@ export default class AuthenticationController {
       await mail.send(
         new ForgotPasswordNotification({
           recipients: { to: user.email },
-          resetLinkUrl,
           token: {
             expiration: token.expiresAt
               ? DateTime.fromJSDate(token.expiresAt)

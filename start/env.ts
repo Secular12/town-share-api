@@ -71,14 +71,6 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   /*
   |----------------------------------------------------------
-  | Variables for configuring seeders
-  |----------------------------------------------------------
-  */
-  SEEDER_NOTIFICATION_UI_URL:
-    Env.schema.string.optional({ format: 'url' }) ?? 'http://townshare.dev',
-
-  /*
-  |----------------------------------------------------------
   | Variables for configuring session package
   |----------------------------------------------------------
   */
@@ -91,4 +83,14 @@ export default await Env.create(new URL('../', import.meta.url), {
   */
   TOKEN_INVITATION_EXPIRATION: customSchema.prettyMsTime,
   TOKEN_RESET_PASSWORD_EXPIRATION: customSchema.prettyMsTime,
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring seeders
+  |----------------------------------------------------------
+  */
+  UI_ROUTE_ADMIN_INVITATION: Env.schema.string({ format: 'url' }),
+  UI_ROUTE_NEIGHBORHOOD_ADMIN_INVITATION: Env.schema.string({ format: 'url' }),
+  UI_ROUTE_RESET_PASSWORD: Env.schema.string({ format: 'url' }),
+  UI_ROUTE_USER_INVITATION: Env.schema.string({ format: 'url' }),
 })

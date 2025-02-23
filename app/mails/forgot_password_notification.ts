@@ -7,7 +7,6 @@ type ForgotPasswordNotificationPayload = {
   recipients: {
     to: string
   }
-  resetLinkUrl: string
   user: User
   token: {
     expiration: string | null
@@ -32,10 +31,9 @@ export default class ForgotPasswordNotification extends BaseMail {
    * the email is sent or queued.
    */
   prepare() {
-    const resetLink = this.payload.resetLinkUrl.replace(
-      '{TOKEN}',
-      encodeURIComponent(this.payload.token.value)
-    )
+    const resetLink = env
+      .get('UI_ROUTE_RESET_PASSWORD')
+      .replace('{TOKEN}', encodeURIComponent(this.payload.token.value))
 
     const viewState = {
       expiration: this.payload.token.expiration,

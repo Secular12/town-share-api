@@ -1,0 +1,17 @@
+@mjml()
+  <mjml>
+    <mj-body>
+      <mj-section>
+        <mj-column>
+          <mj-text>
+            <h1 style="font-weight: bold;">Hello!</h1>
+          </mj-text>
+          <mj-text>
+            <p>You have been invited to apply to become an user for {{ appName }} by {{ inviter.name }}.</p>
+          </mj-text>
+          <mj-button href="{{ invitationLink }}">Apply</mj-button>
+        </mj-column>
+      </mj-section>
+    </mj-body>
+  </mjml>
+@end

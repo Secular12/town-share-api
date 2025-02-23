@@ -5,7 +5,6 @@ import app from '@adonisjs/core/services/app'
 import { BaseMail } from '@adonisjs/mail'
 
 type NeighborhoodAdminInvitationNotificationPayload = {
-  invitationLinkUrl: string
   inviter: User
   message?: string | null
   neighborhood: Neighborhood
@@ -33,10 +32,9 @@ export default class NeighborhoodAdminInvitationNotification extends BaseMail {
    * the email is sent or queued.
    */
   prepare() {
-    const invitationLink = this.payload.invitationLinkUrl.replace(
-      '{TOKEN}',
-      encodeURIComponent(this.payload.token.value)
-    )
+    const invitationLink = env
+      .get('UI_ROUTE_NEIGHBORHOOD_ADMIN_INVITATION')
+      .replace('{TOKEN}', encodeURIComponent(this.payload.token.value))
 
     const viewState = {
       expiration: this.payload.token.expiration,

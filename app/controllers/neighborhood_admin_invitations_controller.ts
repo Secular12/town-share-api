@@ -306,7 +306,6 @@ export default class NeighborhoodAdminInvitationsController {
     await mail.send(
       new NeighborhoodAdminInvitationNotification({
         recipients: { to: email },
-        invitationLinkUrl: payload.invitationLinkUrl,
         inviter: neighborhoodAdminInvitation.inviter,
         message: payload.message,
         neighborhood: neighborhoodAdminInvitation.neighborhood,
@@ -501,7 +500,6 @@ export default class NeighborhoodAdminInvitationsController {
       await mail.send(
         new NeighborhoodAdminInvitationNotification({
           recipients: { to: trxResponse.user.email },
-          invitationLinkUrl: payload.invitationLinkUrl,
           inviter: auth.user!,
           message: payload.message,
           neighborhood: trxResponse.neighborhoodAdminInvitation.neighborhood,

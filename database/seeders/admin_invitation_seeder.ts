@@ -5,7 +5,6 @@ import { AdminInvitationSeederData } from '#types/seeder'
 import AppBaseSeeder from '#database/seeders/app_base_seeder'
 import mail from '@adonisjs/mail/services/main'
 import { DateTime } from 'luxon'
-import env from '#start/env'
 
 export default class AdminInvitationSeeder extends AppBaseSeeder {
   public static async runWith(adminInvitationsData: AdminInvitationSeederData[]) {
@@ -29,8 +28,6 @@ export default class AdminInvitationSeeder extends AppBaseSeeder {
       mail.send(
         new AdminInvitationNotification({
           recipients: { to: adminInvitation.user?.email ?? adminInvitation.pendingUser?.email },
-          // TODO UI URL in dev and test .env
-          invitationLinkUrl: `${env.get('SEEDER_NOTIFICATION_UI_URL')}/admin-invitation?token={TOKEN}`,
           inviter: adminInvitation.inviter,
           message: adminInvitation.message,
           token: {

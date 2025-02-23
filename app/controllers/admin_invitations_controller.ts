@@ -269,7 +269,6 @@ export default class AdminInvitationsController {
     await mail.send(
       new AdminInvitationNotification({
         recipients: { to: email },
-        invitationLinkUrl: payload.invitationLinkUrl,
         inviter: adminInvitation.inviter,
         message: payload.message,
         token: {
@@ -425,7 +424,6 @@ export default class AdminInvitationsController {
       await mail.send(
         new AdminInvitationNotification({
           recipients: { to: trxResponse.user.email },
-          invitationLinkUrl: payload.invitationLinkUrl,
           inviter: auth.user!,
           message: payload.message,
           token: {

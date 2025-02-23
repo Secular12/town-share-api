@@ -104,7 +104,6 @@ const index = vine.compile(
 
 const resend = vine.compile(
   vine.object({
-    invitationLinkUrl: vine.string().trim().url().includes('{TOKEN}'),
     message: vine.string().nullable().optional(),
     timezone: vine.string().trim().timezone(),
   })
@@ -119,7 +118,6 @@ const show = vine.compile(vine.object({}).merge(includes))
 const store = vine.compile(
   vine
     .object({
-      invitationLinkUrl: vine.string().trim().url().includes('{TOKEN}'),
       message: vine.string().nullable().optional(),
       neighborhoodId: vine.number().min(1),
       timezone: vine.string().trim().timezone(),

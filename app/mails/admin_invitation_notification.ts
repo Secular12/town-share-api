@@ -4,7 +4,6 @@ import app from '@adonisjs/core/services/app'
 import { BaseMail } from '@adonisjs/mail'
 
 type AdminInvitationNotificationPayload = {
-  invitationLinkUrl: string
   inviter: User
   message?: string | null
   recipients: { to: string }
@@ -31,10 +30,9 @@ export default class AdminInvitationNotification extends BaseMail {
    * the email is sent or queued.
    */
   prepare() {
-    const invitationLink = this.payload.invitationLinkUrl.replace(
-      '{TOKEN}',
-      encodeURIComponent(this.payload.token.value)
-    )
+    const invitationLink = env
+      .get('UI_ROUTE_ADMIN_INVITATION')
+      .replace('{TOKEN}', encodeURIComponent(this.payload.token.value))
 
     const viewState = {
       expiration: this.payload.token.expiration,
