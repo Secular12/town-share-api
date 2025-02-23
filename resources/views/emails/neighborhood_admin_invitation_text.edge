@@ -1,0 +1,13 @@
+Hello!
+
+You have been invited to become an Application Admin for {{ neighborhood.name }} by {{ inviter.name }} on {{ appName }}.
+
+@if(message)
+  They left the following message:
+
+  {{ message }}
+@endif
+
+The invitation link expires on {{ expiration }}
+
+Invitation link: {{ inviteLink }}

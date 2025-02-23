@@ -1,68 +1,83 @@
+import AdminInvitation from '#models/admin_invitation'
+import Neighborhood from '#models/neighborhood'
+import NeighborhoodAdminInvitation from '#models/neighborhood_admin_invitation'
+import PendingUser from '#models/pending_user'
+import User from '#models/user'
+import UserPhoneNumber from '#models/user_phone_number'
+import { ModelAttributes } from '@adonisjs/lucid/types/model'
 import { DateTime } from 'luxon'
 
 export type AdminInvitationData = {
-  id?: number
-  inviterId: number
-  message?: string | null
-  createdAt?: DateTime
-  revokedAt?: DateTime | null
-  updatedAt?: DateTime | null
-} & ({ acceptedAt?: DateTime } | { deniedAt?: DateTime })
+  data: Omit<Partial<ModelAttributes<AdminInvitation>>, 'acceptedAt' | 'deniedAt'> & {
+    inviterId: number
+  } & ({ acceptedAt?: DateTime } | { deniedAt?: DateTime })
+}
 
-export type AdminInvitationSeederData = AdminInvitationData &
-  ({ pendingUserId: number } | { userId: number })
+export type AdminInvitationSeederData = AdminInvitationData & {
+  data: { pendingUserId: number } | { userId: number }
+}
 
-export type PendingUserData = {
-  id?: number
-  email?: string
-  createdAt?: DateTime
-  updatedAt?: DateTime
-  receivedAdminInvitations?: AdminInvitationData[]
+export type NeighborhoodAdminInvitationData = {
+  data: Omit<Partial<ModelAttributes<NeighborhoodAdminInvitation>>, 'acceptedAt' | 'deniedAt'> & {
+    inviterId: number
+  } & ({ acceptedAt?: DateTime } | { deniedAt?: DateTime })
+}
+
+export type NeighborhoodAdminInvitationSeederData = NeighborhoodAdminInvitationData & {
+  data: { neighborhoodId: number } & ({ pendingUserId: number } | { userId: number })
 }
 
 export type NeighborhoodData = {
-  id?: number
-  city?: string
-  country?: string
-  name?: string
-  state?: string
-  zip?: string | null
-  createdAt?: DateTime
-  updatedAt?: DateTime
-  // adminIds?: number[]
+  data: Partial<ModelAttributes<Neighborhood>>
+  adminInvitations?: (NeighborhoodAdminInvitationData & {
+    data: { pendingUserId: number } | { userId: number }
+  })[]
+  users?: (NeighborhoodUserData & { data: { user_id: number } })[]
   // userLocations?: NeighborhoodUserLocationData[]
+}
+
+export type NeighborhoodUserData = {
+  data: {
+    neighborhood_id?: number
+    user_id?: number
+    is_neighborhood_admin: boolean
+    neighborhood_user_deactivated_at?: DateTime | null
+  }
+}
+
+export type NeighborhoodUserSeederData = NeighborhoodUserData & {
+  data: {
+    neighborhood_id: number
+    user_id: number
+  }
 }
 
 export type NeighborhoodSeederData = NeighborhoodData
 
+export type PendingUserData = {
+  data: Partial<ModelAttributes<PendingUser>>
+  receivedAdminInvitations?: AdminInvitationData[]
+  receivedNeighborhoodAdminInvitations?: (NeighborhoodAdminInvitationData & {
+    data: { neighborhoodId: number }
+  })[]
+}
+
 export type PendingUserSeederData = PendingUserData
 
 export type UserData = {
-  id?: number
-  sponsorId?: number
-  email?: string
-  firstName?: string
-  isApplicationAdmin?: boolean
-  lastName?: string
-  middleName?: string | null
-  nameSuffix?: string | null
-  password?: string
-  createdAt?: DateTime
-  deactivatedAt?: DateTime | null
-  updatedAt?: DateTime
-  receivedAdminInvitations?: AdminInvitationData[]
+  data: Partial<ModelAttributes<User>>
+  neighborhoods?: (NeighborhoodUserData & { data: { neighborhood_id: number } })[]
   phoneNumbers?: UserPhoneNumberData[]
+  receivedAdminInvitations?: AdminInvitationData[]
+  receivedNeighborhoodAdminInvitations?: (NeighborhoodAdminInvitationData & {
+    data: { neighborhoodId: number }
+  })[]
 }
 
 export type UserSeederData = UserData
 
 export type UserPhoneNumberData = {
-  id?: number
-  countryCode?: string
-  extension?: string | null
-  phone?: string
-  createdAt?: DateTime
-  updatedAt?: DateTime
+  data: Omit<Partial<ModelAttributes<UserPhoneNumber>>, 'userId'>
 }
 
-export type UserPhoneNumberSeederData = UserPhoneNumberData & { userId: number }
+export type UserPhoneNumberSeederData = UserPhoneNumberData & { data: { userId: number } }

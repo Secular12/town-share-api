@@ -5,25 +5,30 @@ type IndexPayload = Awaited<ReturnType<(typeof index)['validate']>>
 type UpdatePayload = Awaited<ReturnType<(typeof update)['validate']>>
 
 const countOptions = [
-  'adminedNeighborhoods',
+  '*',
+  'neighborhoods',
   'neighborhoodLocations',
-  'organizationLocations',
-  'organizations',
+  // 'organizationLocations',
+  // 'organizations',
   'phoneNumbers',
   'receivedAdminInvitations',
   'sentAdminInvitations',
 ] as const
 
-const includeOptions = [
-  'adminedNeighborhoods',
+const preloadOptions = [
+  'neighborhoods',
   'neighborhoodLocations',
-  'neighborhoodLocations.*',
   'neighborhoodLocations.neighborhood',
-  'organizationLocations',
-  'organizationLocations.*',
-  'organizationLocations.neighborhood',
-  'organizations',
+  // 'organizationLocations',
+  // 'organizationLocations.neighborhood',
+  // 'organizations',
   'phoneNumbers',
+  'sponsor',
+  'sponsoredUsers',
+] as const
+
+const includeOptions = [
+  ...ValidatorUtil.getIncludeOptions(preloadOptions),
   'receivedAdminInvitations',
   'receivedAdminInvitations.*',
   'receivedAdminInvitations.inviter',
@@ -31,9 +36,7 @@ const includeOptions = [
   'sentAdminInvitations.*',
   'sentAdminInvitations.pendingUser',
   'sentAdminInvitations.user',
-  'sponsor',
-  'sponsoredUsers',
-] as const
+]
 
 const searchByOptions = [
   'email',
@@ -61,8 +64,8 @@ const index = vine.compile(
       isActive: vine.boolean().optional(),
       isApplicationAdmin: vine.boolean().optional(),
       neighborhoodId: vine.number().min(1).optional(),
-      organizationId: vine.number().min(1).optional(),
-      organizationLocationId: vine.number().min(1).optional(),
+      // organizationId: vine.number().min(1).optional(),
+      // organizationLocationId: vine.number().min(1).optional(),
       page: vine.number().min(1),
       perPage: vine.number().max(100).min(1),
       search: ValidatorUtil.searchSchema(),
@@ -107,6 +110,7 @@ export type { IndexPayload, UpdatePayload }
 
 export default {
   countOptions,
+  preloadOptions,
   includeOptions,
   index,
   searchByOptions,

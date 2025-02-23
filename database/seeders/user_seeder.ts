@@ -1,55 +1,83 @@
 import { UserFactory } from '#database/factories/user_factory'
 import AdminInvitationSeeder from '#database/seeders/admin_invitation_seeder'
 import AppBaseSeeder from '#database/seeders/app_base_seeder'
+import NeighborhoodAdminInvitationSeeder from '#database/seeders/neighborhood_admin_invitation_seeder'
+import NeighborhoodUserSeeder from '#database/seeders/neighborhood_user_seeder'
 import UserPhoneNumberSeeder from '#database/seeders/user_phone_number_seeder'
 import { UserSeederData } from '#types/seeder'
 
 export default class UserSeeder extends AppBaseSeeder {
-  public static async runWith(userData: UserSeederData[]) {
-    const userItems = this.getItems(userData)
+  public static async runWith(usersData: UserSeederData[]) {
+    const userItems = this.getItems(usersData)
 
     const users = await UserFactory.merge(userItems).createMany(userItems.length)
 
     for await (const [userIndex, user] of users.entries()) {
-      await users[userIndex].refresh()
+      await user.refresh()
 
-      if (userData[userIndex].receivedAdminInvitations) {
-        await AdminInvitationSeeder.runWith(
-          userData[userIndex].receivedAdminInvitations.map((adminInvitation) => {
-            return { ...adminInvitation, userId: user.id }
-          })
+      const userData = usersData[userIndex]
+
+      if (userData.neighborhoods) {
+        await NeighborhoodUserSeeder.runWith(
+          userData.neighborhoods.map((neighborhoodUser) => ({
+            ...neighborhoodUser,
+            data: {
+              ...neighborhoodUser.data,
+              user_id: user.id,
+            },
+          }))
         )
-
-        await users[userIndex].load('receivedAdminInvitations')
       }
 
-      if (userData[userIndex].phoneNumbers) {
+      if (userData.phoneNumbers) {
         await UserPhoneNumberSeeder.runWith(
-          userData[userIndex].phoneNumbers.map((phoneNumber) => {
-            return { ...phoneNumber, userId: user.id }
+          userData.phoneNumbers.map((phoneNumber) => {
+            return {
+              ...phoneNumber,
+              data: {
+                ...phoneNumber.data,
+                userId: user.id,
+              },
+            }
           })
         )
 
-        await users[userIndex].load('phoneNumbers')
+        await user.load('phoneNumbers')
+      }
+
+      if (userData.receivedAdminInvitations) {
+        await AdminInvitationSeeder.runWith(
+          userData.receivedAdminInvitations.map((adminInvitation) => {
+            return {
+              ...adminInvitation,
+              data: {
+                ...adminInvitation.data,
+                userId: user.id,
+              },
+            }
+          })
+        )
+
+        await user.load('receivedAdminInvitations')
+      }
+
+      if (userData.receivedNeighborhoodAdminInvitations) {
+        await NeighborhoodAdminInvitationSeeder.runWith(
+          userData.receivedNeighborhoodAdminInvitations.map((adminInvitation) => {
+            return {
+              ...adminInvitation,
+              data: {
+                ...adminInvitation.data,
+                userId: user.id,
+              },
+            }
+          })
+        )
+
+        await user.load('receivedNeighborhoodAdminInvitations')
       }
     }
 
     return users
-  }
-
-  private static getItems(userData: UserSeederData[]) {
-    return this.mapData(userData, (data) => ({
-      id: data.id,
-      email: data.email,
-      firstName: data.firstName,
-      isApplicationAdmin: data.isApplicationAdmin,
-      lastName: data.lastName,
-      middleName: data.middleName,
-      nameSuffix: data.nameSuffix,
-      password: data.password,
-      createdAt: data.createdAt,
-      deactivatedAt: data.deactivatedAt,
-      updatedAt: data.updatedAt,
-    }))
   }
 }

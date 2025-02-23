@@ -71,6 +71,14 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   /*
   |----------------------------------------------------------
+  | Variables for configuring seeders
+  |----------------------------------------------------------
+  */
+  SEEDER_NOTIFICATION_UI_URL:
+    Env.schema.string.optional({ format: 'url' }) ?? 'http://townshare.dev',
+
+  /*
+  |----------------------------------------------------------
   | Variables for configuring session package
   |----------------------------------------------------------
   */

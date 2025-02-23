@@ -1,23 +1,29 @@
 import ValidatorUtil from '#utils/validator'
 import vine from '@vinejs/vine'
 
-const countOptions = ['admins', 'organizationLocations', 'userLocations'] as const
-const dateFilters = ValidatorUtil.dateFiltersSchema(['createdAt', 'updatedAt'] as const)
-const includeOptions = [
-  'admins',
-  'admins.*',
-  'admins.phoneNumbers',
-  'admins.organizations',
+const countOptions = [
+  '*',
+  'users',
+  // 'organizationLocations',
+  'userLocations',
 ] as const
+
+const dateFilters = ValidatorUtil.dateFiltersSchema(['createdAt', 'updatedAt'] as const)
+
+const preloadOptions = ['admins'] as const
+
+const includeOptions = ValidatorUtil.getIncludeOptions(preloadOptions)
+
 const searchByOptions = ['city', 'country', 'name', 'state', 'zip'] as const
 
 const counts = ValidatorUtil.countSchema(countOptions)
+
 const includes = ValidatorUtil.includeSchema(includeOptions)
 
 const index = vine.compile(
   vine
     .object({
-      organizationId: vine.number().min(1).optional(),
+      // organizationId: vine.number().min(1).optional(),
       page: vine.number().min(1),
       perPage: vine.number().max(100).min(1),
       search: ValidatorUtil.searchSchema(),
@@ -58,6 +64,7 @@ export default {
   countOptions,
   includeOptions,
   index,
+  preloadOptions,
   searchByOptions,
   show,
   update,

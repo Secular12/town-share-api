@@ -9,7 +9,7 @@ export default class NeighborhoodPolicy extends TownShareBasePolicy {
   }
 
   edit(authUser: User, neighborhood: Neighborhood | number) {
-    const adminedNeighborhoodIds = authUser.adminedNeighborhoods.map(({ id }) => id)
+    const adminedNeighborhoodIds = authUser.neighborhoods.map(({ id }) => id)
 
     return adminedNeighborhoodIds.includes(
       typeof neighborhood === 'number' ? neighborhood : neighborhood.id

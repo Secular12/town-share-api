@@ -4,7 +4,9 @@ import PhoneNumberValidatorSchema from '#validators/schemas/phone_number'
 
 const dateFilters = ValidatorUtil.dateFiltersSchema(['createdAt', 'updatedAt'] as const)
 
-const includeOptions = ['user'] as const
+const preloadOptions = ['user'] as const
+
+const includeOptions = ValidatorUtil.getIncludeOptions(preloadOptions)
 
 const includes = ValidatorUtil.includeSchema(includeOptions)
 

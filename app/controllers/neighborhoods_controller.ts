@@ -11,58 +11,33 @@ export default class NeighborhoodsController {
    * Display a list of resource
    */
   async index({ bouncer, request }: HttpContext) {
-    await bouncer.with(NeighborhoodPolicy).authorize('readMany')
-
     const payload = await NeighborhoodValidator.index.validate(request.qs())
+
+    await bouncer.with(NeighborhoodPolicy).authorize('readMany')
 
     return await Neighborhood.query()
       .select('neighborhoods.*')
       .if((payload.count?.length ?? 0) > 0, (countQuery) => {
         if (vine.helpers.isArray(payload.count)) {
           payload.count!.forEach((countBy) => {
-            countQuery.withCount(countBy)
+            if (countBy !== '*') {
+              countQuery.withCount(countBy)
+            }
           })
         } else if (payload.count === '*') {
           NeighborhoodValidator.countOptions.forEach((countBy) => {
-            countQuery.withCount(countBy)
+            if (countBy !== '*') {
+              countQuery.withCount(countBy)
+            }
           })
         } else {
           countQuery.withCount(payload.count!)
         }
       })
-      .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, [
-          '*',
-          'admins',
-          'admins.*',
-          'admins.phoneNumbers',
-          'admins.organizations',
-        ]),
-        (includeAdminsQuery) => {
-          includeAdminsQuery.preload('admins', (preloadAdminsQuery) => {
-            preloadAdminsQuery
-              .if(
-                ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins.*', 'admins.phoneNumbers']),
-                (includePhoneNumbersQuery) => {
-                  includePhoneNumbersQuery.preload('phoneNumbers')
-                }
-              )
-              .if(
-                ArrayUtil.hasOrIsAnyFrom(payload.include, [
-                  '*',
-                  'admins.*',
-                  'admins.organizations',
-                ]),
-                (includeOrganizationsQuery) => {
-                  includeOrganizationsQuery.preload('organizations')
-                }
-              )
-          })
-        }
-      )
-      .if(payload.organizationId, (userIdQuery) => {
-        userIdQuery.withScopes((scopes) => scopes.existsWithOrganization(payload.organizationId!))
-      })
+      .withScopes((scopes) => scopes.include(payload, NeighborhoodValidator.preloadOptions))
+      // .if(payload.organizationId, (userIdQuery) => {
+      //   userIdQuery.withScopes((scopes) => scopes.existsWithOrganization(payload.organizationId!))
+      // })
       .if(payload.userId, (userIdQuery) => {
         userIdQuery.withScopes((scopes) => scopes.existsWithUser(payload.userId!))
       })
@@ -100,54 +75,29 @@ export default class NeighborhoodsController {
    * Show individual record
    */
   async show({ bouncer, params, request }: HttpContext) {
-    await bouncer.with(NeighborhoodPolicy).authorize('read', params.id)
-
     const payload = await NeighborhoodValidator.show.validate(request.qs())
+
+    await bouncer.with(NeighborhoodPolicy).authorize('read', params.id)
 
     const neighborhood = await Neighborhood.query()
       .if((payload.count?.length ?? 0) > 0, (countQuery) => {
         if (vine.helpers.isArray(payload.count)) {
           payload.count!.forEach((countBy) => {
-            countQuery.withCount(countBy)
+            if (countBy !== '*') {
+              countQuery.withCount(countBy)
+            }
           })
         } else if (payload.count === '*') {
           NeighborhoodValidator.countOptions.forEach((countBy) => {
-            countQuery.withCount(countBy)
+            if (countBy !== '*') {
+              countQuery.withCount(countBy)
+            }
           })
         } else {
           countQuery.withCount(payload.count!)
         }
       })
-      .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, [
-          '*',
-          'admins',
-          'admins.*',
-          'admins.phoneNumbers',
-          'admins.organizations',
-        ]),
-        (includeAdminsQuery) => {
-          includeAdminsQuery.preload('admins', (preloadAdminsQuery) => {
-            preloadAdminsQuery
-              .if(
-                ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'admins.*', 'admins.phoneNumbers']),
-                (includePhoneNumbersQuery) => {
-                  includePhoneNumbersQuery.preload('phoneNumbers')
-                }
-              )
-              .if(
-                ArrayUtil.hasOrIsAnyFrom(payload.include, [
-                  '*',
-                  'admins.*',
-                  'admins.organizations',
-                ]),
-                (includeOrganizationsQuery) => {
-                  includeOrganizationsQuery.preload('organizations')
-                }
-              )
-          })
-        }
-      )
+      .withScopes((scopes) => scopes.include(payload, NeighborhoodValidator.preloadOptions))
       .where('id', params.id)
       .firstOrFail()
 
@@ -158,9 +108,9 @@ export default class NeighborhoodsController {
    * Handle form submission for the edit action
    */
   async update({ bouncer, params, request }: HttpContext) {
-    await bouncer.with(NeighborhoodPolicy).authorize('edit', params.id)
-
     const payload = await NeighborhoodValidator.update(params.id).validate(request.body())
+
+    await bouncer.with(NeighborhoodPolicy).authorize('edit', params.id)
 
     const neighborhood = await Neighborhood.findOrFail(params.id)
 

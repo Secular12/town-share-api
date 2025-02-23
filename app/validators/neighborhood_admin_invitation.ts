@@ -1,4 +1,4 @@
-import AdminInvitation from '#models/admin_invitation'
+import NeighborhoodAdminInvitation from '#models/neighborhood_admin_invitation'
 import ValidatorUtil from '#utils/validator'
 import PasswordValidatorSchema from '#validators/schemas/password'
 import PhoneNumberValidatorSchema from '#validators/schemas/phone_number'
@@ -14,6 +14,7 @@ const dateFilters = ValidatorUtil.dateFiltersSchema([
 
 const preloadOptions = [
   'inviter',
+  'neighborhood',
   'user',
   'user.phoneNumbers',
   'user.sponsor',
@@ -49,9 +50,9 @@ const revokeUserGroup = vine.group([
   }),
 ])
 
-const getAcceptGroup = (adminInvitation: AdminInvitation) =>
+const getAcceptGroup = (neighborhoodAdminInvitation: NeighborhoodAdminInvitation) =>
   vine.group([
-    vine.group.if((_data) => adminInvitation.pendingUserId, {
+    vine.group.if((_data) => neighborhoodAdminInvitation.pendingUserId, {
       firstName: vine.string(),
       lastName: vine.string(),
       middleName: vine.string().nullable().optional(),
@@ -69,8 +70,8 @@ const token = vine.compile(
   })
 )
 
-const accept = (adminInvitation: AdminInvitation) => {
-  const acceptGroup = getAcceptGroup(adminInvitation)
+const accept = (neighborhoodAdminInvitation: NeighborhoodAdminInvitation) => {
+  const acceptGroup = getAcceptGroup(neighborhoodAdminInvitation)
   return vine.compile(vine.object({}).merge(acceptGroup))
 }
 
@@ -78,6 +79,7 @@ const index = vine.compile(
   vine
     .object({
       inviterId: vine.number().min(1).optional(),
+      neighborhoodId: vine.number().min(1).optional(),
       isPending: vine.boolean().optional(),
       page: vine.number().min(1),
       perPage: vine.number().max(100).min(1),
@@ -108,7 +110,9 @@ const resend = vine.compile(
   })
 )
 
-const revoke = vine.compile(vine.object({}).merge(revokeUserGroup))
+const revoke = vine.compile(
+  vine.object({ neighborhoodId: vine.number().min(1) }).merge(revokeUserGroup)
+)
 
 const show = vine.compile(vine.object({}).merge(includes))
 
@@ -117,6 +121,7 @@ const store = vine.compile(
     .object({
       invitationLinkUrl: vine.string().trim().url().includes('{TOKEN}'),
       message: vine.string().nullable().optional(),
+      neighborhoodId: vine.number().min(1),
       timezone: vine.string().trim().timezone(),
     })
     .merge(storeUserGroup)

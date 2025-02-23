@@ -18,7 +18,7 @@ export default class extends BaseSeeder {
       await this.seed('development', [
         'main_seeder',
         // 'neighborhood_admin_invitation_seeder',
-        // 'neighborhood_admin_seeder',
+        // 'neighborhood_user_seeder',
         // 'neighborhood_user_location_seeder',
         // 'organization_seeder',
         // 'organization_user_seeder',
@@ -31,7 +31,7 @@ export default class extends BaseSeeder {
       await this.seed('test', [
         'user_seeder',
         'neighborhood_seeder',
-        'neighborhood_admin_seeder',
+        'neighborhood_user_seeder',
         'neighborhood_user_location_seeder',
         'organization_seeder',
         'organization_user_seeder',

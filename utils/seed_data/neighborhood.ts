@@ -1,40 +1,41 @@
-import { neighborhoodAdmins } from '#database/seeders/test/neighborhood_admin_seeder'
+import { neighborhoodUsers } from '#database/seeders/test/neighborhood_user_seeder'
 import { organizationLocations } from '#database/seeders/test/organization_location_seeder'
 import { neighborhoodUserLocations } from '#database/seeders/test/neighborhood_user_location_seeder'
 import { users } from '#database/seeders/test/user_seeder'
+import { JsObject } from '#types/object'
 
-export const getAdmins = (neighborhoodId: number) =>
-  users.reduce((admins: Record<string, unknown>[], user, userIndex) => {
+export const getUsers = (neighborhoodId: number) =>
+  users.reduce((acc: JsObject[], user, userIndex) => {
     const userId = userIndex + 1
     if (
-      neighborhoodAdmins.some(
-        ({ neighborhood_id, admin_id }) => neighborhood_id === neighborhoodId && admin_id === userId
+      neighborhoodUsers.some(
+        ({ neighborhood_id, user_id }) => neighborhood_id === neighborhoodId && user_id === userId
       )
     ) {
-      admins.push({ id: userId, email: user.email })
+      acc.push({ id: userId, email: user.email })
     }
 
-    return admins
+    return acc
   }, [])
 
-export const getAdminsCount = (neighborhoodId: number) =>
-  users.reduce((adminsCount: number, _user, userIndex) => {
+export const getUsersCount = (neighborhoodId: number) =>
+  users.reduce((usersCount: number, _user, userIndex) => {
     const userId = userIndex + 1
     if (
-      neighborhoodAdmins.some(
-        ({ neighborhood_id, admin_id }) => neighborhood_id === neighborhoodId && admin_id === userId
+      neighborhoodUsers.some(
+        ({ neighborhood_id, user_id }) => neighborhood_id === neighborhoodId && user_id === userId
       )
     ) {
-      return adminsCount + 1
+      return usersCount + 1
     }
 
-    return adminsCount
+    return usersCount
   }, 0)
 
 export const getOrganizationLocations = (neighborhoodId: number) =>
   organizationLocations.reduce(
     (
-      neighborhoodOrganizationLocations: Record<string, unknown>[],
+      neighborhoodOrganizationLocations: JsObject[],
       organizationLocation,
       organizationLocationIndex
     ) => {
@@ -63,7 +64,7 @@ export const getOrganizationLocationsCount = (neighborhoodId: number) =>
 
 export const getUserLocations = (neighborhoodId: number) =>
   neighborhoodUserLocations.reduce(
-    (acc: Record<string, unknown>[], neighborhoodUserLocation, neighborhoodUserLocationIndex) => {
+    (acc: JsObject[], neighborhoodUserLocation, neighborhoodUserLocationIndex) => {
       const neighborhoodUserLocationId = neighborhoodUserLocationIndex + 1
       if (neighborhoodUserLocation.neighborhoodId === neighborhoodId) {
         acc.push({

@@ -5,7 +5,7 @@ import * as UserSeedDataUtil from '#utils/seed_data/user'
 import { test } from '@japa/runner'
 
 export default (route: string) => {
-  test('unprocessable entity - include string is not an acceptable option: *, adminedNeighborhoods, neighborhoodLocations, neighborhoodLocations.*, neighborhoodLocations.neighborhood, organizationLocations, organizationLocations.*, organizationLocations.neighborhood, organizations', async ({
+  test('unprocessable entity - include string is not an acceptable option: *, neighborhoods, neighborhoodLocations, neighborhoodLocations.*, neighborhoodLocations.neighborhood, organizationLocations, organizationLocations.*, organizationLocations.neighborhood, organizations', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -28,7 +28,7 @@ export default (route: string) => {
           meta: {
             choices: [
               '*',
-              'adminedNeighborhoods',
+              'neighborhoods',
               'neighborhoodLocations',
               'neighborhoodLocations.*',
               'neighborhoodLocations.neighborhood',
@@ -49,7 +49,7 @@ export default (route: string) => {
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity - include array has non-acceptable option: admins, admins.*, admins.organizations', async ({
+  test('unprocessable entity - include array has non-acceptable option: users, users.*, users.organizations', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -57,7 +57,7 @@ export default (route: string) => {
     const response = await client
       .get(route)
       .qs({
-        include: ['adminedNeighborhoods', 'foobar'],
+        include: ['neighborhoods', 'foobar'],
         page: 1,
         perPage: 100,
       })
@@ -72,7 +72,7 @@ export default (route: string) => {
           message: 'The selected 1 is invalid',
           meta: {
             choices: [
-              'adminedNeighborhoods',
+              'neighborhoods',
               'neighborhoodLocations',
               'neighborhoodLocations.*',
               'neighborhoodLocations.neighborhood',
@@ -197,7 +197,7 @@ export default (route: string) => {
     .tagResource(['@neighborhood', '@organizationLocation', '@user', '@neighborhoodUserLocation'])
     .tagSuccess()
 
-  test('success - include adminedNeighborhoods, neighborhoodLocations, organizationLocations, organizations, sponsor, sponsoredUsers', async ({
+  test('success - include neighborhoods, neighborhoodLocations, organizationLocations, organizations, sponsor, sponsoredUsers', async ({
     assert,
     client,
   }) => {
@@ -207,7 +207,7 @@ export default (route: string) => {
       .get(route)
       .qs({
         include: [
-          'adminedNeighborhoods',
+          'neighborhoods',
           'neighborhoodLocations',
           'organizationLocations',
           'organizations',
@@ -227,7 +227,7 @@ export default (route: string) => {
       const data = {
         id: userId,
         email: userData.email,
-        adminedNeighborhoods: UserSeedDataUtil.getAdminedNeighborhoods(userId),
+        neighborhoods: UserSeedDataUtil.getneighborhoods(userId),
         neighborhoodLocations: UserSeedDataUtil.getLocations(userId),
         organizationLocations: UserSeedDataUtil.getOrganizationLocations(userId),
         organizations: UserSeedDataUtil.getOrganizations(userId),
@@ -272,7 +272,7 @@ export default (route: string) => {
       return {
         id: userId,
         email: userData.email,
-        adminedNeighborhoods: UserSeedDataUtil.getAdminedNeighborhoods(userId),
+        neighborhoods: UserSeedDataUtil.getneighborhoods(userId),
         neighborhoodLocations: UserSeedDataUtil.getLocations(userId).map((neighborhoodLocation) => {
           return {
             id: neighborhoodLocation.id,

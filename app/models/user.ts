@@ -1,8 +1,9 @@
 import AdminInvitation from '#models/admin_invitation'
 import Neighborhood from '#models/neighborhood'
-import Organization from '#models/organization'
-import OrganizationLocation from '#models/organization_location'
+import NeighborhoodAdminInvitation from '#models/neighborhood_admin_invitation'
 import NeighborhoodUserLocation from '#models/neighborhood_user_location'
+// import Organization from '#models/organization'
+// import OrganizationLocation from '#models/organization_location'
 import UserPhoneNumber from '#models/user_phone_number'
 import env from '#start/env'
 import type { IndexPayload } from '#validators/user'
@@ -10,19 +11,12 @@ import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { compose } from '@adonisjs/core/helpers'
 import hash from '@adonisjs/core/services/hash'
-import {
-  BaseModel,
-  belongsTo,
-  column,
-  computed,
-  hasMany,
-  manyToMany,
-  scope,
-} from '@adonisjs/lucid/orm'
+import { belongsTo, column, computed, hasMany, manyToMany, scope } from '@adonisjs/lucid/orm'
 import { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import vine from '@vinejs/vine'
 import { DateTime } from 'luxon'
+import AppBaseModel from './app_base_model.js'
 
 type Builder = ModelQueryBuilderContract<typeof User>
 
@@ -31,7 +25,7 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   passwordColumnName: 'password',
 })
 
-export default class User extends compose(BaseModel, AuthFinder) {
+export default class User extends compose(AppBaseModel, AuthFinder) {
   /* Primary IDs */
   @column({ isPrimary: true })
   declare id: number
@@ -60,7 +54,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare nameSuffix: string | null
 
   @column({ serializeAs: null })
-  declare password: string | null
+  declare password: string
 
   /* Timestamps */
   @column.dateTime({ autoCreate: true })
@@ -69,8 +63,8 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column.dateTime()
   declare deactivatedAt: DateTime | null
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  @column.dateTime({ autoUpdate: true })
+  declare updatedAt: DateTime | null
 
   /* Computed */
   @computed()
@@ -91,30 +85,67 @@ export default class User extends compose(BaseModel, AuthFinder) {
   }
 
   /* Relationships */
+  @manyToMany(() => Neighborhood, {
+    onQuery: (query) => {
+      query.whereNull('neighborhood_user.neighborhood_user_deactivated_at')
+    },
+    pivotTable: 'neighborhood_user',
+    pivotColumns: ['is_neighborhood_admin', 'neighborhood_user_deactivated_at'],
+  })
+  declare activeNeighborhoods: ManyToMany<typeof Neighborhood>
+
+  @manyToMany(() => Neighborhood, {
+    onQuery: (query) => {
+      query
+        .where('neighborhood_user.is_neighborhood_admin', true)
+        .whereNull('neighborhood_user.neighborhood_user_deactivated_at')
+    },
+    pivotTable: 'neighborhood_user',
+    pivotColumns: ['is_neighborhood_admin', 'neighborhood_user_deactivated_at'],
+  })
+  declare adminedNeighborhoods: ManyToMany<typeof Neighborhood>
+
+  @manyToMany(() => Neighborhood, {
+    onQuery: (query) => {
+      query.whereNotNull('neighborhood_user.neighborhood_user_deactivated_at')
+    },
+    pivotTable: 'neighborhood_user',
+    pivotColumns: ['is_neighborhood_admin', 'neighborhood_user_deactivated_at'],
+  })
+  declare inactiveNeighborhoods: ManyToMany<typeof Neighborhood>
+
   @hasMany(() => AdminInvitation)
   declare receivedAdminInvitations: HasMany<typeof AdminInvitation>
+
+  @hasMany(() => NeighborhoodAdminInvitation)
+  declare receivedNeighborhoodAdminInvitations: HasMany<typeof NeighborhoodAdminInvitation>
 
   @hasMany(() => AdminInvitation, {
     foreignKey: 'inviterId',
   })
   declare sentAdminInvitations: HasMany<typeof AdminInvitation>
 
-  @manyToMany(() => Neighborhood, {
-    pivotTable: 'neighborhood_admins',
-    pivotForeignKey: 'admin_id',
+  @hasMany(() => NeighborhoodAdminInvitation, {
+    foreignKey: 'inviterId',
   })
-  declare adminedNeighborhoods: ManyToMany<typeof Neighborhood>
+  declare sentNeighborhoodAdminInvitations: HasMany<typeof NeighborhoodAdminInvitation>
+
+  @manyToMany(() => Neighborhood, {
+    pivotTable: 'neighborhood_user',
+    pivotColumns: ['is_neighborhood_admin', 'neighborhood_user_deactivated_at'],
+  })
+  declare neighborhoods: ManyToMany<typeof Neighborhood>
 
   @hasMany(() => NeighborhoodUserLocation)
   declare neighborhoodLocations: HasMany<typeof NeighborhoodUserLocation>
 
-  @manyToMany(() => OrganizationLocation)
-  declare organizationLocations: ManyToMany<typeof OrganizationLocation>
+  // @manyToMany(() => OrganizationLocation)
+  // declare organizationLocations: ManyToMany<typeof OrganizationLocation>
 
-  @manyToMany(() => Organization, {
-    pivotColumns: ['is_organization_admin'],
-  })
-  declare organizations: ManyToMany<typeof Organization>
+  // @manyToMany(() => Organization, {
+  //   pivotColumns: ['is_organization_admin'],
+  // })
+  // declare organizations: ManyToMany<typeof Organization>
 
   @hasMany(() => UserPhoneNumber)
   declare phoneNumbers: HasMany<typeof UserPhoneNumber>
@@ -133,97 +164,97 @@ export default class User extends compose(BaseModel, AuthFinder) {
   static existsWithNeighborhood = scope((query, neighborhoodId: number | number[]) => {
     query.whereExists((whereExistsQuery) => {
       whereExistsQuery
-        .select('neighborhood_user_locations.neighborhood_id')
-        .from('neighborhood_user_locations')
-        .whereColumn('neighborhood_user_locations.user_id', 'users.id')
+        .select('neighborhood_user.neighborhood_id')
+        .from('neighborhood_user')
+        .whereColumn('neighborhood_user.user_id', 'users.id')
         .if(
           vine.helpers.isArray(neighborhoodId),
           (neighborhoodIdArrayQuery) => {
             neighborhoodIdArrayQuery.whereIn(
-              'neighborhood_user_locations.neighborhood_id',
+              'neighborhood_user.neighborhood_id',
               neighborhoodId as number[]
             )
           },
           (neighborhoodIdNotArrayQuery) => {
             neighborhoodIdNotArrayQuery.where(
-              'neighborhood_user_locations.neighborhood_id',
+              'neighborhood_user.neighborhood_id',
               neighborhoodId as number
             )
           }
         )
-        .union((unionQuery) => {
-          unionQuery
-            .select('organization_locations.neighborhood_id')
-            .from('organization_location_user')
-            .join(
-              'organization_locations',
-              'organization_locations.id',
-              'organization_location_user.organization_location_id'
-            )
-            .whereColumn('organization_location_user.user_id', 'users.id')
-            .if(
-              vine.helpers.isArray(neighborhoodId),
-              (neighborhoodIdArrayQuery) => {
-                neighborhoodIdArrayQuery.whereIn(
-                  'organization_locations.neighborhood_id',
-                  neighborhoodId as number[]
-                )
-              },
-              (neighborhoodIdNotArrayQuery) => {
-                neighborhoodIdNotArrayQuery.where(
-                  'organization_locations.neighborhood_id',
-                  neighborhoodId as number
-                )
-              }
-            )
-        })
+      // .union((unionQuery) => {
+      //   unionQuery
+      //     .select('organization_locations.neighborhood_id')
+      //     .from('organization_location_user')
+      //     .join(
+      //       'organization_locations',
+      //       'organization_locations.id',
+      //       'organization_location_user.organization_location_id'
+      //     )
+      //     .whereColumn('organization_location_user.user_id', 'users.id')
+      //     .if(
+      //       vine.helpers.isArray(neighborhoodId),
+      //       (neighborhoodIdArrayQuery) => {
+      //         neighborhoodIdArrayQuery.whereIn(
+      //           'organization_locations.neighborhood_id',
+      //           neighborhoodId as number[]
+      //         )
+      //       },
+      //       (neighborhoodIdNotArrayQuery) => {
+      //         neighborhoodIdNotArrayQuery.where(
+      //           'organization_locations.neighborhood_id',
+      //           neighborhoodId as number
+      //         )
+      //       }
+      //     )
+      // })
     })
   })
 
-  static existsWithOrganization = scope((query, organizationId: number | number[]) => {
-    query.whereExists((whereExistsQuery) => {
-      whereExistsQuery
-        .from('organization_user')
-        .whereColumn('organization_user.user_id', 'users.id')
-        .if(
-          vine.helpers.isArray(organizationId),
-          (organizationIdArrayQuery) => {
-            organizationIdArrayQuery.whereIn(
-              'organization_user.organization_id',
-              organizationId as number[]
-            )
-          },
-          (organizationIdNotArrayQuery) => {
-            organizationIdNotArrayQuery.where('organization_user.organization_id', organizationId)
-          }
-        )
-    })
-  })
+  // static existsWithOrganization = scope((query, organizationId: number | number[]) => {
+  //   query.whereExists((whereExistsQuery) => {
+  //     whereExistsQuery
+  //       .from('organization_user')
+  //       .whereColumn('organization_user.user_id', 'users.id')
+  //       .if(
+  //         vine.helpers.isArray(organizationId),
+  //         (organizationIdArrayQuery) => {
+  //           organizationIdArrayQuery.whereIn(
+  //             'organization_user.organization_id',
+  //             organizationId as number[]
+  //           )
+  //         },
+  //         (organizationIdNotArrayQuery) => {
+  //           organizationIdNotArrayQuery.where('organization_user.organization_id', organizationId)
+  //         }
+  //       )
+  //   })
+  // })
 
-  static existsWithOrganizationLocation = scope(
-    (query, organizationLocationId: number | number[]) => {
-      query.whereExists((whereExistsQuery) => {
-        whereExistsQuery
-          .from('organization_location_user')
-          .whereColumn('organization_location_user.user_id', 'users.id')
-          .if(
-            vine.helpers.isArray(organizationLocationId),
-            (organizationIdArrayQuery) => {
-              organizationIdArrayQuery.whereIn(
-                'organization_location_user.organization_location_id',
-                organizationLocationId as number[]
-              )
-            },
-            (organizationIdNotArrayQuery) => {
-              organizationIdNotArrayQuery.where(
-                'organization_location_user.organization_location_id',
-                organizationLocationId
-              )
-            }
-          )
-      })
-    }
-  )
+  // static existsWithOrganizationLocation = scope(
+  //   (query, organizationLocationId: number | number[]) => {
+  //     query.whereExists((whereExistsQuery) => {
+  //       whereExistsQuery
+  //         .from('organization_location_user')
+  //         .whereColumn('organization_location_user.user_id', 'users.id')
+  //         .if(
+  //           vine.helpers.isArray(organizationLocationId),
+  //           (organizationIdArrayQuery) => {
+  //             organizationIdArrayQuery.whereIn(
+  //               'organization_location_user.organization_location_id',
+  //               organizationLocationId as number[]
+  //             )
+  //           },
+  //           (organizationIdNotArrayQuery) => {
+  //             organizationIdNotArrayQuery.where(
+  //               'organization_location_user.organization_location_id',
+  //               organizationLocationId
+  //             )
+  //           }
+  //         )
+  //     })
+  //   }
+  // )
 
   static isNotActive = scope((query) => {
     query.where((whereQuery) => {
@@ -291,35 +322,44 @@ export default class User extends compose(BaseModel, AuthFinder) {
   /* Lucid Methods */
   serializeExtras() {
     const extraColumns: {
-      adminedNeighborhoodsCount?: number
-      isOrganizationAdmin?: boolean
+      isNeighborhoodAdmin?: boolean
+      // isOrganizationAdmin?: boolean
       neighborhoodLocationsCount?: number
-      organizationLocationsCount?: number
-      organizationsCount?: number
+      neighborhoodUserDeactivatedAt?: DateTime
+      // organizationLocationsCount?: number
+      // organizationsCount?: number
       phoneNumbersCount?: number
       receivedAdminInvitationsCount?: number
+      receivedNeighborhoodAdminInvitationsCount?: number
       sentAdminInvitationsCount?: number
+      sentNeighborhoodAdminInvitationsCount?: number
     } = {}
 
-    if (this.$extras.adminedNeighborhoods_count !== undefined) {
-      extraColumns.adminedNeighborhoodsCount = +this.$extras.adminedNeighborhoods_count
+    if (this.$extras.pivot_is_neighborhood_admin !== undefined) {
+      extraColumns.isNeighborhoodAdmin = this.$extras.pivot_is_neighborhood_admin
     }
 
-    if (this.$extras.pivot_is_organization_admin !== undefined) {
-      extraColumns.isOrganizationAdmin = this.$extras.pivot_is_organization_admin
-    }
+    // if (this.$extras.pivot_is_organization_admin !== undefined) {
+    //   extraColumns.isOrganizationAdmin = this.$extras.pivot_is_organization_admin
+    // }
 
     if (this.$extras.neighborhoodLocations_count !== undefined) {
       extraColumns.neighborhoodLocationsCount = +this.$extras.neighborhoodLocations_count
     }
 
-    if (this.$extras.organizationLocations_count !== undefined) {
-      extraColumns.organizationLocationsCount = +this.$extras.organizationLocations_count
+    if (this.$extras.pivot_neighborhood_user_deactivated_at !== undefined) {
+      extraColumns.neighborhoodUserDeactivatedAt = DateTime.fromSQL(
+        this.$extras.pivot_neighborhood_user_deactivated_at
+      ).toUTC()
     }
 
-    if (this.$extras.organizations_count !== undefined) {
-      extraColumns.organizationsCount = +this.$extras.organizations_count
-    }
+    // if (this.$extras.organizationLocations_count !== undefined) {
+    //   extraColumns.organizationLocationsCount = +this.$extras.organizationLocations_count
+    // }
+
+    // if (this.$extras.organizations_count !== undefined) {
+    //   extraColumns.organizationsCount = +this.$extras.organizations_count
+    // }
 
     if (this.$extras.phoneNumbers_count !== undefined) {
       extraColumns.phoneNumbersCount = +this.$extras.phoneNumbers_count
@@ -329,8 +369,18 @@ export default class User extends compose(BaseModel, AuthFinder) {
       extraColumns.receivedAdminInvitationsCount = +this.$extras.receivedAdminInvitations_count
     }
 
+    if (this.$extras.receivedNeighborhoodAdminInvitations_count !== undefined) {
+      extraColumns.receivedNeighborhoodAdminInvitationsCount =
+        +this.$extras.receivedNeighborhoodAdminInvitations_count
+    }
+
     if (this.$extras.sentAdminInvitations_count !== undefined) {
       extraColumns.sentAdminInvitationsCount = +this.$extras.sentAdminInvitations_count
+    }
+
+    if (this.$extras.sentNeighborhoodAdminInvitations_count !== undefined) {
+      extraColumns.sentNeighborhoodAdminInvitationsCount =
+        +this.$extras.sentNeighborhoodAdminInvitations_count
     }
 
     return extraColumns

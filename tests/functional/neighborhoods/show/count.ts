@@ -4,7 +4,7 @@ import * as NeighborhoodSeedDataUtil from '#utils/seed_data/neighborhood'
 import { test } from '@japa/runner'
 
 export default (route: string) => {
-  test('unprocessable entity - count string is not an acceptable option: *, admins, organizationLocations, userLocations', async ({
+  test('unprocessable entity - count string is not an acceptable option: *, users, organizationLocations, userLocations', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -24,7 +24,7 @@ export default (route: string) => {
           field: 'count',
           message: 'The selected count is invalid',
           meta: {
-            choices: ['*', 'admins', 'organizationLocations', 'userLocations'],
+            choices: ['*', 'users', 'organizationLocations', 'userLocations'],
           },
           rule: 'enum',
         },
@@ -35,7 +35,7 @@ export default (route: string) => {
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity - count array has non-acceptable option: admins, organizationLocations, userLocations', async ({
+  test('unprocessable entity - count array has non-acceptable option: users, organizationLocations, userLocations', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -44,7 +44,7 @@ export default (route: string) => {
     const response = await client
       .get(`${route}/${neighborhoodId}`)
       .qs({
-        count: ['admins', 'foobar'],
+        count: ['users', 'foobar'],
       })
       .loginAs(user)
 
@@ -56,7 +56,7 @@ export default (route: string) => {
           index: 1,
           message: 'The selected 1 is invalid',
           meta: {
-            choices: ['admins', 'organizationLocations', 'userLocations'],
+            choices: ['users', 'organizationLocations', 'userLocations'],
           },
           rule: 'enum',
         },
@@ -67,7 +67,7 @@ export default (route: string) => {
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()
 
-  test('success - count: admins, organizationLocations, userLocations', async ({
+  test('success - count: users, organizationLocations, userLocations', async ({
     assert,
     client,
   }) => {
@@ -77,7 +77,7 @@ export default (route: string) => {
     const response = await client
       .get(`${route}/${neighborhoodId}`)
       .qs({
-        count: ['admins', 'organizationLocations', 'userLocations'],
+        count: ['users', 'organizationLocations', 'userLocations'],
       })
       .loginAs(user)
 
@@ -88,7 +88,7 @@ export default (route: string) => {
     const neighborhoodData = {
       id: neighborhoodId,
       name: neighborhoodSeedData.name,
-      adminsCount: NeighborhoodSeedDataUtil.getAdminsCount(neighborhoodId),
+      usersCount: NeighborhoodSeedDataUtil.getUsersCount(neighborhoodId),
       organizationLocationsCount:
         NeighborhoodSeedDataUtil.getOrganizationLocationsCount(neighborhoodId),
       userLocationsCount: NeighborhoodSeedDataUtil.getUserLocationsCount(neighborhoodId),
@@ -119,7 +119,7 @@ export default (route: string) => {
     const neighborhoodData = {
       id: neighborhoodId,
       name: neighborhoodSeedData.name,
-      adminsCount: NeighborhoodSeedDataUtil.getAdminsCount(neighborhoodId),
+      usersCount: NeighborhoodSeedDataUtil.getUsersCount(neighborhoodId),
       organizationLocationsCount:
         NeighborhoodSeedDataUtil.getOrganizationLocationsCount(neighborhoodId),
       userLocationsCount: NeighborhoodSeedDataUtil.getUserLocationsCount(neighborhoodId),

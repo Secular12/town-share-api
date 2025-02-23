@@ -1,4 +1,4 @@
-import { neighborhoodAdmins } from '#database/seeders/test/neighborhood_admin_seeder'
+import { neighborhoodUsers } from '#database/seeders/test/neighborhood_user_seeder'
 import { neighborhoods } from '#database/seeders/test/neighborhood_seeder'
 import { organizationLocations } from '#database/seeders/test/organization_location_seeder'
 import { organizationLocationUsers } from '#database/seeders/test/organization_location_user_seeder'
@@ -6,39 +6,36 @@ import { organizations } from '#database/seeders/test/organization_seeder'
 import { organizationUsers } from '#database/seeders/test/organization_user_seeder'
 import { neighborhoodUserLocations } from '#database/seeders/test/neighborhood_user_location_seeder'
 import { users } from '#database/seeders/test/user_seeder'
+import { JsObject } from '#types/object'
 
-export const getAdminedNeighborhoods = (userId: number) =>
-  neighborhoods.reduce(
-    (adminedNeighborhoods: Record<string, unknown>[], neighborhood, neighborhoodIndex) => {
-      const neighborhoodId = neighborhoodIndex + 1
-
-      if (
-        neighborhoodAdmins.some(
-          ({ neighborhood_id, admin_id }) =>
-            neighborhood_id === neighborhoodId && admin_id === userId
-        )
-      ) {
-        adminedNeighborhoods.push({ id: neighborhoodId, name: neighborhood.name })
-      }
-
-      return adminedNeighborhoods
-    },
-    []
-  )
-
-export const getAdminedNeighborhoodsCount = (userId: number) =>
-  neighborhoods.reduce((adminedNeighborhoodsCount, _neighborhood, neighborhoodIndex) => {
+export const getneighborhoods = (userId: number) =>
+  neighborhoods.reduce((acc: JsObject[], neighborhood, neighborhoodIndex) => {
     const neighborhoodId = neighborhoodIndex + 1
 
     if (
-      neighborhoodAdmins.some(
-        ({ neighborhood_id, admin_id }) => neighborhood_id === neighborhoodId && admin_id === userId
+      neighborhoodUsers.some(
+        ({ neighborhood_id, user_id }) => neighborhood_id === neighborhoodId && user_id === userId
       )
     ) {
-      return adminedNeighborhoodsCount + 1
+      acc.push({ id: neighborhoodId, name: neighborhood.name })
     }
 
-    return adminedNeighborhoodsCount
+    return acc
+  }, [])
+
+export const getneighborhoodsCount = (userId: number) =>
+  neighborhoods.reduce((neighborhoodsCount, _neighborhood, neighborhoodIndex) => {
+    const neighborhoodId = neighborhoodIndex + 1
+
+    if (
+      neighborhoodUsers.some(
+        ({ neighborhood_id, user_id }) => neighborhood_id === neighborhoodId && user_id === userId
+      )
+    ) {
+      return neighborhoodsCount + 1
+    }
+
+    return neighborhoodsCount
   }, 0)
 
 export const getLocations = (userId: number) =>
@@ -94,7 +91,7 @@ export const getOrganizationLocationsCount = (userId: number) =>
   }, 0)
 
 export const getOrganizations = (userId: number) =>
-  organizations.reduce((orgs: Record<string, unknown>[], organization, organizationIndex) => {
+  organizations.reduce((orgs: JsObject[], organization, organizationIndex) => {
     const organizationId = organizationIndex + 1
 
     const matchingOrganizationUser = organizationUsers.find(
@@ -131,20 +128,17 @@ export const getSponsor = (userId: number) => {
 }
 
 export const getSponsoredUsers = (userId: number) => {
-  return users.reduce(
-    (sponsoredUsers: Record<string, unknown>[], sponsoredUser, sponsoredUserIndex) => {
-      const sponsoredUserId = sponsoredUserIndex + 1
+  return users.reduce((sponsoredUsers: JsObject[], sponsoredUser, sponsoredUserIndex) => {
+    const sponsoredUserId = sponsoredUserIndex + 1
 
-      if (sponsoredUser.sponsorId === userId) {
-        sponsoredUsers.push({
-          id: sponsoredUserId,
-          sponsorId: sponsoredUser.sponsorId,
-          email: sponsoredUser.email,
-        })
-      }
+    if (sponsoredUser.sponsorId === userId) {
+      sponsoredUsers.push({
+        id: sponsoredUserId,
+        sponsorId: sponsoredUser.sponsorId,
+        email: sponsoredUser.email,
+      })
+    }
 
-      return sponsoredUsers
-    },
-    []
-  )
+    return sponsoredUsers
+  }, [])
 }

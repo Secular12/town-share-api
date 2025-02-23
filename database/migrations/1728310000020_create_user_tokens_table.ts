@@ -9,8 +9,8 @@ export default class extends BaseSchema {
 
       table
         .integer('tokenable_id')
-        .notNullable()
         .unsigned()
+        .notNullable()
         .references('id')
         .inTable('users')
         .onDelete('CASCADE')
@@ -23,7 +23,7 @@ export default class extends BaseSchema {
       table.timestamp('created_at').notNullable()
       table.timestamp('expires_at').nullable()
       table.timestamp('last_used_at').nullable()
-      table.timestamp('updated_at').notNullable()
+      table.timestamp('updated_at').nullable()
     })
   }
 

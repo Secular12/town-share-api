@@ -4,7 +4,7 @@ import * as UserSeedDataUtil from '#utils/seed_data/user'
 import { test } from '@japa/runner'
 
 export default (route: string) => {
-  test('unprocessable entity - count string is not an acceptable option: *, adminedNeighborhoods, neighborhoodLocations, organizationLocations, organizations', async ({
+  test('unprocessable entity - count string is not an acceptable option: *, neighborhoods, neighborhoodLocations, organizationLocations, organizations', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -27,7 +27,7 @@ export default (route: string) => {
           meta: {
             choices: [
               '*',
-              'adminedNeighborhoods',
+              'neighborhoods',
               'neighborhoodLocations',
               'organizationLocations',
               'organizations',
@@ -42,7 +42,7 @@ export default (route: string) => {
     .tagResource('@user')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity - count array has non-acceptable option: adminedNeighborhoods, neighborhoodLocations, organizationLocations, organizations', async ({
+  test('unprocessable entity - count array has non-acceptable option: neighborhoods, neighborhoodLocations, organizationLocations, organizations', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -50,7 +50,7 @@ export default (route: string) => {
     const response = await client
       .get(route)
       .qs({
-        count: ['adminedNeighborhoods', 'foobar'],
+        count: ['neighborhoods', 'foobar'],
         page: 1,
         perPage: 100,
       })
@@ -65,7 +65,7 @@ export default (route: string) => {
           message: 'The selected 1 is invalid',
           meta: {
             choices: [
-              'adminedNeighborhoods',
+              'neighborhoods',
               'neighborhoodLocations',
               'organizationLocations',
               'organizations',
@@ -80,7 +80,7 @@ export default (route: string) => {
     .tagResource('@user')
     .tagUnprocessableEntity()
 
-  test('success - count: adminedNeighborhoods, neighborhoodLocations, organizationLocations, organizations', async ({
+  test('success - count: neighborhoods, neighborhoodLocations, organizationLocations, organizations', async ({
     assert,
     client,
   }) => {
@@ -90,7 +90,7 @@ export default (route: string) => {
       .get(route)
       .qs({
         count: [
-          'adminedNeighborhoods',
+          'neighborhoods',
           'neighborhoodLocations',
           'organizationLocations',
           'organizations',
@@ -108,7 +108,7 @@ export default (route: string) => {
       return {
         id: userId,
         email: userData.email,
-        adminedNeighborhoodsCount: UserSeedDataUtil.getAdminedNeighborhoodsCount(userId),
+        neighborhoodsCount: UserSeedDataUtil.getneighborhoodsCount(userId),
         neighborhoodLocationsCount: UserSeedDataUtil.getLocationsCount(userId),
         organizationLocationsCount: UserSeedDataUtil.getOrganizationLocationsCount(userId),
         organizationsCount: UserSeedDataUtil.getOrganizationsCount(userId),
@@ -143,7 +143,7 @@ export default (route: string) => {
       return {
         id: userId,
         email: userData.email,
-        adminedNeighborhoodsCount: UserSeedDataUtil.getAdminedNeighborhoodsCount(userId),
+        neighborhoodsCount: UserSeedDataUtil.getneighborhoodsCount(userId),
         neighborhoodLocationsCount: UserSeedDataUtil.getLocationsCount(userId),
         organizationLocationsCount: UserSeedDataUtil.getOrganizationLocationsCount(userId),
         organizationsCount: UserSeedDataUtil.getOrganizationsCount(userId),

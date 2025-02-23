@@ -1,7 +1,6 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-  protected organizationsTableName = 'organizations'
   protected tableName = 'organization_user'
   protected usersTableName = 'users'
 
@@ -11,9 +10,10 @@ export default class extends BaseSchema {
       table
         .integer('organization_id')
         .unsigned()
-        .references(`${this.organizationsTableName}.id`)
         .notNullable()
-      table.integer('user_id').unsigned().references(`${this.usersTableName}.id`).notNullable()
+        .references('id')
+        .inTable('organizations')
+      table.integer('user_id').unsigned().notNullable().references('id').inTable('users')
 
       table.boolean('is_organization_admin').notNullable().defaultTo(false)
     })

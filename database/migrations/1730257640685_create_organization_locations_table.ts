@@ -5,18 +5,18 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+      table.increments('id').notNullable()
 
       table
         .integer('organization_id')
-        .notNullable()
         .unsigned()
+        .notNullable()
         .references('id')
         .inTable('organizations')
       table
         .integer('neighborhood_id')
-        .notNullable()
         .unsigned()
+        .notNullable()
         .references('id')
         .inTable('neighborhoods')
 

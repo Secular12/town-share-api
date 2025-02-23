@@ -5,13 +5,14 @@ import { AdminInvitationSeederData } from '#types/seeder'
 import AppBaseSeeder from '#database/seeders/app_base_seeder'
 import mail from '@adonisjs/mail/services/main'
 import { DateTime } from 'luxon'
+import env from '#start/env'
 
 export default class AdminInvitationSeeder extends AppBaseSeeder {
-  public static async runWith(adminInvitationData: AdminInvitationSeederData[]) {
-    const adminInvitationItems = this.getItems(adminInvitationData)
+  public static async runWith(adminInvitationsData: AdminInvitationSeederData[]) {
+    const adminInvitationItems = this.getItems(adminInvitationsData)
 
     const adminInvitations = await AdminInvitationFactory.merge(adminInvitationItems).createMany(
-      adminInvitationData.length
+      adminInvitationsData.length
     )
 
     for await (const adminInvitation of adminInvitations) {
@@ -28,7 +29,8 @@ export default class AdminInvitationSeeder extends AppBaseSeeder {
       mail.send(
         new AdminInvitationNotification({
           recipients: { to: adminInvitation.user?.email ?? adminInvitation.pendingUser?.email },
-          invitationLinkUrl: 'https://townshare.dev/admin-invitation?token={TOKEN}',
+          // TODO UI URL in dev and test .env
+          invitationLinkUrl: `${env.get('SEEDER_NOTIFICATION_UI_URL')}/admin-invitation?token={TOKEN}`,
           inviter: adminInvitation.inviter,
           message: adminInvitation.message,
           token: {
@@ -44,22 +46,5 @@ export default class AdminInvitationSeeder extends AppBaseSeeder {
     }
 
     return adminInvitations
-  }
-
-  private static getItems(adminInvitationData: AdminInvitationSeederData[]) {
-    return this.mapData(adminInvitationData, (data) => {
-      return {
-        id: data.id,
-        inviterId: data.inviterId,
-        pendingUserId: 'pendingUserId' in data ? data.pendingUserId : undefined,
-        userId: 'userId' in data ? data.userId : undefined,
-        message: data.message,
-        acceptedAt: 'acceptedAt' in data ? data.acceptedAt : undefined,
-        createdAt: data.createdAt,
-        deniedAt: 'deniedAt' in data ? data.deniedAt : undefined,
-        revokedAt: data.revokedAt,
-        updatedAt: data.updatedAt,
-      }
-    })
   }
 }

@@ -6,8 +6,13 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.primary(['organization_location_id', 'user_id'])
-      table.integer('organization_location_id').notNullable().unsigned()
-      table.integer('user_id').notNullable().unsigned().references('id').inTable('users')
+      table
+        .integer('organization_location_id')
+        .unsigned()
+        .notNullable()
+        .references('id')
+        .inTable('organization_locations')
+      table.integer('user_id').unsigned().notNullable().references('id').inTable('users')
     })
   }
 

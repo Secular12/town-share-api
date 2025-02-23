@@ -5,12 +5,12 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+      table.increments('id').notNullable()
 
       table
         .integer('tokenable_id')
-        .notNullable()
         .unsigned()
+        .notNullable()
         .references('id')
         .inTable('admin_invitations')
         .onDelete('CASCADE')
@@ -23,7 +23,7 @@ export default class extends BaseSchema {
       table.timestamp('created_at').notNullable()
       table.timestamp('expires_at').nullable()
       table.timestamp('last_used_at').nullable()
-      table.timestamp('updated_at').notNullable()
+      table.timestamp('updated_at').nullable()
     })
   }
 

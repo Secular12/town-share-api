@@ -19,8 +19,8 @@ export default class Organization extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  @column.dateTime({ autoUpdate: true })
+  declare updatedAt: DateTime | null
 
   /* Computed */
 

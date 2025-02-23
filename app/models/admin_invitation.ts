@@ -1,9 +1,10 @@
+import AppBaseModel from '#models/app_base_model'
 import User from '#models/user'
 import PendingUser from '#models/pending_user'
 import env from '#start/env'
 import { IndexPayload } from '#validators/admin_invitation'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
-import { BaseModel, belongsTo, column, computed, scope } from '@adonisjs/lucid/orm'
+import { belongsTo, column, computed, scope } from '@adonisjs/lucid/orm'
 import { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import vine from '@vinejs/vine'
@@ -11,7 +12,7 @@ import { DateTime } from 'luxon'
 
 type Builder = ModelQueryBuilderContract<typeof AdminInvitation>
 
-export default class AdminInvitation extends BaseModel {
+export default class AdminInvitation extends AppBaseModel {
   /* Primary IDs */
   @column({ isPrimary: true })
   declare id: number
@@ -43,8 +44,8 @@ export default class AdminInvitation extends BaseModel {
   @column.dateTime()
   declare revokedAt: DateTime | null
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  @column.dateTime({ autoUpdate: true })
+  declare updatedAt: DateTime | null
 
   /* Computed */
   @computed()

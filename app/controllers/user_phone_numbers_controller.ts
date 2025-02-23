@@ -58,12 +58,11 @@ export default class UserPhoneNumbersController {
   }
 
   async update({ bouncer, params, request }: HttpContext) {
-    console.log(params)
+    const payload = await UserPhoneNumberValidator.update.validate(request.body())
+
     const userPhoneNumber = await UserPhoneNumber.findOrFail(params.id)
 
     await bouncer.with(UserPhoneNumberPolicy).authorize('update', userPhoneNumber)
-
-    const payload = await UserPhoneNumberValidator.update.validate(request.body())
 
     userPhoneNumber.merge(payload)
 

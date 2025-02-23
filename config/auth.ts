@@ -15,12 +15,10 @@ class CustomUserProvider extends SessionLucidUserProvider<typeof User> {
     const user = await model
       .query()
       .where('id', Number(identifier))
-      .preload('adminedNeighborhoods', (adminedNeighborhoodsQuery) => {
-        adminedNeighborhoodsQuery.select('id')
-      })
-      .preload('organizations', (organizationsQuery) => {
-        organizationsQuery.where('organization_user.is_organization_admin', true).select('id')
-      })
+      .preload('adminedNeighborhoods')
+      // .preload('organizations', (organizationsQuery) => {
+      //   organizationsQuery.where('organization_user.is_organization_admin', true).select('id')
+      // })
       .first()
 
     if (!user) {

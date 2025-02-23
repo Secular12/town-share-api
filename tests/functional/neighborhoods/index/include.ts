@@ -5,7 +5,7 @@ import * as UserSeedDataUtil from '#utils/seed_data/user'
 import { test } from '@japa/runner'
 
 export default (route: string) => {
-  test('unprocessable entity - include string is not an acceptable option: *, admins, admins.*, admins.organizations', async ({
+  test('unprocessable entity - include string is not an acceptable option: *, users, users.*, users.organizations', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -26,7 +26,7 @@ export default (route: string) => {
           field: 'include',
           message: 'The selected include is invalid',
           meta: {
-            choices: ['*', 'admins', 'admins.*', 'admins.organizations'],
+            choices: ['*', 'users', 'users.*', 'users.organizations'],
           },
           rule: 'enum',
         },
@@ -37,7 +37,7 @@ export default (route: string) => {
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()
 
-  test('unprocessable entity - include array has non-acceptable option: admins, admins.*, admins.organizations', async ({
+  test('unprocessable entity - include array has non-acceptable option: users, users.*, users.organizations', async ({
     client,
   }) => {
     const user = await User.findOrFail(1)
@@ -45,7 +45,7 @@ export default (route: string) => {
     const response = await client
       .get(route)
       .qs({
-        include: ['admins', 'foobar'],
+        include: ['users', 'foobar'],
         page: 1,
         perPage: 100,
       })
@@ -59,7 +59,7 @@ export default (route: string) => {
           index: 1,
           message: 'The selected 1 is invalid',
           meta: {
-            choices: ['admins', 'admins.*', 'admins.organizations'],
+            choices: ['users', 'users.*', 'users.organizations'],
           },
           rule: 'enum',
         },
@@ -70,13 +70,13 @@ export default (route: string) => {
     .tagResource('@neighborhood')
     .tagUnprocessableEntity()
 
-  test('success - include: admins.organizations', async ({ assert, client }) => {
+  test('success - include: users.organizations', async ({ assert, client }) => {
     const user = await User.findOrFail(1)
 
     const response = await client
       .get(route)
       .qs({
-        include: 'admins.organizations',
+        include: 'users.organizations',
         page: 1,
         perPage: 100,
       })
@@ -92,11 +92,11 @@ export default (route: string) => {
         return {
           id: neighborhoodId,
           name: neighborhoodData.name,
-          admins: NeighborhoodSeedDataUtil.getAdmins(neighborhoodId).map((admin) => {
+          users: NeighborhoodSeedDataUtil.getUsers(neighborhoodId).map((userItem) => {
             return {
-              id: admin.id,
-              email: admin.email,
-              organizations: UserSeedDataUtil.getOrganizations(admin.id as number),
+              id: userItem.id,
+              email: userItem.email,
+              organizations: UserSeedDataUtil.getOrganizations(userItem.id as number),
             }
           }),
         }
@@ -110,13 +110,13 @@ export default (route: string) => {
     .tagResource(['@neighborhood', '@organization', '@user'])
     .tagSuccess()
 
-  test('success - include admins.*', async ({ assert, client }) => {
+  test('success - include users.*', async ({ assert, client }) => {
     const user = await User.findOrFail(1)
 
     const response = await client
       .get(route)
       .qs({
-        include: 'admins.organizations',
+        include: 'users.organizations',
         page: 1,
         perPage: 100,
       })
@@ -132,11 +132,11 @@ export default (route: string) => {
         return {
           id: neighborhoodId,
           name: neighborhoodData.name,
-          admins: NeighborhoodSeedDataUtil.getAdmins(neighborhoodId).map((admin) => {
+          users: NeighborhoodSeedDataUtil.getUsers(neighborhoodId).map((userItem) => {
             return {
-              id: admin.id,
-              email: admin.email,
-              organizations: UserSeedDataUtil.getOrganizations(admin.id as number),
+              id: userItem.id,
+              email: userItem.email,
+              organizations: UserSeedDataUtil.getOrganizations(userItem.id as number),
             }
           }),
         }
@@ -150,13 +150,13 @@ export default (route: string) => {
     .tagResource(['@neighborhood', '@organization', '@user'])
     .tagSuccess()
 
-  test('success - include admins', async ({ assert, client }) => {
+  test('success - include users', async ({ assert, client }) => {
     const user = await User.findOrFail(1)
 
     const response = await client
       .get(route)
       .qs({
-        include: 'admins',
+        include: 'users',
         page: 1,
         perPage: 100,
       })
@@ -172,7 +172,7 @@ export default (route: string) => {
         return {
           id: neighborhoodId,
           name: neighborhoodData.name,
-          admins: NeighborhoodSeedDataUtil.getAdmins(neighborhoodId),
+          users: NeighborhoodSeedDataUtil.getUsers(neighborhoodId),
         }
       })
 
@@ -190,7 +190,7 @@ export default (route: string) => {
     const response = await client
       .get(route)
       .qs({
-        include: 'admins.organizations',
+        include: 'users.organizations',
         page: 1,
         perPage: 100,
       })
@@ -206,11 +206,11 @@ export default (route: string) => {
         return {
           id: neighborhoodId,
           name: neighborhoodData.name,
-          admins: NeighborhoodSeedDataUtil.getAdmins(neighborhoodId).map((admin) => {
+          users: NeighborhoodSeedDataUtil.getUsers(neighborhoodId).map((userItem) => {
             return {
-              id: admin.id,
-              email: admin.email,
-              organizations: UserSeedDataUtil.getOrganizations(admin.id as number),
+              id: userItem.id,
+              email: userItem.email,
+              organizations: UserSeedDataUtil.getOrganizations(userItem.id as number),
             }
           }),
         }

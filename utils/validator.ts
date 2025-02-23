@@ -8,7 +8,7 @@ const countSchema = <T extends readonly string[]>(countOptions: T) => {
       count: vine.array(vine.enum(countOptions)).minLength(1),
     }),
     vine.group.else({
-      count: vine.enum(['*', ...countOptions] as const).optional(),
+      count: vine.enum(countOptions).optional(),
     }),
   ])
 }
@@ -30,13 +30,30 @@ const dateFiltersSchema = <T extends string>(columns: T[]) => {
   })
 }
 
+const getIncludeOptions = <const T extends readonly string[]>(preloadOptions: T) => {
+  return preloadOptions.reduce((options: string[], preloadOption) => {
+    const preloadSplit = preloadOption.split('.')
+
+    const wildCards = preloadSplit.reduce((wildCardAcc: string[], _, preloadSplitIndex) => {
+      const wildCard =
+        preloadSplitIndex === 0 ? '*' : `${preloadSplit.slice(0, preloadSplitIndex).join('.')}.*`
+
+      if (!options.includes(wildCard)) wildCardAcc.push(wildCard)
+
+      return wildCardAcc
+    }, [])
+
+    return [...options, ...wildCards, preloadOption]
+  }, [])
+}
+
 const includeSchema = <T extends readonly string[]>(includeOptions: T) => {
   return vine.group([
     vine.group.if((data) => vine.helpers.isArray(data.include), {
       include: vine.array(vine.enum(includeOptions)).minLength(1),
     }),
     vine.group.else({
-      include: vine.enum(['*', ...includeOptions] as const).optional(),
+      include: vine.enum(includeOptions).optional(),
     }),
   ])
 }
@@ -79,6 +96,7 @@ const singleOrMultipleOrderBySchema = <T extends readonly string[]>(columns: T) 
 export default {
   countSchema,
   dateFiltersSchema,
+  getIncludeOptions,
   includeSchema,
   luxonDateTimeTransform,
   orderBySchema,

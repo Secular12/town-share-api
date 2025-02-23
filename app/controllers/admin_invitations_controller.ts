@@ -1,5 +1,6 @@
 import AdminInvitationNotification from '#mails/admin_invitation_notification'
 import AdminInvitation from '#models/admin_invitation'
+import NeighborhoodAdminInvitation from '#models/neighborhood_admin_invitation'
 import PendingUser from '#models/pending_user'
 import User from '#models/user'
 import AdminInvitationPolicy from '#policies/admin_invitation_policy'
@@ -28,9 +29,9 @@ export default class AdminInvitationsController {
 
     const adminInvitation = await AdminInvitation.findOrFail(adminInvitationToken.tokenableId)
 
-    await bouncer.with(AdminInvitationPolicy).authorize('acceptOrDeny', adminInvitation)
-
     const payload = await AdminInvitationValidator.accept(adminInvitation).validate(request.body())
+
+    await bouncer.with(AdminInvitationPolicy).authorize('acceptOrDeny', adminInvitation)
 
     const pendingUser = adminInvitation.pendingUserId
       ? await PendingUser.find(adminInvitation.pendingUserId)
@@ -121,6 +122,22 @@ export default class AdminInvitationsController {
           )
         }
       }
+
+      if (pendingUser) {
+        // TODO: other pendingUser to User updates
+        const neighborhoodAdminInvitations = await NeighborhoodAdminInvitation.query()
+          .select('id')
+          .where('pendingUserId', pendingUser.id)
+
+        await NeighborhoodAdminInvitation.updateOrCreateMany(
+          'id',
+          neighborhoodAdminInvitations.map(({ id }) => ({
+            id,
+            pendingUserId: null,
+            userId: user.id,
+          }))
+        )
+      }
     })
 
     if (pendingUser) {
@@ -168,14 +185,7 @@ export default class AdminInvitationsController {
 
       const updatedAdminInvitations = await AdminInvitation.updateOrCreateMany(
         'id',
-        adminInvitations.map(({ id, userId }) => {
-          if (userId) {
-            return {
-              id,
-              deniedAt: dateTimeNow,
-            }
-          }
-
+        adminInvitations.map(({ id }) => {
           return {
             id,
             deniedAt: dateTimeNow,
@@ -203,44 +213,13 @@ export default class AdminInvitationsController {
   }
 
   async index({ bouncer, request }: HttpContext) {
-    await bouncer.with(AdminInvitationPolicy).authorize('readMany')
-
     const payload = await AdminInvitationValidator.index.validate(request.qs())
+
+    await bouncer.with(AdminInvitationPolicy).authorize('readMany')
 
     return AdminInvitation.query()
       .select('admin_invitations.*')
-      .if(ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'inviter']), (includeInviterQuery) => {
-        includeInviterQuery.preload('inviter')
-      })
-      .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, [
-          '*',
-          'user',
-          'user.*',
-          'user.phoneNumbers',
-          'user.sponsor',
-        ]),
-        (includeUserQuery) => {
-          includeUserQuery.preload('user', (userPreloadQuery) => {
-            userPreloadQuery
-              .if(
-                ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'user.*', 'user.sponsor']),
-                (includeSponsorQuery) => {
-                  includeSponsorQuery.preload('sponsor')
-                }
-              )
-              .if(
-                ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'user.*', 'user.phoneNumbers']),
-                (includePhoneNumbersQuery) => {
-                  includePhoneNumbersQuery.preload('phoneNumbers')
-                }
-              )
-          })
-        }
-      )
-      .if(ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'pendingUser']), (includeUserQuery) => {
-        includeUserQuery.preload('pendingUser')
-      })
+      .withScopes((scopes) => scopes.include(payload, AdminInvitationValidator.preloadOptions))
       .if(payload.inviterId, (inviterIdQuery) => {
         inviterIdQuery.where('inviterId', payload.inviterId!)
       })
@@ -266,6 +245,8 @@ export default class AdminInvitationsController {
   }
 
   async resend({ bouncer, params, request, response }: HttpContext) {
+    const payload = await AdminInvitationValidator.resend.validate(request.body())
+
     const adminInvitation = await AdminInvitation.query()
       .preload('inviter')
       .preload('pendingUser')
@@ -274,8 +255,6 @@ export default class AdminInvitationsController {
       .firstOrFail()
 
     await bouncer.with(AdminInvitationPolicy).authorize('resend', adminInvitation)
-
-    const payload = await AdminInvitationValidator.resend.validate(request.body())
 
     if (!adminInvitation.isPending) {
       return response.badRequest({
@@ -306,9 +285,9 @@ export default class AdminInvitationsController {
   }
 
   async revoke({ bouncer, request, response }: HttpContext) {
-    await bouncer.with(AdminInvitationPolicy).authorize('revoke')
-
     const payload = await AdminInvitationValidator.revoke.validate(request.body())
+
+    await bouncer.with(AdminInvitationPolicy).authorize('revoke')
 
     const adminInvitations = await AdminInvitation.query()
       .withScopes((scopes) => scopes.isPending())
@@ -346,51 +325,20 @@ export default class AdminInvitationsController {
   }
 
   async show({ bouncer, params, request }: HttpContext) {
-    await bouncer.with(AdminInvitationPolicy).authorize('read', params.id)
-
     const payload = await AdminInvitationValidator.show.validate(request.qs())
 
+    await bouncer.with(AdminInvitationPolicy).authorize('read', params.id)
+
     return AdminInvitation.query()
-      .if(ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'inviter']), (includeInviterQuery) => {
-        includeInviterQuery.preload('inviter')
-      })
-      .if(
-        ArrayUtil.hasOrIsAnyFrom(payload.include, [
-          '*',
-          'user',
-          'user.*',
-          'user.phoneNumbers',
-          'user.sponsor',
-        ]),
-        (includeUserQuery) => {
-          includeUserQuery.preload('user', (userPreloadQuery) => {
-            userPreloadQuery
-              .if(
-                ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'user.*', 'user.sponsor']),
-                (includeSponsorQuery) => {
-                  includeSponsorQuery.preload('sponsor')
-                }
-              )
-              .if(
-                ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'user.*', 'user.phoneNumbers']),
-                (includePhoneNumbersQuery) => {
-                  includePhoneNumbersQuery.preload('phoneNumbers')
-                }
-              )
-          })
-        }
-      )
-      .if(ArrayUtil.hasOrIsAnyFrom(payload.include, ['*', 'pendingUser']), (includeUserQuery) => {
-        includeUserQuery.preload('pendingUser')
-      })
+      .withScopes((scopes) => scopes.include(payload, AdminInvitationValidator.preloadOptions))
       .where('id', params.id)
       .firstOrFail()
   }
 
   async store({ auth, bouncer, request, response }: HttpContext) {
-    await bouncer.with(AdminInvitationPolicy).authorize('create')
-
     const payload = await AdminInvitationValidator.store.validate(request.body())
+
+    await bouncer.with(AdminInvitationPolicy).authorize('create')
 
     const isUser = (item: User | PendingUser): item is User => {
       const jsonItem = item.toJSON()

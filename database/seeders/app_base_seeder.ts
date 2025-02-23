@@ -8,4 +8,8 @@ export default class AppBaseSeeder extends BaseSeeder {
       return ObjectUtil.filter(cb(item, itemIndex), (value) => value !== undefined)
     })
   }
+
+  static getItems<T extends { data: JsObject }>(data: T[]) {
+    return this.mapData(data, (dataItem) => dataItem.data)
+  }
 }

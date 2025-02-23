@@ -9,7 +9,7 @@ export default class AdminInvitationPolicy extends BasePolicy {
     return (
       authUser?.isApplicationAdmin ||
       (!authUser && !!adminInvitation.pendingUserId) ||
-      (!!authUser && authUser?.id === adminInvitation.userId)
+      (!!authUser && authUser.id === adminInvitation.userId)
     )
   }
 
@@ -22,7 +22,7 @@ export default class AdminInvitationPolicy extends BasePolicy {
       typeof adminInvitation === 'number'
         ? await AdminInvitation.find(adminInvitation)
         : adminInvitation
-    return authUser.isApplicationAdmin || (!!invitation && authUser.id === invitation.userId)
+    return authUser.isApplicationAdmin || authUser.id === invitation?.userId
   }
 
   readMany(authUser: User): AuthorizerResponse {

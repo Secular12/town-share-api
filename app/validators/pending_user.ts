@@ -3,17 +3,16 @@ import ValidatorUtil from '#utils/validator'
 
 type IndexPayload = Awaited<ReturnType<(typeof index)['validate']>>
 
-const countOptions = ['receivedAdminInvitations'] as const
+const countOptions = ['*', 'receivedAdminInvitations'] as const
 
 const dateFilters = ValidatorUtil.dateFiltersSchema(['createdAt', 'updatedAt'] as const)
 
-const includeOptions = [
-  'receivedAdminInvitations',
-  'receivedAdminInvitations.*',
-  'receivedAdminInvitations.inviter',
-] as const
+const preloadOptions = ['receivedAdminInvitations', 'receivedAdminInvitations.inviter'] as const
+
+const includeOptions = ValidatorUtil.getIncludeOptions(preloadOptions)
 
 const counts = ValidatorUtil.countSchema(countOptions)
+
 const includes = ValidatorUtil.includeSchema(includeOptions)
 
 const index = vine.compile(
@@ -31,4 +30,4 @@ const show = vine.compile(vine.object({}).merge(counts).merge(includes))
 
 export type { IndexPayload }
 
-export default { countOptions, index, show }
+export default { countOptions, index, preloadOptions, show }
